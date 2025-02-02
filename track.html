@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подбор трековой системы</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 800px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            margin-top: 20px;
+        }
+        .form-container {
+            grid-column: 1;
+        }
+        .result-container {
+            grid-column: 2;
+            display: none;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        select, input[type="text"], input[type="checkbox"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .images img {
+            width: 40px;
+            height: auto;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .dimensions {
+            display: flex;
+            flex-direction: column;
+        }
+        .shape-options {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .shape-options div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .shape-label {
+            display: flex;
+            align-items: center;
+        }
+        .result-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .result-item img {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+        .result-item .description {
+            margin-right: 10px;
+        }
+        .total-price {
+            font-weight: bold;
+            text-align: right;
+        }
+        .button-container {
+            margin-top: 20px; /* Отступ сверху для кнопки */
+        }
+        .button-container button {
+            width: 100%; /* Полная ширина кнопки */
+            padding: 15px; /* Увеличенный отступ внутри кнопки */
+            font-size: 16px; /* Увеличенный размер шрифта */
+        }
+        .lighting-container {
+            margin-top: 20px;
+            display: none; /* Изначально скрытый контейнер */
+        }
+        .lighting-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .lighting-row select, .lighting-row input[type="number"] {
+            width: calc(50% - 30px);
+            margin-right: 10px;
+        }
+        .lighting-row input[type="number"] {
+            width: calc(50% - 50px);
+            text-align: center;
+        }
+        .lighting-row .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+        .lighting-row .quantity-controls button {
+            width: 30px;
+            padding: 5px;
+            font-size: 14px;
+        }
+        .lighting-row .remove-button {
+            margin-left: 10px;
+        }
+        .add-lighting-row-button {
+            margin-top: 10px;
+            width: 30%; /* Сделано меньше */
+            padding: 5px; /* Сделано меньше */
+            font-size: 12px; /* Сделано меньше */
+            text-align: left; /* Выравнивание текста влево */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2 style="font-size: 16px; margin-bottom: 10px;">Подбор трековой системы</h2>
+
+            <label for="type">Тип:</label>
+            <select id="type" name="type">
+                <option value="one-phase">Однофазный</option>
+                <option value="magnetic">Магнитный</option>
+            </select>
+
+            <label for="color">Цвет:</label>
+            <select id="color" name="color">
+                <option value="black">Черный</option>
+                <option value="white">Белый</option>
+            </select>
+
+            <label for="mounting">Способ монтажа:</label>
+            <select id="mounting" name="mounting">
+                <option value="surface">Накладной</option>
+                <option value="recessed">Встраиваемый</option>
+                <option value="stretch-ceiling">В натяжной потолок</option>
+            </select>
+
+            <label>Фигура:</label>
+            <div class="shape-options">
+                <div>
+                    <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
+                    <label for="straight" class="shape-label">
+                        <img src="images/straight.png" alt="Прямая">
+                        Прямая
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
+                    <label for="L-shape" class="shape-label">
+                        <img src="images/L-shape.png" alt="L-образная">
+                        L-образная
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
+                    <label for="T-shape" class="shape-label">
+                        <img src="images/T-shape.png" alt="T-образная">
+                        T-образная
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
+                    <label for="P-shape" class="shape-label">
+                        <img src="images/P-shape.png" alt="П-образная">
+                        П-образная
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
+                    <label for="rectangle" class="shape-label">
+                        <img src="images/rectangle.png" alt="Прямоугольник">
+                        Прямоугольник
+                    </label>
+                </div>
+            </div>
+            <input type="hidden" id="selectedShape" name="selectedShape" value="">
+
+            <label for="lengthA">Длина а (см):</label>
+            <input type="text" id="lengthA" name="lengthA" placeholder="Длина а" style="margin-bottom: 5px;">
+
+            <label for="lengthB">Длина б (см):</label>
+            <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+
+            <button type="button" class="add-lighting-row-button" onclick="addLightingRow()">Добавить светильник</button>
+
+            <div class="lighting-container" id="lightingContainer">
+                <!-- Динамически добавляемые строки будут здесь -->
+            </div>
+
+            <div class="button-container">
+                <button type="button" onclick="showSelection()">Подобрать</button>
+            </div>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <h2 id="systemName"></h2>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let products = {};
+        let lightingRowsCount = 0;
+
+        // Загрузка JSON-файла
+        fetch('products.json')
+            .then(response => response.json())
+            .then(data => {
+                products = data;
+                console.log('Products loaded:', products);
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных:', error);
+                alert('Не удалось загрузить данные о продуктах.');
+            });
+
+        function selectShape(shape) {
+            document.getElementById('selectedShape').value = shape;
+        }
+
+        function showSelection() {
+            const type = document.getElementById('type').value;
+            const color = document.getElementById('color').value;
+            const mounting = document.getElementById('mounting').value;
+            const shape = document.getElementById('selectedShape').value;
+            const lengthA = parseFloat(document.getElementById('lengthA').value);
+            const lengthB = parseFloat(document.getElementById('lengthB').value);
+
+            if (!type || !color || !mounting || !shape || isNaN(lengthA)) {
+                if (shape !== 'straight' && isNaN(lengthB)) {
+                    alert('Пожалуйста, заполните все поля.');
+                    return;
+                } else if (shape === 'straight' && !isNaN(lengthB) && lengthB !== 0) {
+                    alert('Для фигуры "Прямая" поле "Длина б" должно быть пустым.');
+                    return;
+                }
+            }
+
+            // Проверяем наличие данных для выбранного типа, цвета и способа монтажа
+            if (!products[type] || !products[type][color] || !products[type][color][mounting]) {
+                alert('Не найдено подходящего комплекта для выбранных параметров.');
+                return;
+            }
+
+            const selectedProduct = products[type][color][mounting];
+            const lengthOptions = selectedProduct.lengthOptions;
+            const connectors = selectedProduct.connectors[shape];
+            const components = selectedProduct.components;
+            const additionalComponents = selectedProduct.additionalComponents || [];
+
+            let totalLength = lengthA;
+            if (shape !== 'straight' && !isNaN(lengthB)) {
+                totalLength += lengthB;
+            }
+
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+
+            if (selectedProduct) {
+                let totalPrice = 0;
+                const systemName = 'Maytoni UNITY';
+                resultsContainer.innerHTML += `<h2>${systemName}</h2>`;
+                
+                // Логика подбора комплектующих
+                let remainingLength = totalLength;
+                let items = [];
+                let usedConnectors = new Set();
+
+                while (remainingLength > 0) {
+                    let selectedItem = null;
+                    for (let option of lengthOptions) {
+                        if (remainingLength >= option.min && remainingLength <= option.max) {
+                            selectedItem = option.items[0];
+                            break;
+                        } else if (remainingLength > option.max) {
+                            selectedItem = option.items[option.items.length - 1]; // Берем самый длинный доступный шинопровод
+                        }
+                    }
+
+                    if (selectedItem) {
+                        items.push(selectedItem);
+                        const itemLength = parseInt(selectedItem.split('-')[1].substring(0, 3)); // Получаем длину шинопровода
+                        remainingLength -= itemLength;
+                    } else {
+                        alert('Не удалось подобрать шинопровод для указанной длины.');
+                        return;
+                    }
+                }
+
+                // Добавление коннекторов если есть несколько шинопроводов
+                if (items.length > 1) {
+                    Array.from(new Set(items)).forEach((item, index) => {
+                        if (index < items.length - 1) {
+                            usedConnectors.add(connectors);
+                        }
+                    });
+                }
+
+                // Добавление дополнительных компонентов (например, профиля для натяжного потолка)
+                additionalComponents.forEach(component => {
+                    items.push(component);
+                });
+
+                // Отображение выбранных комплектующих
+                items.forEach(itemId => {
+                    const item = components[itemId];
+                    if (item) {  // Проверяем наличие элемента в объекте components
+                        totalPrice += item.price;
+                        resultsContainer.innerHTML += `
+                            <div class="result-item">
+                                <img src="${item.image}" alt="">
+                                <div class="description">
+                                    <span>${item.name}</span><br>
+                                    <span>Цена: ${item.price}р</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        console.warn(`Component with ID ${itemId} not found.`);
+                    }
+                });
+
+                // Отображение использованных коннекторов
+                Array.from(usedConnectors).forEach(connectorId => {
+                    const connector = components[connectorId];
+                    if (connector) {  // Проверяем наличие элемента в объекте components
+                        totalPrice += connector.price;
+                        resultsContainer.innerHTML += `
+                            <div class="result-item">
+                                <img src="${connector.image}" alt="">
+                                <div class="description">
+                                    <span>${connector.name}</span><br>
+                                    <span>Цена: ${connector.price}р</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        console.warn(`Connector with ID ${connectorId} not found.`);
+                    }
+                });
+
+                resultsContainer.innerHTML += `<div class="total-price">Итого: ${totalPrice}р</div>`;
+            } else {
+                resultsContainer.innerHTML = '<p>Не найдено подходящего комплекта.</p>';
+            }
+
+            document.getElementById('resultContainer').style.display = 'block';
+        }
+
+        function addLightingRow() {
+            lightingRowsCount++;
+            const container = document.getElementById('lightingContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'lighting-row';
+            newRow.id = `lightingRow${lightingRowsCount}`;
+            newRow.innerHTML = `
+                <select id="light${lightingRowsCount}" name="light${lightingRowsCount}">
+                    <option value="spot">Спот</option>
+                    <option value="linear">Линейный</option>
+                    <option value="pendant">Подвесной</option>
+                </select>
+                <div class="quantity-controls">
+                    <button type="button" onclick="decreaseQuantity('light${lightingRowsCount}')">-</button>
+                    <input type="number" id="quantity${lightingRowsCount}" name="quantity${lightingRowsCount}" value="1" min="1" style="width: 60px;">
+                    <button type="button" onclick="increaseQuantity('light${lightingRowsCount}')">+</button>
+                </div>
+                <button type="button" class="remove-button" onclick="removeLightingRow('lightingRow${lightingRowsCount}')">Удалить</button>
+            `;
+            container.appendChild(newRow);
+            // Если это первая строка, показываем контейнер
+            if (lightingRowsCount === 1) {
+                container.style.display = 'block';
+            }
+        }
+
+        function increaseQuantity(lightId) {
+            const quantityInput = document.getElementById(`quantity${lightId.slice(-1)}`);
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        }
+
+        function decreaseQuantity(lightId) {
+            const quantityInput = document.getElementById(`quantity${lightId.slice(-1)}`);
+            if (parseInt(quantityInput.value) > 1) {
+                quantityInput.value = parseInt(quantityInput.value) - 1;
+            }
+        }
+
+        function removeLightingRow(rowId) {
+            const row = document.getElementById(rowId);
+            row.remove();
+            lightingRowsCount--;
+            // Если больше нет строк, скрываем контейнер
+            if (lightingRowsCount === 0) {
+                document.getElementById('lightingContainer').style.display = 'none';
+            }
+        }
+
+        function initializeLightingContainer() {
+            const container = document.getElementById('lightingContainer');
+            container.innerHTML = ''; // Очищаем контейнер
+            lightingRowsCount = 0; // Сбрасываем счетчик строк
+            container.style.display = 'none'; // Скрываем контейнер
+        }
+
+        // Инициализация контейнера при загрузке страницы
+        window.onload = initializeLightingContainer;
+    </script>
+</body>
+</html>

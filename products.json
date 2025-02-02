@@ -1,0 +1,90 @@
+{
+    "one-phase": {
+        "black": {
+            "surface": {
+                "lengthOptions": [
+                    { "min": 0, "max": 100, "items": ["TRX001-111B"] },
+                    { "min": 100, "max": 200, "items": ["TRX001-112B"] },
+                    { "min": 200, "max": 300, "items": ["TRX001-113B"] }
+                ],
+                "connectors": {
+                    "straight": ["TRA001C-11B"],
+                    "L-shape": ["TRA001CL-11B"],
+                    "T-shape": ["TRA001CT-11B"]
+                },
+                "components": {
+                    "TRX001-111B": { "name": "Шинопровод 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
+                    "TRX001-112B": { "name": "Шинопровод 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
+                    "TRX001-113B": { "name": "Шинопровод 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
+                    "TRA001C-11B": { "name": "Коннектор прямой TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
+                    "TRA001CL-11B": { "name": "Коннектор угловой TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
+                    "TRA001CT-11B": { "name": "Коннектор Т-образный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+                }
+            },
+            "recessed": {
+                "lengthOptions": [
+                    { "min": 0, "max": 100, "items": ["TRX004-111B"] },
+                    { "min": 100, "max": 200, "items": ["TRX004-112B"] },
+                    { "min": 200, "max": 300, "items": ["TRX004-113B"] }
+                ],
+                "connectors": {
+                    "straight": ["TRA002C-11B"],
+                    "L-shape": ["TRA002CL-11B"],
+                    "T-shape": ["TRA002CT-11B"]
+                },
+                "components": {
+                    "TRX004-111B": { "name": "Шинопровод встраиваемый 1м TRX004-111B", "price": 1600, "image": "images/TRX004-111B.png" },
+                    "TRX004-112B": { "name": "Шинопровод встраиваемый 2м TRX004-112B", "price": 2600, "image": "images/TRX004-112B.png" },
+                    "TRX004-113B": { "name": "Шинопровод встраиваемый 3м TRX004-113B", "price": 3600, "image": "images/TRX004-113B.png" },
+                    "TRA002C-11B": { "name": "Коннектор прямой TRA002C-11B", "price": 110, "image": "images/TRA002C-11B.png" },
+                    "TRA002CL-11B": { "name": "Коннектор угловой TRA002CL-11B", "price": 160, "image": "images/TRA002CL-11B.png" },
+                    "TRA002CT-11B": { "name": "Коннектор Т-образный TRA002CT-11B", "price": 210, "image": "images/TRA002CT-11B.png" }
+                }
+            },
+            "stretch-ceiling": {
+                "lengthOptions": [
+                    { "min": 0, "max": 100, "items": ["TRX003-111B"] },
+                    { "min": 100, "max": 200, "items": ["TRX003-112B"] },
+                    { "min": 200, "max": 300, "items": ["TRX003-113B"] }
+                ],
+                "connectors": {
+                    "straight": ["TRA003C-11B"],
+                    "L-shape": ["TRA003CL-11B"],
+                    "T-shape": ["TRA003CT-11B"]
+                },
+                "additionalComponents": ["TRA001MP-112S"],
+                "components": {
+                    "TRX003-111B": { "name": "Шинопровод натяжной 1м TRX003-111B", "price": 1700, "image": "images/TRX003-111B.png" },
+                    "TRX003-112B": { "name": "Шинопровод натяжной 2м TRX003-112B", "price": 2700, "image": "images/TRX003-112B.png" },
+                    "TRX003-113B": { "name": "Шинопровод натяжной 3м TRX003-113B", "price": 3700, "image": "images/TRX003-113B.png" },
+                    "TRA003C-11B": { "name": "Коннектор прямой TRA003C-11B", "price": 120, "image": "images/TRA003C-11B.png" },
+                    "TRA003CL-11B": { "name": "Коннектор угловой TRA003CL-11B", "price": 170, "image": "images/TRA003CL-11B.png" },
+                    "TRA003CT-11B": { "name": "Коннектор Т-образный TRA003CT-11B", "price": 220, "image": "images/TRA003CT-11B.png" },
+                    "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+                }
+            }
+        },
+        "white": {
+            "surface": {
+                "lengthOptions": [
+                    { "min": 0, "max": 100, "items": ["TRX001-111W"] },
+                    { "min": 100, "max": 200, "items": ["TRX001-112W"] },
+                    { "min": 200, "max": 300, "items": ["TRX001-113W"] }
+                ],
+                "connectors": {
+                    "straight": ["TRA001C-11W"],
+                    "L-shape": ["TRA001CL-11W"],
+                    "T-shape": ["TRA001CT-11W"]
+                },
+                "components": {
+                    "TRX001-111W": { "name": "Шинопровод 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
+                    "TRX001-112W": { "name": "Шинопровод 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
+                    "TRX001-113W": { "name": "Шинопровод 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
+                    "TRA001C-11W": { "name": "Коннектор прямой TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
+                    "TRA001CL-11W": { "name": "Коннектор угловой TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
+                    "TRA001CT-11W": { "name": "Коннектор Т-образный TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" }
+                }
+            }
+        }
+    }
+}
