@@ -22,10 +22,7 @@
       height: auto;
       overflow: visible;
     }
-    h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
+    /* Таблица результатов */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -38,7 +35,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px; /* уменьшен размер шрифта */
+      font-size: 13px; /* уменьшенный размер шрифта */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -63,16 +60,16 @@
       display: none;
       overflow: visible;
     }
-    /* Отладочный блок можно убрать, если он не нужен */
     .debug {
-      display: none;
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Заголовок системы -->
-    <h2 id="systemName">Maytoni UNITY</h2>
+    <!-- Удалён дублирующий заголовок (Maytoni UNITY) -->
     
     <!-- Контейнер для вывода результатов подбора -->
     <div id="resultContainer" class="result-container">
@@ -86,13 +83,13 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Здесь будут выведены результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок (скрыт) -->
+    <!-- Отладочный блок (при необходимости, можно оставить пустым) -->
     <div id="debug" class="debug"></div>
   </div>
   
@@ -102,25 +99,26 @@
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
-      const mountingParam = params.get("mounting") || "surface";
+      let mountingParam = params.get("mounting") || "surface";
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
       
-      // Для Maytoni UNITY используем комплект "surface" (если mounting = stretch-ceiling, можно объединять компоненты)
-      const mounting = mountingParam; 
+      // Для Maytoni UNITY используем комплект "surface"
+      const mounting = mountingParam;
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из JSON
+      // Загружаем данные из JSON (убедитесь, что /track/products.json доступен и содержит корректный JSON)
       fetch('/track/products.json')
         .then(response => {
-          if (!response.ok) {
-            throw new Error("Ошибка загрузки данных: " + response.status);
+          if (!response.ok) { 
+            throw new Error("Ошибка загрузки данных: " + response.status); 
           }
           return response.json();
         })
         .then(data => {
+          // Получаем комплект для Maytoni UNITY
           const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
           if (!selectedProduct) {
             throw new Error("Не найден комплект для выбранных параметров.");
@@ -135,12 +133,11 @@
           
           const lengthOptions = selectedProduct.lengthOptions;
           
-          // Рассчитываем общую требуемую длину:
-          // Для "straight" используем lengthA; для остальных – можно доработать по аналогии.
+          // Для фигуры "straight" общий требуемый трек равен lengthA
           let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
           console.log("Общая требуемая длина:", totalLength, "см");
           
-          // Расчет составного комплекта (для фигуры "straight"):
+          // Расчет комплектующих для трека по принципу: подбираем треки, пока суммарная длина не станет >= totalLength
           let selectedItems = [];
           let provided = 0;
           while (provided < totalLength) {
@@ -158,18 +155,17 @@
             selectedItems.push(piece);
             provided += piece.pieceLength;
           }
-          console.log("Выбраны треки:", selectedItems);
+          console.log("Подобранные треки:", selectedItems);
           
-          // Если более одного элемента, добавляем соединительные элементы между ними
+          // Если более одного элемента, добавляем соединительные элементы между ними (прямой коннектор)
           let usedConnectors = [];
           if (selectedItems.length > 1) {
-            // Для Maytoni UNITY используем прямой коннектор
             for (let i = 0; i < selectedItems.length - 1; i++) {
               usedConnectors.push(selectedProduct.connectors.straight[0]);
             }
           }
           
-          // Группируем элементы
+          // Группируем элементы (треки и коннекторы)
           let groupedItems = {};
           selectedItems.concat(usedConnectors).forEach(itemObj => {
             const id = itemObj.id;
@@ -180,7 +176,7 @@
           });
           console.log("Сгруппированные элементы:", groupedItems);
           
-          // Выводим результаты в таблицу
+          // Формируем HTML для таблицы результатов
           let tbodyHTML = "";
           let totalPrice = 0;
           for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -196,15 +192,15 @@
                 </tr>
               `;
             } else {
-              console.warn(`Компонент с ID ${id} не найден.`);
+              console.warn("Компонент с ID " + id + " не найден.");
             }
           }
           
           document.getElementById("results").innerHTML = tbodyHTML;
           document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
-          document.getElementById("systemName").textContent = "Maytoni UNITY";
           document.getElementById("resultContainer").style.display = "block";
-          // Очищаем отладочный блок
+          
+          // Очищаем отладочный блок (не выводим лишние сообщения)
           document.getElementById("debug").textContent = "";
           console.log("Подбор завершён успешно.");
         })
