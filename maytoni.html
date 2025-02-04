@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Maytoni UNITY – Результаты подбора</title>
+  <title>Maytoni UNITY – Подбор трековой системы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -37,11 +38,11 @@
       background-color: #f4f4f4;
       font-weight: bold;
     }
-    .results-table th:nth-child(3), 
+    .results-table th:nth-child(3),
     .results-table td:nth-child(3) {
       width: 100px;
     }
-    .results-table th:nth-child(2), 
+    .results-table th:nth-child(2),
     .results-table td:nth-child(2) {
       width: 50px;
       text-align: center;
@@ -63,10 +64,10 @@
 </head>
 <body>
   <div class="container">
-    <!-- Заголовок для системы -->
-    <h2 id="systemName">Начальное название</h2>
+    <!-- Заголовок, который будет обновлён после подбора -->
+    <h2 id="systemName">Maytoni UNITY</h2>
     
-    <!-- Контейнер для вывода результатов подбора -->
+    <!-- Контейнер для таблицы с результатами подбора -->
     <div id="resultContainer" class="result-container">
       <table class="results-table" id="resultsTable">
         <thead id="tableHeader">
@@ -78,69 +79,97 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Результаты подбора появятся здесь -->
+          <!-- Здесь будут выводиться результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок (опционально) -->
+    <!-- Отладочный блок -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
+    // Запуск кода после загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
-      // Функция, которая выполняет подбор системы (здесь используется заглушка)
-      function showSelection() {
-        console.log("Начало работы showSelection");
-        
-        var systemNameEl = document.getElementById("systemName");
-        if (systemNameEl) {
-          systemNameEl.textContent = "Maytoni UNITY";
-        } else {
-          console.error("Элемент с id 'systemName' не найден.");
-        }
-        
-        var resultsEl = document.getElementById("results");
-        if (resultsEl) {
-          resultsEl.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
-        } else {
-          console.error("Элемент с id 'results' не найден.");
-        }
-        
-        var totalPriceEl = document.getElementById("totalPrice");
-        if (totalPriceEl) {
-          totalPriceEl.innerHTML = "<div>Итого: 0р</div>";
-        } else {
-          console.error("Элемент с id 'totalPrice' не найден.");
-        }
-        
-        var resultContainerEl = document.getElementById("resultContainer");
-        if (resultContainerEl) {
-          resultContainerEl.style.display = "block";
-        } else {
-          console.error("Элемент с id 'resultContainer' не найден.");
-        }
-        
-        var debugEl = document.getElementById("debug");
-        if (debugEl) {
-          debugEl.textContent = "Подбор выполнен для Maytoni UNITY";
-        }
-        
-        console.log("Подбор завершён успешно.");
-      }
+      // Получаем параметры подбора из URL (если они заданы)
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type") || "one-phase";       // Например, "one-phase"
+      const color = params.get("color") || "black";           // Например, "black"
+      const mounting = params.get("mounting") || "surface";   // Например, "surface" для Maytoni UNITY
+      const shape = params.get("shape") || "straight";        // Например, "straight"
+      const lengthA = parseFloat(params.get("lengthA")) || 150; // Значение по умолчанию: 150 см
+      const lengthB = parseFloat(params.get("lengthB")) || 0;   // Для "straight" длина б не используется
       
-      function safeShowSelection() {
-        try {
-          showSelection();
-        } catch (e) {
-          console.error("Ошибка в showSelection:", e);
-          alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-        }
-      }
+      console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Для демонстрации запускаем функцию через 1 секунду
-      setTimeout(safeShowSelection, 1000);
+      // Загружаем данные из products.json
+      fetch('/products.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Ошибка загрузки данных: " + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Получаем комплект для Maytoni UNITY
+          const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
+          if (!selectedProduct) {
+            throw new Error("Не найден комплект для выбранных параметров.");
+          }
+          
+          // Если mounting = stretch-ceiling, объединяем компоненты:
+          let components = selectedProduct.components;
+          if (mounting === "stretch-ceiling") {
+            const ceilingProduct = data[type][color]["stretch-ceiling"];
+            components = Object.assign({}, components, ceilingProduct.components);
+          }
+          
+          const lengthOptions = selectedProduct.lengthOptions;
+          
+          // Простейшая логика подбора для фигуры "straight"
+          // (Если потребуется, добавьте обработку для других фигур)
+          let chosenId = "";
+          if (shape === "straight") {
+            if (lengthA <= 100) {
+              chosenId = lengthOptions[0].items[0];
+            } else if (lengthA <= 200) {
+              chosenId = lengthOptions[1].items[0];
+            } else if (lengthA <= 300) {
+              chosenId = lengthOptions[2].items[0];
+            } else {
+              chosenId = lengthOptions[2].items[0];
+            }
+          } else {
+            // Заглушка для других фигур
+            chosenId = lengthOptions[1].items[0];
+          }
+          
+          const comp = components[chosenId];
+          if (!comp) {
+            throw new Error("Не найден компонент с ID " + chosenId);
+          }
+          
+          // Формируем вывод результатов
+          const tbody = document.getElementById("results");
+          tbody.innerHTML = `
+            <tr>
+              <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td style="background-color: white; text-align: center;">1 шт.</td>
+              <td>${comp.price}р</td>
+              <td>${comp.price}р</td>
+            </tr>
+          `;
+          document.getElementById("systemName").textContent = "Maytoni UNITY";
+          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${comp.price}р</div>`;
+          document.getElementById("resultContainer").style.display = "block";
+          document.getElementById("debug").textContent = "Подбор выполнен для Maytoni UNITY";
+          console.log("Подбор завершён успешно.");
+        })
+        .catch(error => {
+          console.error("Ошибка:", error);
+          document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
+        });
     });
   </script>
 </body>
