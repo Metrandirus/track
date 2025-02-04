@@ -104,7 +104,7 @@
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
       // Загружаем данные из products.json
-      fetch('/products.json')
+     fetch('products.json')
         .then(response => {
           if (!response.ok) {
             throw new Error("Ошибка загрузки данных: " + response.status);
