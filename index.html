@@ -2,263 +2,95 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Выбор трековой системы – Производители</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подбор трековой системы</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
       background-color: #e7f5fd;
-      display: flex;
-      height: 100vh;
+      margin: 0;
+      padding: 20px;
     }
-    /* Левая область – форма выбора */
-    .selection-form {
-      width: 30%;
+    .container {
+      max-width: 800px;
+      margin: auto;
       background-color: white;
       padding: 20px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      box-sizing: border-box;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .selection-form h2 {
+    h2 {
       font-size: 18px;
       margin-bottom: 10px;
     }
-    .selection-form label {
-      display: block;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .selection-form select,
-    .selection-form input[type="text"] {
+    .results-table {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .shape-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      border-collapse: collapse;
       margin-top: 10px;
+      background-color: white;
     }
-    .shape-options div {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .results-table th, .results-table td {
       border: 1px solid #ddd;
-      padding: 5px;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-      width: 48%;
-      box-sizing: border-box;
-    }
-    .shape-options img {
-      width: 50px;
-      height: auto;
-    }
-    .shape-options label {
-      font-size: 12px;
-      margin-top: 5px;
-      text-align: center;
-    }
-    .length-section {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      align-items: center;
-    }
-    .length-section input[type="text"] {
-      width: 45%;
       padding: 8px;
-      font-size: 14px;
-      box-sizing: border-box;
+      text-align: left;
     }
-    .button-container {
-      margin-top: 20px;
-    }
-    .button-container button {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    
-    /* Правая область – 5 колонок производителей, изначально скрыта */
-    .manufacturers-container {
-      display: none; /* Изначально скрыта */
-      width: 70%;
-      padding: 10px;
-      box-sizing: border-box;
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      background-color: #e7f5fd;
-    }
-    .manufacturer {
-      flex: 1;
-      border: 1px solid #ccc;
-      background-color: white;
-      display: flex;
-      flex-direction: column;
-    }
-    .manufacturer header {
-      background-color: white;
-      text-align: center;
-      padding: 10px;
+    .results-table th {
+      background-color: #f4f4f4;
       font-weight: bold;
-      border-bottom: 1px solid #ccc;
     }
-    .manufacturer iframe {
-      width: 100%;
-      height: 600px; /* Настройте по необходимости */
-      border: none;
-      flex-grow: 1;
-    }
-    
-    /* Отладочный блок (опционально) */
-    .debug {
-      font-size: 12px;
-      color: red;
+    .total-price {
+      font-weight: bold;
+      text-align: right;
       margin-top: 10px;
+    }
+    .result-container {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <!-- Левая область: форма выбора трековой системы -->
-  <div class="selection-form">
-    <h2>Выбор трековой системы</h2>
-    
-    <label for="type">Тип:</label>
-    <select id="type" name="type">
-      <option value="one-phase">Однофазный</option>
-      <option value="magnetic">Магнитный</option>
-    </select>
-    
-    <label for="color">Цвет:</label>
-    <select id="color" name="color">
-      <option value="black">Черный</option>
-      <option value="white">Белый</option>
-    </select>
-    
-    <label for="mounting">Способ монтажа:</label>
-    <select id="mounting" name="mounting">
-      <option value="surface">Накладной</option>
-      <option value="recessed">Встраиваемый</option>
-      <option value="stretch-ceiling">В натяжной потолок</option>
-    </select>
-    
-    <label>Фигура:</label>
-    <div class="shape-options">
-      <div>
-        <img src="images/straight.png" alt="Прямая">
-        <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
-        <label for="straight">Прямая</label>
-      </div>
-      <div>
-        <img src="images/L-shape.png" alt="L-образная">
-        <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
-        <label for="L-shape">L-образная</label>
-      </div>
-      <div>
-        <img src="images/T-shape.png" alt="T-образная">
-        <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
-        <label for="T-shape">T-образная</label>
-      </div>
-      <div>
-        <img src="images/P-shape.png" alt="П-образная">
-        <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
-        <label for="P-shape">П-образная</label>
-      </div>
-      <div>
-        <img src="images/rectangle.png" alt="Прямоугольник">
-        <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
-        <label for="rectangle">Прямоугольник</label>
-      </div>
-    </div>
-    <input type="hidden" id="selectedShape" name="selectedShape" value="">
-    
-    <div class="length-section">
-      <label for="lengthA">Длина а (см):</label>
-      <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
-      
-      <label for="lengthB">Длина б (см):</label>
-      <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
-    </div>
-    
-    <div class="button-container">
-      <button type="button" onclick="safeShowSelection()">Подобрать</button>
-    </div>
-    
-    <!-- Опционально: отладочный блок -->
-    <div id="debug" class="debug"></div>
-  </div>
-  
-  <!-- Правая область: 5 колонок для производителей, изначально скрыта -->
-  <div class="manufacturers-container" id="manufacturersContainer">
-    <div class="manufacturer">
-      <header>Maytoni UNITY</header>
-      <iframe src="maytoni.html"></iframe>
-    </div>
-    <div class="manufacturer">
-      <header>NOVOTECH</header>
-      <iframe src="novotech.html"></iframe>
-    </div>
-    <div class="manufacturer">
-      <header>ST LUCE</header>
-      <iframe src="st_luce.html"></iframe>
-    </div>
-    <div class="manufacturer">
-      <header>AMBRELA</header>
-      <iframe src="ambrela.html"></iframe>
-    </div>
-    <div class="manufacturer">
-      <header>DENKIRS</header>
-      <iframe src="denkirs.html"></iframe>
+  <div class="container">
+    <h2 id="systemName">Начальное название</h2>
+    <div id="resultContainer" class="result-container">
+      <table class="results-table" id="resultsTable">
+        <thead id="tableHeader">
+          <tr>
+            <th>Наименование</th>
+            <th>кол.</th>
+            <th>Цена за шт.</th>
+            <th>Общая цена</th>
+          </tr>
+        </thead>
+        <tbody id="results">
+          <!-- Результаты будут здесь -->
+        </tbody>
+      </table>
+      <div id="totalPrice" class="total-price"></div>
     </div>
   </div>
   
+  <!-- Скрипт помещён в конце body -->
   <script>
-    // Глобальная обработка ошибок
-    window.onerror = function(message, source, lineno, colno, error) {
-      console.error("Глобальная ошибка:", message, "в", source + ":" + lineno + ":" + colno, error);
-      alert("Произошла ошибка в работе приложения. Проверьте консоль для подробностей.");
-      return true;
-    };
-
-    // Функция для установки выбранной фигуры
-    function selectShape(shape) {
-      document.getElementById("selectedShape").value = shape;
-      console.log("Выбрана фигура:", shape);
-    }
-    
-    // Функция-обертка для безопасного вызова showSelection
-    function safeShowSelection() {
-      try {
-        showSelection();
-        // После выполнения подбора показываем правую область с производителями
-        document.getElementById("manufacturersContainer").style.display = "flex";
-      } catch (e) {
-        console.error("Ошибка в showSelection:", e);
-        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+    document.addEventListener("DOMContentLoaded", function() {
+      // Проверка наличия элементов
+      var systemNameEl = document.getElementById("systemName");
+      var resultContainerEl = document.getElementById("resultContainer");
+      var resultsEl = document.getElementById("results");
+      var totalPriceEl = document.getElementById("totalPrice");
+      
+      if (!systemNameEl || !resultContainerEl || !resultsEl || !totalPriceEl) {
+        console.error("Один или несколько необходимых элементов не найдены.");
+        return;
       }
-    }
-    
-    // Здесь разместите логику подбора трековой системы для Maytoni UNITY.
-    // Ниже приведена заглушка – её следует заменить на вашу реальную логику.
-    function showSelection() {
-      console.log("Функция showSelection() вызвана. Здесь будет выполнен подбор трековой системы Maytoni UNITY.");
       
-      // Пример: вывод результата в блоке resultContainer
-      document.getElementById("systemName").textContent = "Maytoni UNITY";
-      document.getElementById("results").innerHTML = "<tr><td colspan='8' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
-      document.getElementById("totalPrice").innerHTML = "<div>Итого: 0р</div>";
-      document.getElementById("resultContainer").style.display = "block";
+      // Пример простейшей логики: вывод результата подбора
+      systemNameEl.textContent = "Maytoni UNITY";
+      resultsEl.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
+      totalPriceEl.innerHTML = "<div>Итого: 0р</div>";
+      resultContainerEl.style.display = "block";
       
-      // Если требуется добавить отладочную информацию, можно записать её в блок debug:
-      document.getElementById("debug").textContent = "Подбор выполнен для Maytoni UNITY";
-    }
+      console.log("Подбор завершён успешно.");
+    });
   </script>
 </body>
 </html>
