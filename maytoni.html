@@ -64,10 +64,10 @@
 </head>
 <body>
   <div class="container">
-    <!-- Заголовок, который будет обновлён после подбора -->
+    <!-- Заголовок системы -->
     <h2 id="systemName">Maytoni UNITY</h2>
     
-    <!-- Контейнер для таблицы с результатами подбора -->
+    <!-- Контейнер для вывода результатов подбора -->
     <div id="resultContainer" class="result-container">
       <table class="results-table" id="resultsTable">
         <thead id="tableHeader">
@@ -85,26 +85,29 @@
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок -->
+    <!-- Отладочный блок (опционально, можно оставить пустым) -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
-    // Запуск кода после загрузки DOM
+    // Запускаем код после загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
-      // Получаем параметры подбора из URL (если они заданы)
+      // Считываем параметры из URL, если заданы, иначе устанавливаем значения по умолчанию
       const params = new URLSearchParams(window.location.search);
-      const type = params.get("type") || "one-phase";       // Например, "one-phase"
-      const color = params.get("color") || "black";           // Например, "black"
-      const mounting = params.get("mounting") || "surface";   // Например, "surface" для Maytoni UNITY
-      const shape = params.get("shape") || "straight";        // Например, "straight"
-      const lengthA = parseFloat(params.get("lengthA")) || 150; // Значение по умолчанию: 150 см
-      const lengthB = parseFloat(params.get("lengthB")) || 0;   // Для "straight" длина б не используется
+      const type = params.get("type") || "one-phase";
+      const color = params.get("color") || "black";
+      const mountingParam = params.get("mounting") || "surface";
+      const shape = params.get("shape") || "straight";
+      const lengthA = parseFloat(params.get("lengthA")) || 150;
+      const lengthB = parseFloat(params.get("lengthB")) || 0;
+      
+      // Для Maytoni UNITY используем комплект для mounting "surface"
+      const mounting = mountingParam; // Для Maytoni UNITY по умолчанию "surface"
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из products.json
-     fetch('/track/products.json')
+      // Загружаем данные из JSON-файла (убедитесь, что файл products.json находится по пути /track/products.json)
+      fetch('/track/products.json')
         .then(response => {
           if (!response.ok) {
             throw new Error("Ошибка загрузки данных: " + response.status);
@@ -112,15 +115,15 @@
           return response.json();
         })
         .then(data => {
-          // Получаем комплект для Maytoni UNITY
+          // Получаем комплект для Maytoni UNITY: data["one-phase"]["black"]["surface"]
           const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
           if (!selectedProduct) {
             throw new Error("Не найден комплект для выбранных параметров.");
           }
           
-          // Если mounting = stretch-ceiling, объединяем компоненты:
+          // Если mounting = stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
           let components = selectedProduct.components;
-          if (mounting === "stretch-ceiling") {
+          if (mountingParam === "stretch-ceiling") {
             const ceilingProduct = data[type][color]["stretch-ceiling"];
             components = Object.assign({}, components, ceilingProduct.components);
           }
@@ -128,7 +131,6 @@
           const lengthOptions = selectedProduct.lengthOptions;
           
           // Простейшая логика подбора для фигуры "straight"
-          // (Если потребуется, добавьте обработку для других фигур)
           let chosenId = "";
           if (shape === "straight") {
             if (lengthA <= 100) {
@@ -141,7 +143,7 @@
               chosenId = lengthOptions[2].items[0];
             }
           } else {
-            // Заглушка для других фигур
+            // Для остальных фигур используем заглушку (можно расширить логику)
             chosenId = lengthOptions[1].items[0];
           }
           
@@ -150,7 +152,7 @@
             throw new Error("Не найден компонент с ID " + chosenId);
           }
           
-          // Формируем вывод результатов
+          // Формируем вывод результатов в таблицу
           const tbody = document.getElementById("results");
           tbody.innerHTML = `
             <tr>
@@ -160,10 +162,14 @@
               <td>${comp.price}р</td>
             </tr>
           `;
+          
+          // Обновляем заголовок и итоговую стоимость
           document.getElementById("systemName").textContent = "Maytoni UNITY";
           document.getElementById("totalPrice").innerHTML = `<div>Итого: ${comp.price}р</div>`;
           document.getElementById("resultContainer").style.display = "block";
-          document.getElementById("debug").textContent = "Подбор выполнен для Maytoni UNITY";
+          
+          // Очистим отладочный блок (убираем старые сообщения)
+          document.getElementById("debug").textContent = "";
           console.log("Подбор завершён успешно.");
         })
         .catch(error => {
