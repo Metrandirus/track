@@ -98,27 +98,224 @@
     // Ждём полной загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
       // Функция для выполнения подбора (здесь представлена заглушка, замените на реальную логику)
-      function showSelection() {
-        console.log("Начало работы showSelection");
-        
-        var systemNameEl = document.getElementById("systemName");
-        if (systemNameEl) {
-          systemNameEl.textContent = "Maytoni UNITY";
-        } else {
-          console.error("Элемент с id 'systemName' не найден.");
+      // Функция-обёртка для отладки
+    function safeShowSelection() {
+      try {
+        showSelection();
+      } catch (e) {
+        console.error("Ошибка в showSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+      }
+    }
+    
+    function showSelection() {
+      console.log("Начало работы showSelection");
+      const type = document.getElementById("type").value;
+      const color = document.getElementById("color").value;
+      let mounting = document.getElementById("mounting").value;
+      const shape = document.getElementById("selectedShape").value;
+      const lengthAValue = document.getElementById("lengthA").value.trim();
+      const lengthBValue = document.getElementById("lengthB").value.trim();
+      const lengthA = parseFloat(lengthAValue);
+      const lengthB = parseFloat(lengthBValue);
+      
+      if (!type || !color || !mounting || !shape || isNaN(lengthA)) {
+        alert("Пожалуйста, заполните все обязательные поля.");
+        return;
+      }
+      if (shape === "straight") {
+        if (lengthBValue !== "" && parseFloat(lengthBValue) !== 0) {
+          alert("Для фигуры \"Прямая\" поле \"Длина б\" должно быть пустым или равняться 0.");
+          return;
         }
-        
-        var resultsEl = document.getElementById("results");
-        if (resultsEl) {
-          // Пример вывода: одна строка с данными товара (замените на свою логику подбора)
-          resultsEl.innerHTML = "<tr>" +
-            "<td><img src='images/TRX001-112B.png' alt='' style='width:50px; height:auto; margin-right:10px;'>Шинопровод накладной черный 2м TRX001-112B</td>" +
-            "<td style='background-color: white; text-align: center;'>1 шт.</td>" +
-            "<td>2500р</td>" +
-            "<td>2500р</td>" +
-            "</tr>";
+      } else {
+        if (lengthBValue === "" || isNaN(lengthB)) {
+          alert("Пожалуйста, заполните поле \"Длина б\" для выбранной фигуры.");
+          return;
+        }
+      }
+      
+      // Для режима stretch-ceiling треки подбираются по правилам surface, затем добавляется профиль.
+      const originalMounting = mounting;
+      if (mounting === "stretch-ceiling") { mounting = "surface"; }
+      
+      let totalLength = 0;
+      if (shape === "straight") {
+        totalLength = lengthA;
+      } else if (shape === "rectangle") {
+        totalLength = 2 * (lengthA + lengthB);
+      } else if (shape === "T-shape" || shape === "P-shape") {
+        totalLength = lengthA + lengthB;
+      } else {
+        totalLength = lengthA + lengthB;
+      }
+      
+      console.log("mounting:", mounting, "shape:", shape);
+      
+      const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
+      if (!selectedProduct) {
+        alert("Не найден подходящий комплект для выбранных параметров.");
+        return;
+      }
+      
+      // Если режим stretch-ceiling, объединяем компоненты из stretch-ceiling с компонентами surface.
+      let components = selectedProduct.components;
+      if (originalMounting === "stretch-ceiling") {
+        const ceilingProduct = products[type][color]["stretch-ceiling"];
+        components = Object.assign({}, components, ceilingProduct.components);
+      }
+      
+      const lengthOptions = selectedProduct.lengthOptions;
+      const connectorsStraight = selectedProduct.connectors.straight[0];
+      const connectorsLShape = selectedProduct.connectors["L-shape"] ? selectedProduct.connectors["L-shape"][0] : connectorsStraight;
+      const connectorsTShape = selectedProduct.connectors["T-shape"] ? selectedProduct.connectors["T-shape"][0] : connectorsStraight;
+      
+      let selectedItems = [];
+      let usedConnectors = [];
+      
+      // Вспомогательные функции для подбора треков:
+      function getTracksForLegRecessed(legLength) {
+        let pieces = [];
+        if (legLength <= 100) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+        } else if (legLength <= 200) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        } else if (legLength <= 300) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else {
-          console.error("Элемент с id 'results' не найден.");
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+        }
+        return pieces;
+      }
+      
+      function getTracksForLegSurface(legLength) {
+        let pieces = [];
+        if (legLength <= 100) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+        } else if (legLength <= 200) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        } else if (legLength <= 300) {
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        } else if (legLength <= 400) {
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+        } else {
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        }
+        return pieces;
+      }
+      
+      // Обработка по типу фигуры
+      if (shape === "L-shape") {
+        const legATracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
+        const legBTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
+        console.log("L-shape: legATracks:", legATracks, "legBTracks:", legBTracks);
+        selectedItems = legATracks.concat(legBTracks);
+        usedConnectors.push(connectorsLShape);
+        if (mounting === "recessed") {
+          if (legATracks.length > 1) { usedConnectors.push(connectorsStraight); }
+          if (legBTracks.length > 1) { usedConnectors.push(connectorsStraight); }
+        }
+      }
+      else if (shape === "rectangle") {
+        const tracksA = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
+        const tracksB = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
+        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
+        for (let i = 0; i < 4; i++) { usedConnectors.push(connectorsLShape); }
+      }
+      else if (shape === "T-shape") {
+        // T‑образная система: длина а – верхний трек, длина б – вертикальный трек.
+        const topTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
+        const verticalTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
+        console.log("T-shape: topTracks:", topTracks, "verticalTracks:", verticalTracks);
+        selectedItems = topTracks.concat(verticalTracks);
+        usedConnectors.push(connectorsTShape);
+        if (topTracks.length > 1) {
+          for (let i = 0; i < topTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
+        }
+        if (verticalTracks.length > 1) {
+          for (let i = 0; i < verticalTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
+        }
+      }
+      else if (shape === "P-shape") {
+        // P‑образная система: "Длина а" – боковые треки (используются дважды), "Длина б" – соединяющий трек.
+        const sideTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
+        const connectingTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
+        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
+        usedConnectors.push(connectorsLShape);
+        usedConnectors.push(connectorsLShape);
+        if (sideTracks.length > 1) {
+          for (let i = 0; i < sideTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
+          for (let i = 0; i < sideTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
+        }
+        if (connectingTracks.length > 1) {
+          for (let i = 0; i < connectingTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
+        }
+      }
+      else {
+        // Прямая и прочие системы:
+        let provided = 0;
+        if (mounting === "recessed") {
+          while (provided < totalLength) {
+            const remainder = totalLength - provided;
+            let piece;
+            if (remainder <= 100) {
+              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+            } else if (remainder <= 200) {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+            } else if (remainder <= 300) {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+              selectedItems.push(piece);
+              provided += piece.pieceLength;
+              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+            } else {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+            }
+            selectedItems.push(piece);
+            provided += piece.pieceLength;
+          }
+        } else {
+          while (provided < totalLength) {
+            const remainder = totalLength - provided;
+            let piece;
+            if (provided > 0 && remainder <= 100) {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+              selectedItems.push(piece);
+              provided += piece.pieceLength;
+              break;
+            } else if (remainder <= 100) {
+              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+            } else if (remainder <= 200) {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+            } else if (remainder <= 300) {
+              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+            } else {
+              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+            }
+            selectedItems.push(piece);
+            provided += piece.pieceLength;
+          }
+          if (selectedItems.length > 1) {
+            for (let i = 0; i < selectedItems.length - 1; i++) {
+              usedConnectors.push(connectorsStraight);
+            }
+          }
+        }
+      }
+      
+      // Если режим stretch-ceiling – добавляем профиль.
+      if (originalMounting === "stretch-ceiling") {
+        let trackLength = selectedItems.reduce((sum, piece) => sum + (piece.pieceLength || 0), 0);
+        let profileCount = Math.ceil(trackLength / 200); // профиль 200 см
+        if (profileCount % 2 !== 0) { profileCount++; }
+        console.log("Общая длина треков:", trackLength, "см, профилей:", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
+        }
+      }
         }
         
         var totalPriceEl = document.getElementById("totalPrice");
