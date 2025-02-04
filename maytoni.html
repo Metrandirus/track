@@ -5,9 +5,11 @@
   <title>Maytoni UNITY – Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Убираем фиксированные высоты, чтобы содержимое могло расти */
+    /* Общие стили для maytoni.html */
     html, body {
-      height: auto;
+      margin: 0;
+      padding: 0;
+      background-color: #e7f5fd;
       overflow: visible;
     }
     .container {
@@ -17,8 +19,8 @@
       padding: 20px;
       border: 1px solid #ddd;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      /* Убираем фиксированную высоту, чтобы контейнер расширялся */
       height: auto;
+      overflow: visible;
     }
     h2 {
       font-size: 18px;
@@ -35,7 +37,8 @@
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
-      word-wrap: break-word; /* Позволяет переносить длинные слова */
+      word-wrap: break-word;
+      font-size: 14px; /* Можно уменьшить, если текст не помещается */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -54,10 +57,10 @@
       font-weight: bold;
       text-align: right;
       margin-top: 10px;
+      font-size: 14px;
     }
     .result-container {
       display: none;
-      /* Убираем overflow, чтобы содержимое отображалось полностью */
       overflow: visible;
     }
     .debug {
@@ -84,274 +87,103 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Здесь будут выведены результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок (при необходимости можно убрать) -->
+    <!-- Отладочный блок (при необходимости, можно оставить пустым) -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
-    // Ждём полной загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
-      // Функция для выполнения подбора (здесь представлена заглушка, замените на реальную логику)
-      // Функция-обёртка для отладки
-    function safeShowSelection() {
-      try {
-        showSelection();
-      } catch (e) {
-        console.error("Ошибка в showSelection:", e);
-        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-      }
-    }
-    
-    function showSelection() {
-      console.log("Начало работы showSelection");
-      const type = document.getElementById("type").value;
-      const color = document.getElementById("color").value;
-      let mounting = document.getElementById("mounting").value;
-      const shape = document.getElementById("selectedShape").value;
-      const lengthAValue = document.getElementById("lengthA").value.trim();
-      const lengthBValue = document.getElementById("lengthB").value.trim();
-      const lengthA = parseFloat(lengthAValue);
-      const lengthB = parseFloat(lengthBValue);
+      // Считываем параметры подбора из URL (если они заданы) или используем значения по умолчанию:
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type") || "one-phase";
+      const color = params.get("color") || "black";
+      let mountingParam = params.get("mounting") || "surface";
+      const shape = params.get("shape") || "straight";
+      const lengthA = parseFloat(params.get("lengthA")) || 150;
+      const lengthB = parseFloat(params.get("lengthB")) || 0;
       
-      if (!type || !color || !mounting || !shape || isNaN(lengthA)) {
-        alert("Пожалуйста, заполните все обязательные поля.");
-        return;
-      }
-      if (shape === "straight") {
-        if (lengthBValue !== "" && parseFloat(lengthBValue) !== 0) {
-          alert("Для фигуры \"Прямая\" поле \"Длина б\" должно быть пустым или равняться 0.");
-          return;
-        }
-      } else {
-        if (lengthBValue === "" || isNaN(lengthB)) {
-          alert("Пожалуйста, заполните поле \"Длина б\" для выбранной фигуры.");
-          return;
-        }
-      }
+      // Для Maytoni UNITY используется комплект "surface"
+      const mounting = mountingParam; // Здесь можно изменить логику, если потребуется
       
-      // Для режима stretch-ceiling треки подбираются по правилам surface, затем добавляется профиль.
-      const originalMounting = mounting;
-      if (mounting === "stretch-ceiling") { mounting = "surface"; }
+      console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      let totalLength = 0;
-      if (shape === "straight") {
-        totalLength = lengthA;
-      } else if (shape === "rectangle") {
-        totalLength = 2 * (lengthA + lengthB);
-      } else if (shape === "T-shape" || shape === "P-shape") {
-        totalLength = lengthA + lengthB;
-      } else {
-        totalLength = lengthA + lengthB;
-      }
-      
-      console.log("mounting:", mounting, "shape:", shape);
-      
-      const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
-      if (!selectedProduct) {
-        alert("Не найден подходящий комплект для выбранных параметров.");
-        return;
-      }
-      
-      // Если режим stretch-ceiling, объединяем компоненты из stretch-ceiling с компонентами surface.
-      let components = selectedProduct.components;
-      if (originalMounting === "stretch-ceiling") {
-        const ceilingProduct = products[type][color]["stretch-ceiling"];
-        components = Object.assign({}, components, ceilingProduct.components);
-      }
-      
-      const lengthOptions = selectedProduct.lengthOptions;
-      const connectorsStraight = selectedProduct.connectors.straight[0];
-      const connectorsLShape = selectedProduct.connectors["L-shape"] ? selectedProduct.connectors["L-shape"][0] : connectorsStraight;
-      const connectorsTShape = selectedProduct.connectors["T-shape"] ? selectedProduct.connectors["T-shape"][0] : connectorsStraight;
-      
-      let selectedItems = [];
-      let usedConnectors = [];
-      
-      // Вспомогательные функции для подбора треков:
-      function getTracksForLegRecessed(legLength) {
-        let pieces = [];
-        if (legLength <= 100) {
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else if (legLength <= 200) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-        } else if (legLength <= 300) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        }
-        return pieces;
-      }
-      
-      function getTracksForLegSurface(legLength) {
-        let pieces = [];
-        if (legLength <= 100) {
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else if (legLength <= 200) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-        } else if (legLength <= 300) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        } else if (legLength <= 400) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        }
-        return pieces;
-      }
-      
-      // Обработка по типу фигуры
-      if (shape === "L-shape") {
-        const legATracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const legBTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        console.log("L-shape: legATracks:", legATracks, "legBTracks:", legBTracks);
-        selectedItems = legATracks.concat(legBTracks);
-        usedConnectors.push(connectorsLShape);
-        if (mounting === "recessed") {
-          if (legATracks.length > 1) { usedConnectors.push(connectorsStraight); }
-          if (legBTracks.length > 1) { usedConnectors.push(connectorsStraight); }
-        }
-      }
-      else if (shape === "rectangle") {
-        const tracksA = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const tracksB = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        for (let i = 0; i < 4; i++) { usedConnectors.push(connectorsLShape); }
-      }
-      else if (shape === "T-shape") {
-        // T‑образная система: длина а – верхний трек, длина б – вертикальный трек.
-        const topTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const verticalTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        console.log("T-shape: topTracks:", topTracks, "verticalTracks:", verticalTracks);
-        selectedItems = topTracks.concat(verticalTracks);
-        usedConnectors.push(connectorsTShape);
-        if (topTracks.length > 1) {
-          for (let i = 0; i < topTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-        if (verticalTracks.length > 1) {
-          for (let i = 0; i < verticalTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-      }
-      else if (shape === "P-shape") {
-        // P‑образная система: "Длина а" – боковые треки (используются дважды), "Длина б" – соединяющий трек.
-        const sideTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const connectingTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
-        usedConnectors.push(connectorsLShape);
-        usedConnectors.push(connectorsLShape);
-        if (sideTracks.length > 1) {
-          for (let i = 0; i < sideTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-          for (let i = 0; i < sideTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-        if (connectingTracks.length > 1) {
-          for (let i = 0; i < connectingTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-      }
-      else {
-        // Прямая и прочие системы:
-        let provided = 0;
-        if (mounting === "recessed") {
-          while (provided < totalLength) {
-            const remainder = totalLength - provided;
-            let piece;
-            if (remainder <= 100) {
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else if (remainder <= 200) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            } else if (remainder <= 300) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-              selectedItems.push(piece);
-              provided += piece.pieceLength;
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+      // Загружаем данные из JSON-файла
+      fetch('/track/products.json')
+        .then(response => {
+          if (!response.ok) { 
+            throw new Error("Ошибка загрузки данных: " + response.status); 
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Получаем комплект для Maytoni UNITY (например, data["one-phase"]["black"]["surface"])
+          const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
+          if (!selectedProduct) {
+            throw new Error("Не найден комплект для выбранных параметров.");
+          }
+          
+          // Если выбран режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling" с комплектом "surface"
+          let components = selectedProduct.components;
+          if (mountingParam === "stretch-ceiling") {
+            const ceilingProduct = data[type][color]["stretch-ceiling"];
+            components = Object.assign({}, components, ceilingProduct.components);
+          }
+          
+          const lengthOptions = selectedProduct.lengthOptions;
+          
+          // Простейшая логика подбора для фигуры "straight"
+          let chosenId = "";
+          if (shape === "straight") {
+            if (lengthA <= 100) {
+              chosenId = lengthOptions[0].items[0];
+            } else if (lengthA <= 200) {
+              chosenId = lengthOptions[1].items[0];
+            } else if (lengthA <= 300) {
+              chosenId = lengthOptions[2].items[0];
             } else {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+              chosenId = lengthOptions[2].items[0];
             }
-            selectedItems.push(piece);
-            provided += piece.pieceLength;
+          } else {
+            // Заглушка для остальных фигур; при необходимости расширьте логику
+            chosenId = lengthOptions[1].items[0];
           }
-        } else {
-          while (provided < totalLength) {
-            const remainder = totalLength - provided;
-            let piece;
-            if (provided > 0 && remainder <= 100) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-              selectedItems.push(piece);
-              provided += piece.pieceLength;
-              break;
-            } else if (remainder <= 100) {
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else if (remainder <= 200) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            } else if (remainder <= 300) {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            } else {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            }
-            selectedItems.push(piece);
-            provided += piece.pieceLength;
+          
+          const comp = components[chosenId];
+          if (!comp) {
+            throw new Error("Не найден компонент с ID " + chosenId);
           }
-          if (selectedItems.length > 1) {
-            for (let i = 0; i < selectedItems.length - 1; i++) {
-              usedConnectors.push(connectorsStraight);
-            }
-          }
-        }
-      }
-      
-      // Если режим stretch-ceiling – добавляем профиль.
-      if (originalMounting === "stretch-ceiling") {
-        let trackLength = selectedItems.reduce((sum, piece) => sum + (piece.pieceLength || 0), 0);
-        let profileCount = Math.ceil(trackLength / 200); // профиль 200 см
-        if (profileCount % 2 !== 0) { profileCount++; }
-        console.log("Общая длина треков:", trackLength, "см, профилей:", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
-        }
-      }
-        }
-        
-        var totalPriceEl = document.getElementById("totalPrice");
-        if (totalPriceEl) {
-          totalPriceEl.innerHTML = "<div>Итого: 2500р</div>";
-        } else {
-          console.error("Элемент с id 'totalPrice' не найден.");
-        }
-        
-        var resultContainerEl = document.getElementById("resultContainer");
-        if (resultContainerEl) {
-          resultContainerEl.style.display = "block";
-        } else {
-          console.error("Элемент с id 'resultContainer' не найден.");
-        }
-        
-        // Убираем отладочную надпись, чтобы она не дублировалась
-        var debugEl = document.getElementById("debug");
-        if (debugEl) {
-          debugEl.textContent = "";
-        }
-        
-        console.log("Подбор завершён успешно.");
-      }
-      
-      function safeShowSelection() {
-        try {
-          showSelection();
-        } catch (e) {
-          console.error("Ошибка в showSelection:", e);
-          alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-        }
-      }
-      
-      // Для демонстрации запускаем функцию через 1 секунду (замените вызов на ваше событие, например, по нажатию кнопки)
-      setTimeout(safeShowSelection, 1000);
+          
+          // Формируем вывод результата: выводим одну строку с выбранным компонентом
+          const tbody = document.getElementById("results");
+          tbody.innerHTML = `
+            <tr>
+              <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td style="background-color: white; text-align: center;">1 шт.</td>
+              <td>${comp.price}р</td>
+              <td>${comp.price}р</td>
+            </tr>
+          `;
+          
+          // Обновляем заголовок и итоговую стоимость
+          document.getElementById("systemName").textContent = "Maytoni UNITY";
+          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${comp.price}р</div>`;
+          document.getElementById("resultContainer").style.display = "block";
+          
+          // Очищаем отладочный блок (не выводим лишние сообщения)
+          document.getElementById("debug").textContent = "";
+          
+          console.log("Подбор завершён успешно.");
+        })
+        .catch(error => {
+          console.error("Ошибка:", error);
+          document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
+        });
     });
   </script>
 </body>
