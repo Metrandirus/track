@@ -12,12 +12,29 @@
       padding: 20px;
     }
     .container {
-      max-width: 800px;
-      margin: auto;
-      background-color: white;
-      padding: 20px;
-      border: 1px solid #ddd;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  max-width: 800px;
+  margin: auto;
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  overflow: hidden; /* убирает прокрутку */
+}
+
+.result-container {
+  display: none;
+  max-width: 100%; /* не превышает родительский контейнер */
+  overflow-x: auto; /* если нужно, позволяет горизонтальную прокрутку */
+}
+
+.results-table {
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: white;
+  table-layout: fixed; /* фиксированная ширина столбцов */
+  width: 100%; /* таблица занимает всю доступную ширину */
+}
+
     }
     h2 {
       font-size: 18px;
