@@ -5,47 +5,20 @@
   <title>Maytoni UNITY – Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #e7f5fd;
-      margin: 0;
-      padding: 20px;
+    /* Убираем фиксированные высоты, чтобы содержимое могло расти */
+    html, body {
+      height: auto;
+      overflow: visible;
     }
     .container {
-  max-width: 800px;
-  margin: auto;
-  background-color: white;
-  padding: 20px;
-  border: 1px solid #ddd;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  overflow: hidden; /* убирает прокрутку */
-}
-
-.result-container {
-  display: none;
-  max-width: 100%; /* чтобы не было горизонтальной прокрутки */
-  overflow: visible; /* чтобы все элементы были видны */
-}
-
-.results-table {
-  border-collapse: collapse;
-  margin-top: 10px;
-  background-color: white;
-  width: 100%; /* таблица на всю ширину контейнера */
-  table-layout: auto; /* динамическое распределение ширины */
-}
-
-.results-table th, .results-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-  word-wrap: break-word; /* перенос длинных слов */
-}
-
-#systemName {
-  display: none; /* Убираем дублирующийся заголовок внизу */
-}
-
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      /* Убираем фиксированную высоту, чтобы контейнер расширялся */
+      height: auto;
     }
     h2 {
       font-size: 18px;
@@ -56,11 +29,13 @@
       border-collapse: collapse;
       margin-top: 10px;
       background-color: white;
+      table-layout: auto;
     }
     .results-table th, .results-table td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
+      word-wrap: break-word; /* Позволяет переносить длинные слова */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -82,6 +57,8 @@
     }
     .result-container {
       display: none;
+      /* Убираем overflow, чтобы содержимое отображалось полностью */
+      overflow: visible;
     }
     .debug {
       font-size: 12px;
@@ -113,97 +90,71 @@
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок (опционально, можно оставить пустым) -->
+    <!-- Отладочный блок (при необходимости можно убрать) -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
-    // Запускаем код после загрузки DOM
+    // Ждём полной загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
-      // Считываем параметры из URL, если заданы, иначе устанавливаем значения по умолчанию
-      const params = new URLSearchParams(window.location.search);
-      const type = params.get("type") || "one-phase";
-      const color = params.get("color") || "black";
-      const mountingParam = params.get("mounting") || "surface";
-      const shape = params.get("shape") || "straight";
-      const lengthA = parseFloat(params.get("lengthA")) || 150;
-      const lengthB = parseFloat(params.get("lengthB")) || 0;
+      // Функция для выполнения подбора (здесь представлена заглушка, замените на реальную логику)
+      function showSelection() {
+        console.log("Начало работы showSelection");
+        
+        var systemNameEl = document.getElementById("systemName");
+        if (systemNameEl) {
+          systemNameEl.textContent = "Maytoni UNITY";
+        } else {
+          console.error("Элемент с id 'systemName' не найден.");
+        }
+        
+        var resultsEl = document.getElementById("results");
+        if (resultsEl) {
+          // Пример вывода: одна строка с данными товара (замените на свою логику подбора)
+          resultsEl.innerHTML = "<tr>" +
+            "<td><img src='images/TRX001-112B.png' alt='' style='width:50px; height:auto; margin-right:10px;'>Шинопровод накладной черный 2м TRX001-112B</td>" +
+            "<td style='background-color: white; text-align: center;'>1 шт.</td>" +
+            "<td>2500р</td>" +
+            "<td>2500р</td>" +
+            "</tr>";
+        } else {
+          console.error("Элемент с id 'results' не найден.");
+        }
+        
+        var totalPriceEl = document.getElementById("totalPrice");
+        if (totalPriceEl) {
+          totalPriceEl.innerHTML = "<div>Итого: 2500р</div>";
+        } else {
+          console.error("Элемент с id 'totalPrice' не найден.");
+        }
+        
+        var resultContainerEl = document.getElementById("resultContainer");
+        if (resultContainerEl) {
+          resultContainerEl.style.display = "block";
+        } else {
+          console.error("Элемент с id 'resultContainer' не найден.");
+        }
+        
+        // Убираем отладочную надпись, чтобы она не дублировалась
+        var debugEl = document.getElementById("debug");
+        if (debugEl) {
+          debugEl.textContent = "";
+        }
+        
+        console.log("Подбор завершён успешно.");
+      }
       
-      // Для Maytoni UNITY используем комплект для mounting "surface"
-      const mounting = mountingParam; // Для Maytoni UNITY по умолчанию "surface"
+      function safeShowSelection() {
+        try {
+          showSelection();
+        } catch (e) {
+          console.error("Ошибка в showSelection:", e);
+          alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+        }
+      }
       
-      console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
-      
-      // Загружаем данные из JSON-файла (убедитесь, что файл products.json находится по пути /track/products.json)
-      fetch('/track/products.json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Ошибка загрузки данных: " + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          // Получаем комплект для Maytoni UNITY: data["one-phase"]["black"]["surface"]
-          const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
-          if (!selectedProduct) {
-            throw new Error("Не найден комплект для выбранных параметров.");
-          }
-          
-          // Если mounting = stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
-          let components = selectedProduct.components;
-          if (mountingParam === "stretch-ceiling") {
-            const ceilingProduct = data[type][color]["stretch-ceiling"];
-            components = Object.assign({}, components, ceilingProduct.components);
-          }
-          
-          const lengthOptions = selectedProduct.lengthOptions;
-          
-          // Простейшая логика подбора для фигуры "straight"
-          let chosenId = "";
-          if (shape === "straight") {
-            if (lengthA <= 100) {
-              chosenId = lengthOptions[0].items[0];
-            } else if (lengthA <= 200) {
-              chosenId = lengthOptions[1].items[0];
-            } else if (lengthA <= 300) {
-              chosenId = lengthOptions[2].items[0];
-            } else {
-              chosenId = lengthOptions[2].items[0];
-            }
-          } else {
-            // Для остальных фигур используем заглушку (можно расширить логику)
-            chosenId = lengthOptions[1].items[0];
-          }
-          
-          const comp = components[chosenId];
-          if (!comp) {
-            throw new Error("Не найден компонент с ID " + chosenId);
-          }
-          
-          // Формируем вывод результатов в таблицу
-          const tbody = document.getElementById("results");
-          tbody.innerHTML = `
-            <tr>
-              <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
-              <td style="background-color: white; text-align: center;">1 шт.</td>
-              <td>${comp.price}р</td>
-              <td>${comp.price}р</td>
-            </tr>
-          `;
-          
-          // Обновляем заголовок и итоговую стоимость
-          document.getElementById("systemName").textContent = "Maytoni UNITY";
-          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${comp.price}р</div>`;
-          document.getElementById("resultContainer").style.display = "block";
-          
-          // Очистим отладочный блок (убираем старые сообщения)
-          document.getElementById("debug").textContent = "";
-          console.log("Подбор завершён успешно.");
-        })
-        .catch(error => {
-          console.error("Ошибка:", error);
-          document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
-        });
+      // Для демонстрации запускаем функцию через 1 секунду (замените вызов на ваше событие, например, по нажатию кнопки)
+      setTimeout(safeShowSelection, 1000);
     });
   </script>
 </body>
