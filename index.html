@@ -261,7 +261,7 @@
     let lightingRowsCount = 0;
     
     // Загрузка JSON-файла
-    fetch('/products.json')
+    fetch('products.json')
       .then(response => {
         if (!response.ok) { throw new Error("Ошибка загрузки данных: " + response.status); }
         return response.json();
