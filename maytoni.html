@@ -63,7 +63,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Заголовок системы -->
+    <!-- Заголовок для системы -->
     <h2 id="systemName">Начальное название</h2>
     
     <!-- Контейнер для вывода результатов подбора -->
@@ -91,28 +91,83 @@
   <script>
     // Ждем полной загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
-      // Ищем все необходимые элементы
-      var systemNameEl = document.getElementById("systemName");
-      var resultContainerEl = document.getElementById("resultContainer");
-      var resultsEl = document.getElementById("results");
-      var totalPriceEl = document.getElementById("totalPrice");
-      var debugEl = document.getElementById("debug");
       
-      // Если какой-либо элемент не найден, выводим сообщение в консоль
-      if (!systemNameEl) { console.error("Элемент с id 'systemName' не найден."); }
-      if (!resultContainerEl) { console.error("Элемент с id 'resultContainer' не найден."); }
-      if (!resultsEl) { console.error("Элемент с id 'results' не найден."); }
-      if (!totalPriceEl) { console.error("Элемент с id 'totalPrice' не найден."); }
-      if (!debugEl) { console.error("Элемент с id 'debug' не найден."); }
+      function showSelection() {
+        console.log("Начало работы showSelection");
+        
+        var systemNameEl = document.getElementById("systemName");
+        if (systemNameEl) {
+          systemNameEl.textContent = "Maytoni UNITY";
+        } else {
+          console.error("Элемент с id 'systemName' не найден.");
+        }
+        
+        // Здесь реализуйте вашу логику подбора трековой системы.
+        // В данном примере используется упрощённая логика для демонстрации:
+        // выбираем один компонент в зависимости от длины A.
+        var lengthA = 150; // Пример: 150 см. (В реальной логике получаем значение из формы)
+        var lengthOptions = [
+          { "min": 0, "max": 100, "items": ["TRX001-111B"] },
+          { "min": 101, "max": 200, "items": ["TRX001-112B"] },
+          { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+        ];
+        
+        var components = {
+          "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
+          "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
+          "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" }
+        };
+        
+        var chosenId = "";
+        if (lengthA <= 100) {
+          chosenId = lengthOptions[0].items[0];
+        } else if (lengthA <= 200) {
+          chosenId = lengthOptions[1].items[0];
+        } else if (lengthA <= 300) {
+          chosenId = lengthOptions[2].items[0];
+        } else {
+          chosenId = lengthOptions[2].items[0];
+        }
+        
+        var comp = components[chosenId];
+        if (!comp) {
+          console.error("Не найден компонент с ID " + chosenId);
+          document.getElementById("results").innerHTML = "<tr><td colspan='4' style='text-align: center;'>Ошибка: компонент не найден</td></tr>";
+          return;
+        }
+        
+        // Формируем результат: выводим одну строку
+        var tbody = document.getElementById("results");
+        tbody.innerHTML = "<tr>" +
+          "<td><img src='" + comp.image + "' alt='' style='width:50px; height:auto; margin-right:10px;'>" + comp.name + "</td>" +
+          "<td style='background-color: white; text-align: center;'>1 шт.</td>" +
+          "<td>" + comp.price + "р</td>" +
+          "<td>" + comp.price + "р</td>" +
+          "</tr>";
+        
+        var totalPriceEl = document.getElementById("totalPrice");
+        totalPriceEl.innerHTML = "<div>Итого: " + comp.price + "р</div>";
+        
+        var resultContainerEl = document.getElementById("resultContainer");
+        resultContainerEl.style.display = "block";
+        
+        var debugEl = document.getElementById("debug");
+        debugEl.textContent = "Подбор выполнен для Maytoni UNITY";
+        
+        console.log("Подбор завершён успешно.");
+      }
       
-      // Устанавливаем данные (здесь пример заглушки, замените на реальную логику)
-      systemNameEl.textContent = "Maytoni UNITY";
-      resultsEl.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
-      totalPriceEl.innerHTML = "<div>Итого: 0р</div>";
-      resultContainerEl.style.display = "block";
-      debugEl.textContent = "Подбор выполнен для Maytoni UNITY";
+      function safeShowSelection() {
+        try {
+          showSelection();
+        } catch (e) {
+          console.error("Ошибка в showSelection:", e);
+          alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+        }
+      }
       
-      console.log("Подбор завершён успешно.");
+      // Для демонстрации запускаем функцию через 1 секунду (замените вызов на реальное событие, если нужно)
+      setTimeout(safeShowSelection, 1000);
     });
   </script>
 </body>
