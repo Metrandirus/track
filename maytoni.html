@@ -78,7 +78,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Результаты подбора будут выведены здесь -->
+          <!-- Результаты подбора появятся здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -89,9 +89,8 @@
   </div>
   
   <script>
-    // Ждем полной загрузки DOM
     document.addEventListener("DOMContentLoaded", function() {
-      
+      // Функция, которая выполняет подбор системы (здесь используется заглушка)
       function showSelection() {
         console.log("Начало работы showSelection");
         
@@ -102,57 +101,31 @@
           console.error("Элемент с id 'systemName' не найден.");
         }
         
-        // Здесь реализуйте вашу логику подбора трековой системы.
-        // В данном примере используется упрощённая логика для демонстрации:
-        // выбираем один компонент в зависимости от длины A.
-        var lengthA = 150; // Пример: 150 см. (В реальной логике получаем значение из формы)
-        var lengthOptions = [
-          { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-          { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-          { "min": 201, "max": 300, "items": ["TRX001-113B"] }
-        ];
-        
-        var components = {
-          "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-          "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-          "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" }
-        };
-        
-        var chosenId = "";
-        if (lengthA <= 100) {
-          chosenId = lengthOptions[0].items[0];
-        } else if (lengthA <= 200) {
-          chosenId = lengthOptions[1].items[0];
-        } else if (lengthA <= 300) {
-          chosenId = lengthOptions[2].items[0];
+        var resultsEl = document.getElementById("results");
+        if (resultsEl) {
+          resultsEl.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
         } else {
-          chosenId = lengthOptions[2].items[0];
+          console.error("Элемент с id 'results' не найден.");
         }
-        
-        var comp = components[chosenId];
-        if (!comp) {
-          console.error("Не найден компонент с ID " + chosenId);
-          document.getElementById("results").innerHTML = "<tr><td colspan='4' style='text-align: center;'>Ошибка: компонент не найден</td></tr>";
-          return;
-        }
-        
-        // Формируем результат: выводим одну строку
-        var tbody = document.getElementById("results");
-        tbody.innerHTML = "<tr>" +
-          "<td><img src='" + comp.image + "' alt='' style='width:50px; height:auto; margin-right:10px;'>" + comp.name + "</td>" +
-          "<td style='background-color: white; text-align: center;'>1 шт.</td>" +
-          "<td>" + comp.price + "р</td>" +
-          "<td>" + comp.price + "р</td>" +
-          "</tr>";
         
         var totalPriceEl = document.getElementById("totalPrice");
-        totalPriceEl.innerHTML = "<div>Итого: " + comp.price + "р</div>";
+        if (totalPriceEl) {
+          totalPriceEl.innerHTML = "<div>Итого: 0р</div>";
+        } else {
+          console.error("Элемент с id 'totalPrice' не найден.");
+        }
         
         var resultContainerEl = document.getElementById("resultContainer");
-        resultContainerEl.style.display = "block";
+        if (resultContainerEl) {
+          resultContainerEl.style.display = "block";
+        } else {
+          console.error("Элемент с id 'resultContainer' не найден.");
+        }
         
         var debugEl = document.getElementById("debug");
-        debugEl.textContent = "Подбор выполнен для Maytoni UNITY";
+        if (debugEl) {
+          debugEl.textContent = "Подбор выполнен для Maytoni UNITY";
+        }
         
         console.log("Подбор завершён успешно.");
       }
@@ -166,7 +139,7 @@
         }
       }
       
-      // Для демонстрации запускаем функцию через 1 секунду (замените вызов на реальное событие, если нужно)
+      // Для демонстрации запускаем функцию через 1 секунду
       setTimeout(safeShowSelection, 1000);
     });
   </script>
