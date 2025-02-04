@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Подбор трековой системы</title>
   <style>
-    /* Общие стили */
+    /* Общие стили страницы */
     body {
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
@@ -18,9 +18,8 @@
     .container {
       display: flex;
       width: 100%;
-      box-sizing: border-box;
     }
-    /* Левая область – форма выбора */
+    /* Левая область: форма выбора */
     .form-container {
       width: 35%;
       background-color: white;
@@ -93,7 +92,7 @@
       cursor: pointer;
     }
     
-    /* Правая область – контейнер для 5 колонок производителей */
+    /* Правая область: контейнер для 5 колонок производителей */
     .manufacturers-container {
       width: 65%;
       padding: 10px;
@@ -101,7 +100,8 @@
       display: none; /* Изначально скрыт */
       gap: 10px;
       background-color: #e7f5fd;
-      overflow: hidden; /* Скролл не нужен */
+      /* Отсутствие прокрутки – каждая колонка будет иметь нужную высоту */
+      overflow: hidden;
     }
     .manufacturer {
       flex: 1;
@@ -116,14 +116,17 @@
       padding: 10px;
       font-weight: bold;
       border-bottom: 1px solid #ccc;
+      font-size: 14px;
     }
     .manufacturer iframe {
       width: 100%;
+      /* Устанавливаем минимальную высоту и уменьшаем шрифт внутри iframe через CSS (при условии, что внутри файлов CSS тоже настроен) */
+      height: 600px;
       border: none;
-      overflow: hidden; /* Скрываем прокрутку внутри */
+      overflow: hidden;
     }
     
-    /* Отладочный блок (опционально) */
+    /* Отладочный блок (если нужен) */
     .debug {
       margin-top: 10px;
       font-size: 12px;
@@ -133,7 +136,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Левая область: форма выбора -->
+    <!-- Левая область: Форма выбора трековой системы -->
     <div class="form-container">
       <h2>Подбор трековой системы</h2>
       
@@ -198,7 +201,7 @@
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
       
-      <!-- Отладочный блок -->
+      <!-- Отладочный блок (опционально) -->
       <div id="debug" class="debug"></div>
     </div>
     
@@ -241,33 +244,33 @@
       console.log("Выбрана фигура:", shape);
     }
     
-    // Функция для изменения высоты iframe по содержимому
+    // Функция для изменения высоты iframe (при условии, что содержимое находится в одном домене)
     function resizeIframe(iframe) {
       try {
-        // Попытка получить высоту содержимого, если iframe находится в том же домене
-        var doc = iframe.contentDocument ? iframe.contentDocument : iframe.contentWindow.document;
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        // Устанавливаем высоту iframe равной высоте его содержимого
         iframe.style.height = doc.body.scrollHeight + "px";
       } catch (e) {
         console.error("Не удалось изменить высоту iframe:", e);
       }
     }
     
-    // Функция для сброса (перезагрузки) всех iframe в правой области
+    // Функция для сброса содержимого всех iframe (перезагрузка их src)
     function resetManufacturers() {
       var iframes = document.querySelectorAll(".manufacturers-container iframe");
       iframes.forEach(function(iframe) {
-        // Сброс iframe – можно установить src заново
+        // Перезагружаем iframe, чтобы сбросить предыдущие результаты
         iframe.src = iframe.src;
       });
     }
     
-    // Функция-обертка для безопасного вызова showSelection
+    // Функция-обертка для безопасного вызова подбора
     function safeShowSelection() {
       try {
         showSelection();
-        // После выполнения подбора делаем правую область видимой
+        // После подбора показываем правую область
         document.getElementById("manufacturersContainer").style.display = "flex";
-        // Сбрасываем содержимое iframe, чтобы убрать предыдущие результаты
+        // Сбрасываем содержимое iframe, чтобы убрать старые результаты
         resetManufacturers();
       } catch (e) {
         console.error("Ошибка в showSelection:", e);
@@ -275,13 +278,13 @@
       }
     }
     
-    // Здесь разместите вашу логику подбора для основной формы.
-    // Пример ниже – заглушка; в реальном варианте она должна передавать параметры в iframe или обновлять их содержимое.
+    // Здесь разместите логику подбора для выбранных характеристик.
+    // Ниже приведена заглушка, которую можно заменить на реальную логику.
     function showSelection() {
       console.log("Функция showSelection() вызвана.");
-      // Здесь можно выполнить логику подбора и обновить отладочный блок:
-      document.getElementById("debug").textContent = "Подбор выполнен. Старые результаты сброшены.";
-      // Дополнительная логика подбора может быть реализована здесь, например, передача параметров в iframe через postMessage.
+      // Например, можно обновлять отладочный блок:
+      document.getElementById("debug").textContent = "Параметры выбраны. Производители обновлены.";
+      // Здесь можно, например, передать параметры в каждый iframe через postMessage или обновить их содержимое.
     }
   </script>
 </body>
