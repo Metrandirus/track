@@ -22,7 +22,10 @@
       height: auto;
       overflow: visible;
     }
-    /* Таблица результатов */
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -69,8 +72,6 @@
 </head>
 <body>
   <div class="container">
-    <!-- Удалён дублирующий заголовок (Maytoni UNITY) -->
-    
     <!-- Контейнер для вывода результатов подбора -->
     <div id="resultContainer" class="result-container">
       <table class="results-table" id="resultsTable">
@@ -89,13 +90,27 @@
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок (при необходимости, можно оставить пустым) -->
+    <!-- Отладочный блок (если не нужен – можно убрать) -->
     <div id="debug" class="debug"></div>
+    
+    <!-- Кнопка для демонстрации подбора (если требуется) -->
+    <button onclick="safeShowSelection()">Запустить подбор</button>
   </div>
   
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // Считываем параметры из URL или используем значения по умолчанию
+    // Объявляем функции в глобальной области, чтобы их можно было вызвать через onclick
+    window.safeShowSelection = function() {
+      try {
+        showSelection();
+      } catch (e) {
+        console.error("Ошибка в showSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+      }
+    };
+
+    window.showSelection = function() {
+      console.log("Начало работы showSelection");
+      // Считываем параметры из URL (если заданы), иначе используются значения по умолчанию
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -109,22 +124,21 @@
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из JSON (убедитесь, что /track/products.json доступен и содержит корректный JSON)
+      // Загружаем данные из JSON (убедитесь, что файл /track/products.json содержит корректный JSON)
       fetch('/track/products.json')
         .then(response => {
-          if (!response.ok) { 
-            throw new Error("Ошибка загрузки данных: " + response.status); 
+          if (!response.ok) {
+            throw new Error("Ошибка загрузки данных: " + response.status);
           }
           return response.json();
         })
         .then(data => {
-          // Получаем комплект для Maytoni UNITY
           const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
           if (!selectedProduct) {
             throw new Error("Не найден комплект для выбранных параметров.");
           }
           
-          // Если mounting = stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
+          // Если mounting = stretch-ceiling, объединяем компоненты
           let components = selectedProduct.components;
           if (mountingParam === "stretch-ceiling") {
             const ceilingProduct = data[type][color]["stretch-ceiling"];
@@ -132,12 +146,11 @@
           }
           
           const lengthOptions = selectedProduct.lengthOptions;
-          
-          // Для фигуры "straight" общий требуемый трек равен lengthA
+          // Рассчитываем требуемую длину
           let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
           console.log("Общая требуемая длина:", totalLength, "см");
           
-          // Расчет комплектующих для трека по принципу: подбираем треки, пока суммарная длина не станет >= totalLength
+          // Подбор для фигуры "straight": подбираем трековые элементы до достижения требуемой длины
           let selectedItems = [];
           let provided = 0;
           while (provided < totalLength) {
@@ -157,7 +170,7 @@
           }
           console.log("Подобранные треки:", selectedItems);
           
-          // Если более одного элемента, добавляем соединительные элементы между ними (прямой коннектор)
+          // Если более одного элемента, добавляем прямые коннекторы между ними
           let usedConnectors = [];
           if (selectedItems.length > 1) {
             for (let i = 0; i < selectedItems.length - 1; i++) {
@@ -165,7 +178,7 @@
             }
           }
           
-          // Группируем элементы (треки и коннекторы)
+          // Группируем треки и коннекторы
           let groupedItems = {};
           selectedItems.concat(usedConnectors).forEach(itemObj => {
             const id = itemObj.id;
@@ -176,7 +189,7 @@
           });
           console.log("Сгруппированные элементы:", groupedItems);
           
-          // Формируем HTML для таблицы результатов
+          // Формируем HTML для таблицы
           let tbodyHTML = "";
           let totalPrice = 0;
           for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -200,14 +213,18 @@
           document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
           document.getElementById("resultContainer").style.display = "block";
           
-          // Очищаем отладочный блок (не выводим лишние сообщения)
-          document.getElementById("debug").textContent = "";
           console.log("Подбор завершён успешно.");
         })
         .catch(error => {
           console.error("Ошибка:", error);
           document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
         });
+    };
+    
+    // Если требуется автоматический запуск (например, по таймауту), можно добавить:
+    document.addEventListener("DOMContentLoaded", function() {
+      // Запуск через 1 секунду для демонстрации
+      setTimeout(window.safeShowSelection, 1000);
     });
   </script>
 </body>
