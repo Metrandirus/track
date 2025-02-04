@@ -1,72 +1,61 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <base href="/track/">
-<head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Подбор трековой системы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Выбор трековой системы – Производители</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
       background-color: #e7f5fd;
+      display: flex;
+      height: 100vh;
     }
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      width: 800px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* Левая область – форма выбора */
+    .selection-form {
+      width: 30%;
       background-color: white;
-      margin-top: 20px;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
     }
-    .form-container {
-      grid-column: 1;
+    .selection-form h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
     }
-    .result-container {
-      grid-column: 2;
-      display: none;
-      border-left: 1px solid #ccc;
-      border-right: 1px solid #ccc;
-      padding: 0 15px;
-      background-color: transparent;
-    }
-    label {
+    .selection-form label {
       display: block;
       margin-top: 10px;
       font-size: 14px;
     }
-    select, input[type="text"], input[type="checkbox"] {
+    .selection-form select,
+    .selection-form input[type="text"] {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
       font-size: 14px;
+      box-sizing: border-box;
     }
     .shape-options {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      margin-top: 10px;
     }
     .shape-options div {
       display: flex;
       flex-direction: column;
       align-items: center;
       border: 1px solid #ddd;
-      padding: 10px;
+      padding: 5px;
       border-radius: 5px;
       background-color: #f9f9f9;
-      width: calc(25% - 10px);
+      width: 48%;
+      box-sizing: border-box;
     }
     .shape-options img {
-      width: 64px;
+      width: 50px;
       height: auto;
     }
     .shape-options label {
@@ -76,176 +65,157 @@
     }
     .length-section {
       display: flex;
-      align-items: center;
       gap: 10px;
+      margin-top: 15px;
+      align-items: center;
     }
     .length-section input[type="text"] {
-      width: 100px;
-    }
-    .add-lighting-row-button {
-      margin-left: auto;
-      width: 150px;
-      padding: 5px;
-      font-size: 12px;
-      text-align: left;
-    }
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background-color: white;
-    }
-    .results-table th, .results-table td {
-      border: 1px solid #ddd;
+      width: 45%;
       padding: 8px;
-      text-align: left;
-    }
-    .results-table th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    .results-table tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    .results-table th:nth-child(3), .results-table td:nth-child(3) {
-      width: 100px;
-    }
-    .results-table th:nth-child(2), .results-table td:nth-child(2) {
-      width: 50px;
-      text-align: center;
-    }
-    .total-price {
-      font-weight: bold;
-      text-align: right;
-      margin-top: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
     }
     .button-container {
       margin-top: 20px;
     }
     .button-container button {
       width: 100%;
-      padding: 15px;
+      padding: 10px;
       font-size: 16px;
+      cursor: pointer;
     }
-    .lighting-container {
-      margin-top: 20px;
-      display: none;
-    }
-    .lighting-row {
+    
+    /* Правая область – 5 колонок производителей, изначально скрыта */
+    .manufacturers-container {
+      display: none; /* Изначально скрыта */
+      width: 70%;
+      padding: 10px;
+      box-sizing: border-box;
       display: flex;
-      align-items: center;
-      margin-bottom: 10px;
+      gap: 10px;
+      overflow-x: auto;
+      background-color: #e7f5fd;
     }
-    .lighting-row select, .lighting-row input[type="number"] {
-      width: calc(50% - 30px);
-      margin-right: 10px;
+    .manufacturer {
+      flex: 1;
+      border: 1px solid #ccc;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
     }
-    .lighting-row input[type="number"] {
-      width: calc(50% - 50px);
+    .manufacturer header {
+      background-color: white;
       text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
     }
-    .lighting-row .quantity-controls {
-      display: flex;
-      align-items: center;
+    .manufacturer iframe {
+      width: 100%;
+      height: 600px; /* Настройте по необходимости */
+      border: none;
+      flex-grow: 1;
     }
-    .lighting-row .quantity-controls button {
-      width: 30px;
-      padding: 5px;
-      font-size: 14px;
-    }
-    .lighting-row .remove-button {
-      margin-left: 10px;
+    
+    /* Отладочный блок (опционально) */
+    .debug {
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="form-container">
-      <h2 style="font-size: 16px; margin-bottom: 10px;">Подбор трековой системы</h2>
-      
-      <label for="type">Тип:</label>
-      <select id="type" name="type">
-        <option value="one-phase">Однофазный</option>
-        <option value="magnetic">Магнитный</option>
-      </select>
-      
-      <label for="color">Цвет:</label>
-      <select id="color" name="color">
-        <option value="black">Черный</option>
-        <option value="white">Белый</option>
-      </select>
-      
-      <label for="mounting">Способ монтажа:</label>
-      <select id="mounting" name="mounting">
-        <option value="surface">Накладной</option>
-        <option value="recessed">Встраиваемый</option>
-        <option value="stretch-ceiling">В натяжной потолок</option>
-      </select>
-      
-      <label>Фигура:</label>
-      <div class="shape-options">
-        <div>
-          <img src="images/straight.png" alt="Прямая">
-          <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
-          <label for="straight" class="shape-label">Прямая</label>
-        </div>
-        <div>
-          <img src="images/L-shape.png" alt="L-образная">
-          <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
-          <label for="L-shape" class="shape-label">L-образная</label>
-        </div>
-        <div>
-          <img src="images/T-shape.png" alt="T-образная">
-          <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
-          <label for="T-shape" class="shape-label">T-образная</label>
-        </div>
-        <div>
-          <img src="images/P-shape.png" alt="П-образная">
-          <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
-          <label for="P-shape" class="shape-label">П-образная</label>
-        </div>
-        <div>
-          <img src="images/rectangle.png" alt="Прямоугольник">
-          <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
-          <label for="rectangle" class="shape-label">Прямоугольник</label>
-        </div>
+  <!-- Левая область: форма выбора трековой системы -->
+  <div class="selection-form">
+    <h2>Выбор трековой системы</h2>
+    
+    <label for="type">Тип:</label>
+    <select id="type" name="type">
+      <option value="one-phase">Однофазный</option>
+      <option value="magnetic">Магнитный</option>
+    </select>
+    
+    <label for="color">Цвет:</label>
+    <select id="color" name="color">
+      <option value="black">Черный</option>
+      <option value="white">Белый</option>
+    </select>
+    
+    <label for="mounting">Способ монтажа:</label>
+    <select id="mounting" name="mounting">
+      <option value="surface">Накладной</option>
+      <option value="recessed">Встраиваемый</option>
+      <option value="stretch-ceiling">В натяжной потолок</option>
+    </select>
+    
+    <label>Фигура:</label>
+    <div class="shape-options">
+      <div>
+        <img src="images/straight.png" alt="Прямая">
+        <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
+        <label for="straight">Прямая</label>
       </div>
-      <input type="hidden" id="selectedShape" name="selectedShape" value="">
-      
-      <div class="length-section">
-        <label for="lengthA">Длина а (см):</label>
-        <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
-        
-        <label for="lengthB">Длина б (см):</label>
-        <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
-        
-        <button type="button" class="add-lighting-row-button" onclick="addLightingRow()">Добавить светильник</button>
+      <div>
+        <img src="images/L-shape.png" alt="L-образная">
+        <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
+        <label for="L-shape">L-образная</label>
       </div>
-      
-      <div class="lighting-container" id="lightingContainer">
-        <!-- Динамически добавляемые строки -->
+      <div>
+        <img src="images/T-shape.png" alt="T-образная">
+        <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
+        <label for="T-shape">T-образная</label>
       </div>
-      
-      <div class="button-container">
-        <button type="button" onclick="safeShowSelection()">Подобрать</button>
+      <div>
+        <img src="images/P-shape.png" alt="П-образная">
+        <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
+        <label for="P-shape">П-образная</label>
+      </div>
+      <div>
+        <img src="images/rectangle.png" alt="Прямоугольник">
+        <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
+        <label for="rectangle">Прямоугольник</label>
       </div>
     </div>
+    <input type="hidden" id="selectedShape" name="selectedShape" value="">
     
-    <div class="result-container" id="resultContainer">
-      <h2 id="systemName"></h2>
-      <table class="results-table" id="resultsTable">
-        <thead>
-          <!-- Если система однофазная, добавляются 4 дополнительные колонки -->
-          <tr id="tableHeader">
-            <th>Наименование</th>
-            <th>кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-          </tr>
-        </thead>
-        <tbody id="results"></tbody>
-      </table>
-      <div class="total-price" id="totalPrice"></div>
+    <div class="length-section">
+      <label for="lengthA">Длина а (см):</label>
+      <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
+      
+      <label for="lengthB">Длина б (см):</label>
+      <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+    </div>
+    
+    <div class="button-container">
+      <button type="button" onclick="safeShowSelection()">Подобрать</button>
+    </div>
+    
+    <!-- Опционально: отладочный блок -->
+    <div id="debug" class="debug"></div>
+  </div>
+  
+  <!-- Правая область: 5 колонок для производителей, изначально скрыта -->
+  <div class="manufacturers-container" id="manufacturersContainer">
+    <div class="manufacturer">
+      <header>Maytoni UNITY</header>
+      <iframe src="maytoni.html"></iframe>
+    </div>
+    <div class="manufacturer">
+      <header>NOVOTECH</header>
+      <iframe src="novotech.html"></iframe>
+    </div>
+    <div class="manufacturer">
+      <header>ST LUCE</header>
+      <iframe src="st_luce.html"></iframe>
+    </div>
+    <div class="manufacturer">
+      <header>AMBRELA</header>
+      <iframe src="ambrela.html"></iframe>
+    </div>
+    <div class="manufacturer">
+      <header>DENKIRS</header>
+      <iframe src="denkirs.html"></iframe>
     </div>
   </div>
   
@@ -257,376 +227,38 @@
       return true;
     };
 
-    let products = {};
-    let lightingRowsCount = 0;
-    
-    // Загрузка JSON-файла
-    fetch('products.json')
-      .then(response => {
-        if (!response.ok) { throw new Error("Ошибка загрузки данных: " + response.status); }
-        return response.json();
-      })
-      .then(data => {
-        products = data;
-        console.log("Products loaded:", products);
-      })
-      .catch(error => {
-        console.error("Ошибка при загрузке JSON-файла:", error);
-        alert("Не удалось загрузить данные о продуктах.");
-      });
-      
+    // Функция для установки выбранной фигуры
     function selectShape(shape) {
       document.getElementById("selectedShape").value = shape;
+      console.log("Выбрана фигура:", shape);
     }
     
-    // Функция-обёртка для отладки
+    // Функция-обертка для безопасного вызова showSelection
     function safeShowSelection() {
       try {
         showSelection();
+        // После выполнения подбора показываем правую область с производителями
+        document.getElementById("manufacturersContainer").style.display = "flex";
       } catch (e) {
         console.error("Ошибка в showSelection:", e);
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     }
     
+    // Здесь разместите логику подбора трековой системы для Maytoni UNITY.
+    // Ниже приведена заглушка – её следует заменить на вашу реальную логику.
     function showSelection() {
-      console.log("Начало работы showSelection");
-      const type = document.getElementById("type").value;
-      const color = document.getElementById("color").value;
-      let mounting = document.getElementById("mounting").value;
-      const shape = document.getElementById("selectedShape").value;
-      const lengthAValue = document.getElementById("lengthA").value.trim();
-      const lengthBValue = document.getElementById("lengthB").value.trim();
-      const lengthA = parseFloat(lengthAValue);
-      const lengthB = parseFloat(lengthBValue);
+      console.log("Функция showSelection() вызвана. Здесь будет выполнен подбор трековой системы Maytoni UNITY.");
       
-      if (!type || !color || !mounting || !shape || isNaN(lengthA)) {
-        alert("Пожалуйста, заполните все обязательные поля.");
-        return;
-      }
-      if (shape === "straight") {
-        if (lengthBValue !== "" && parseFloat(lengthBValue) !== 0) {
-          alert("Для фигуры \"Прямая\" поле \"Длина б\" должно быть пустым или равняться 0.");
-          return;
-        }
-      } else {
-        if (lengthBValue === "" || isNaN(lengthB)) {
-          alert("Пожалуйста, заполните поле \"Длина б\" для выбранной фигуры.");
-          return;
-        }
-      }
-      
-      // Для режима stretch-ceiling треки подбираются по правилам surface, затем добавляется профиль.
-      const originalMounting = mounting;
-      if (mounting === "stretch-ceiling") { mounting = "surface"; }
-      
-      let totalLength = 0;
-      if (shape === "straight") {
-        totalLength = lengthA;
-      } else if (shape === "rectangle") {
-        totalLength = 2 * (lengthA + lengthB);
-      } else if (shape === "T-shape" || shape === "P-shape") {
-        totalLength = lengthA + lengthB;
-      } else {
-        totalLength = lengthA + lengthB;
-      }
-      
-      console.log("mounting:", mounting, "shape:", shape);
-      
-      const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
-      if (!selectedProduct) {
-        alert("Не найден подходящий комплект для выбранных параметров.");
-        return;
-      }
-      
-      // Если режим stretch-ceiling, объединяем компоненты из stretch-ceiling с компонентами surface.
-      let components = selectedProduct.components;
-      if (originalMounting === "stretch-ceiling") {
-        const ceilingProduct = products[type][color]["stretch-ceiling"];
-        components = Object.assign({}, components, ceilingProduct.components);
-      }
-      
-      const lengthOptions = selectedProduct.lengthOptions;
-      const connectorsStraight = selectedProduct.connectors.straight[0];
-      const connectorsLShape = selectedProduct.connectors["L-shape"] ? selectedProduct.connectors["L-shape"][0] : connectorsStraight;
-      const connectorsTShape = selectedProduct.connectors["T-shape"] ? selectedProduct.connectors["T-shape"][0] : connectorsStraight;
-      
-      let selectedItems = [];
-      let usedConnectors = [];
-      
-      // Вспомогательные функции для подбора треков:
-      function getTracksForLegRecessed(legLength) {
-        let pieces = [];
-        if (legLength <= 100) {
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else if (legLength <= 200) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-        } else if (legLength <= 300) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        }
-        return pieces;
-      }
-      
-      function getTracksForLegSurface(legLength) {
-        let pieces = [];
-        if (legLength <= 100) {
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else if (legLength <= 200) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-        } else if (legLength <= 300) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        } else if (legLength <= 400) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-        } else {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        }
-        return pieces;
-      }
-      
-      // Обработка по типу фигуры
-      if (shape === "L-shape") {
-        const legATracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const legBTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        console.log("L-shape: legATracks:", legATracks, "legBTracks:", legBTracks);
-        selectedItems = legATracks.concat(legBTracks);
-        usedConnectors.push(connectorsLShape);
-        if (mounting === "recessed") {
-          if (legATracks.length > 1) { usedConnectors.push(connectorsStraight); }
-          if (legBTracks.length > 1) { usedConnectors.push(connectorsStraight); }
-        }
-      }
-      else if (shape === "rectangle") {
-        const tracksA = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const tracksB = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        for (let i = 0; i < 4; i++) { usedConnectors.push(connectorsLShape); }
-      }
-      else if (shape === "T-shape") {
-        // T‑образная система: длина а – верхний трек, длина б – вертикальный трек.
-        const topTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const verticalTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        console.log("T-shape: topTracks:", topTracks, "verticalTracks:", verticalTracks);
-        selectedItems = topTracks.concat(verticalTracks);
-        usedConnectors.push(connectorsTShape);
-        if (topTracks.length > 1) {
-          for (let i = 0; i < topTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-        if (verticalTracks.length > 1) {
-          for (let i = 0; i < verticalTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-      }
-      else if (shape === "P-shape") {
-        // P‑образная система: "Длина а" – боковые треки (используются дважды), "Длина б" – соединяющий трек.
-        const sideTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthA) : getTracksForLegSurface(lengthA);
-        const connectingTracks = (mounting === "recessed") ? getTracksForLegRecessed(lengthB) : getTracksForLegSurface(lengthB);
-        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
-        usedConnectors.push(connectorsLShape);
-        usedConnectors.push(connectorsLShape);
-        if (sideTracks.length > 1) {
-          for (let i = 0; i < sideTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-          for (let i = 0; i < sideTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-        if (connectingTracks.length > 1) {
-          for (let i = 0; i < connectingTracks.length - 1; i++) { usedConnectors.push(connectorsStraight); }
-        }
-      }
-      else {
-        // Прямая и прочие системы:
-        let provided = 0;
-        if (mounting === "recessed") {
-          while (provided < totalLength) {
-            const remainder = totalLength - provided;
-            let piece;
-            if (remainder <= 100) {
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else if (remainder <= 200) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            } else if (remainder <= 300) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-              selectedItems.push(piece);
-              provided += piece.pieceLength;
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            }
-            selectedItems.push(piece);
-            provided += piece.pieceLength;
-          }
-        } else {
-          while (provided < totalLength) {
-            const remainder = totalLength - provided;
-            let piece;
-            if (provided > 0 && remainder <= 100) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-              selectedItems.push(piece);
-              provided += piece.pieceLength;
-              break;
-            } else if (remainder <= 100) {
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else if (remainder <= 200) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            } else if (remainder <= 300) {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            } else {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            }
-            selectedItems.push(piece);
-            provided += piece.pieceLength;
-          }
-          if (selectedItems.length > 1) {
-            for (let i = 0; i < selectedItems.length - 1; i++) {
-              usedConnectors.push(connectorsStraight);
-            }
-          }
-        }
-      }
-      
-      // Если режим stretch-ceiling – добавляем профиль.
-      if (originalMounting === "stretch-ceiling") {
-        let trackLength = selectedItems.reduce((sum, piece) => sum + (piece.pieceLength || 0), 0);
-        let profileCount = Math.ceil(trackLength / 200); // профиль 200 см
-        if (profileCount % 2 !== 0) { profileCount++; }
-        console.log("Общая длина треков:", trackLength, "см, профилей:", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
-        }
-      }
-      
-      // Формирование расширенного заголовка для однофазной системы
-      let headerHTML = "";
-      if (type === "one-phase") {
-        headerHTML = `
-          <tr>
-            <th>Наименование</th>
-            <th>кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-            
-          </tr>
-        `;
-      } else {
-        headerHTML = `
-          <tr>
-            <th>Наименование</th>
-            <th>кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-          </tr>
-        `;
-      }
-      document.getElementById("tableHeader").innerHTML = headerHTML;
-      
-      // Группировка элементов
-      const groupedItems = {};
-      selectedItems.forEach(itemObj => {
-        const itemId = itemObj.id;
-        if (!groupedItems[itemId]) {
-          groupedItems[itemId] = { count: 0, component: components[itemId] };
-        }
-        groupedItems[itemId].count++;
-      });
-      usedConnectors.forEach(connectorId => {
-        if (!groupedItems[connectorId]) {
-          groupedItems[connectorId] = { count: 0, component: components[connectorId] };
-        }
-        groupedItems[connectorId].count++;
-      });
-      
-      const resultsTableBody = document.getElementById("results");
-      resultsTableBody.innerHTML = "";
-      let totalPrice = 0;
-      const systemName = "Maytoni UNITY";
-      document.getElementById("systemName").textContent = systemName;
-      
-      for (const [itemId, itemData] of Object.entries(groupedItems)) {
-        const item = itemData.component;
-        if (item) {
-          totalPrice += item.price * itemData.count;
-          let extraColumns = "";
-          if (type === "one-phase") {
-            extraColumns = `
-              <td style="background-color: white;"></td>
-              <td style="background-color: white;"></td>
-              <td style="background-color: white;"></td>
-              <td style="background-color: white;"></td>
-            `;
-          }
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><img src="${item.image}" alt="" style="width: 50px; height: auto; margin-right: 10px;">${item.name}</td>
-            <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
-            <td>${item.price}р</td>
-            <td>${item.price * itemData.count}р</td>
-            ${extraColumns}
-          `;
-          resultsTableBody.appendChild(row);
-        } else {
-          console.warn(`Компонент с ID ${itemId} не найден.`);
-        }
-      }
-      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
+      // Пример: вывод результата в блоке resultContainer
+      document.getElementById("systemName").textContent = "Maytoni UNITY";
+      document.getElementById("results").innerHTML = "<tr><td colspan='8' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
+      document.getElementById("totalPrice").innerHTML = "<div>Итого: 0р</div>";
       document.getElementById("resultContainer").style.display = "block";
-      console.log("Подбор завершён успешно.");
+      
+      // Если требуется добавить отладочную информацию, можно записать её в блок debug:
+      document.getElementById("debug").textContent = "Подбор выполнен для Maytoni UNITY";
     }
-    
-    function addLightingRow() {
-      lightingRowsCount++;
-      const container = document.getElementById("lightingContainer");
-      const newRow = document.createElement("div");
-      newRow.className = "lighting-row";
-      newRow.id = `lightingRow${lightingRowsCount}`;
-      newRow.innerHTML = `
-        <select id="light${lightingRowsCount}" name="light${lightingRowsCount}">
-          <option value="spot">Спот</option>
-          <option value="linear">Линейный</option>
-          <option value="pendant">Подвесной</option>
-        </select>
-        <div class="quantity-controls">
-          <button type="button" onclick="decreaseQuantity('light${lightingRowsCount}')">-</button>
-          <input type="number" id="quantity${lightingRowsCount}" name="quantity${lightingRowsCount}" value="1" min="1" style="width: 60px;">
-          <button type="button" onclick="increaseQuantity('light${lightingRowsCount}')">+</button>
-        </div>
-        <button type="button" class="remove-button" onclick="removeLightingRow('lightingRow${lightingRowsCount}')">Удалить</button>
-      `;
-      container.appendChild(newRow);
-      if (lightingRowsCount === 1) { container.style.display = "block"; }
-    }
-    
-    function increaseQuantity(lightId) {
-      const quantityInput = document.getElementById(`quantity${lightId.slice(-1)}`);
-      quantityInput.value = parseInt(quantityInput.value) + 1;
-    }
-    
-    function decreaseQuantity(lightId) {
-      const quantityInput = document.getElementById(`quantity${lightId.slice(-1)}`);
-      if (parseInt(quantityInput.value) > 1) {
-        quantityInput.value = parseInt(quantityInput.value) - 1;
-      }
-    }
-    
-    function removeLightingRow(rowId) {
-      const row = document.getElementById(rowId);
-      row.remove();
-      lightingRowsCount--;
-      if (lightingRowsCount === 0) {
-        document.getElementById("lightingContainer").style.display = "none";
-      }
-    }
-    
-    function initializeLightingContainer() {
-      const container = document.getElementById("lightingContainer");
-      container.innerHTML = "";
-      lightingRowsCount = 0;
-      container.style.display = "none";
-    }
-    
-    window.onload = initializeLightingContainer;
   </script>
 </body>
 </html>
