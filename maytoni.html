@@ -23,16 +23,27 @@
 
 .result-container {
   display: none;
-  max-width: 100%; /* не превышает родительский контейнер */
-  overflow-x: auto; /* если нужно, позволяет горизонтальную прокрутку */
+  max-width: 100%; /* чтобы не было горизонтальной прокрутки */
+  overflow: visible; /* чтобы все элементы были видны */
 }
 
 .results-table {
   border-collapse: collapse;
   margin-top: 10px;
   background-color: white;
-  table-layout: fixed; /* фиксированная ширина столбцов */
-  width: 100%; /* таблица занимает всю доступную ширину */
+  width: 100%; /* таблица на всю ширину контейнера */
+  table-layout: auto; /* динамическое распределение ширины */
+}
+
+.results-table th, .results-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  word-wrap: break-word; /* перенос длинных слов */
+}
+
+#systemName {
+  display: none; /* Убираем дублирующийся заголовок внизу */
 }
 
     }
