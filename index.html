@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -94,7 +93,7 @@
       cursor: pointer;
     }
     
-    /* Правая область: контейнер для производителей */
+    /* Правая область: контейнер для 5 колонок производителей */
     .manufacturers-container {
       width: 65%;
       padding: 10px;
@@ -136,7 +135,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Левая область: форма выбора трековой системы -->
+    <!-- Левая область: Форма выбора трековой системы -->
     <div class="form-container">
       <h2>Подбор трековой системы</h2>
       
@@ -201,7 +200,7 @@
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
       
-      <!-- Отладочный блок -->
+      <!-- Отладочный блок (опционально) -->
       <div id="debug" class="debug"></div>
     </div>
     
@@ -231,43 +230,38 @@
   </div>
   
   <script>
-    // Глобальная обработка ошибок
-    window.onerror = function(message, source, lineno, colno, error) {
-      console.error("Глобальная ошибка:", message, "в", source + ":" + lineno + ":" + colno, error);
-      alert("Произошла ошибка в работе приложения. Проверьте консоль для подробностей.");
-      return true;
-    };
-
+    // Глобальная функция изменения высоты iframe
+    function resizeIframe(iframe) {
+      try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        // Если содержимое еще не загружено, можно установить минимальную высоту
+        if (doc && doc.body && doc.body.scrollHeight) {
+          iframe.style.height = doc.body.scrollHeight + "px";
+        }
+      } catch (e) {
+        console.error("Ошибка при изменении высоты iframe:", e);
+      }
+    }
+    
     // Функция для установки выбранной фигуры
     function selectShape(shape) {
       document.getElementById("selectedShape").value = shape;
       console.log("Выбрана фигура:", shape);
     }
     
-    // Функция для изменения высоты iframe по содержимому (при условии, что содержимое в одном домене)
-    function resizeIframe(iframe) {
-      try {
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
-        iframe.style.height = doc.body.scrollHeight + "px";
-      } catch (e) {
-        console.error("Ошибка при изменении высоты iframe:", e);
-      }
-    }
-    
     // Функция для сброса содержимого всех iframe (перезагрузка их src)
     function resetManufacturers() {
       var iframes = document.querySelectorAll(".manufacturers-container iframe");
       iframes.forEach(function(iframe) {
-        // Перезагружаем iframe для сброса старых результатов
         iframe.src = iframe.src;
       });
     }
     
-    // Функция-обертка для безопасного вызова подбора
-    function safeShowSelection() {
+    // Функция-обёртка для безопасного вызова подбора
+    window.safeShowSelection = function() {
       try {
         showSelection();
-        // После подбора делаем видимой правую область с производителями
+        // После выполнения подбора делаем видимой правую область
         document.getElementById("manufacturersContainer").style.display = "flex";
         // Сбрасываем содержимое iframe, чтобы убрать старые результаты
         resetManufacturers();
@@ -275,136 +269,125 @@
         console.error("Ошибка в showSelection:", e);
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
-    }
+    };
     
-    // Реальная логика подбора для Maytoni UNITY (пример для фигуры "straight")
-    function showSelection() {
+    // Функция подбора для Maytoni UNITY
+    window.showSelection = function() {
       console.log("Функция showSelection() вызвана.");
-      // Считываем параметры из формы
-      const type = document.getElementById("type").value;
-      const color = document.getElementById("color").value;
-      let mounting = document.getElementById("mounting").value;
-      const shape = document.getElementById("selectedShape").value;
-      const lengthAValue = document.getElementById("lengthA").value.trim();
-      const lengthBValue = document.getElementById("lengthB").value.trim();
-      const lengthA = parseFloat(lengthAValue);
-      const lengthB = parseFloat(lengthBValue);
+      // Считываем параметры из URL или используем значения по умолчанию
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type") || "one-phase";
+      const color = params.get("color") || "black";
+      let mountingParam = params.get("mounting") || "surface";
+      const shape = params.get("shape") || "straight";
+      const lengthA = parseFloat(params.get("lengthA")) || 150;
+      const lengthB = parseFloat(params.get("lengthB")) || 0;
       
-      if (!type || !color || !mounting || !shape || isNaN(lengthA)) {
-        alert("Пожалуйста, заполните все обязательные поля.");
-        return;
-      }
-      if (shape === "straight") {
-        if (lengthBValue !== "" && parseFloat(lengthBValue) !== 0) {
-          alert("Для фигуры \"Прямая\" поле \"Длина б\" должно быть пустым или равняться 0.");
-          return;
-        }
-      } else {
-        if (lengthBValue === "" || isNaN(lengthB)) {
-          alert("Пожалуйста, заполните поле \"Длина б\" для выбранной фигуры.");
-          return;
-        }
-      }
+      // Для Maytoni UNITY используем комплект "surface"
+      const mounting = mountingParam;
       
-      // Для режима stretch-ceiling подбираем по правилам surface, затем добавляем профиль (если нужно)
-      const originalMounting = mounting;
-      if (mounting === "stretch-ceiling") { mounting = "surface"; }
+      console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      let totalLength = 0;
-      if (shape === "straight") {
-        totalLength = lengthA;
-      } else if (shape === "rectangle") {
-        totalLength = 2 * (lengthA + lengthB);
-      } else if (shape === "T-shape" || shape === "P-shape") {
-        totalLength = lengthA + lengthB;
-      } else {
-        totalLength = lengthA + lengthB;
-      }
-      
-      console.log("mounting:", mounting, "shape:", shape, "общая длина:", totalLength);
-      
-      const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
-      if (!selectedProduct) {
-        alert("Не найден подходящий комплект для выбранных параметров.");
-        return;
-      }
-      
-      // Если режим stretch-ceiling, объединяем компоненты из stretch-ceiling с компонентами surface
-      let components = selectedProduct.components;
-      if (originalMounting === "stretch-ceiling") {
-        const ceilingProduct = products[type][color]["stretch-ceiling"];
-        components = Object.assign({}, components, ceilingProduct.components);
-      }
-      
-      const lengthOptions = selectedProduct.lengthOptions;
-      const connectorsStraight = selectedProduct.connectors.straight[0];
-      
-      // Подбор для фигуры "straight": выбираем треки, пока не покроем требуемую длину
-      let selectedItems = [];
-      let provided = 0;
-      while (provided < totalLength) {
-        const remainder = totalLength - provided;
-        let piece;
-        if (remainder <= 100) {
-          piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-        } else if (remainder <= 200) {
-          piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-        } else if (remainder <= 300) {
-          piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-        } else {
-          piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-        }
-        selectedItems.push(piece);
-        provided += piece.pieceLength;
-      }
-      console.log("Подобранные треки:", selectedItems);
-      
-      // Если выбрано более одного элемента, добавляем прямые коннекторы между ними
-      let usedConnectors = [];
-      if (selectedItems.length > 1) {
-        for (let i = 0; i < selectedItems.length - 1; i++) {
-          usedConnectors.push(connectorsStraight);
-        }
-      }
-      
-      // Группируем треки и коннекторы
-      let groupedItems = {};
-      selectedItems.concat(usedConnectors).forEach(itemObj => {
-        const id = itemObj.id;
-        if (!groupedItems[id]) {
-          groupedItems[id] = { count: 0, component: components[id] };
-        }
-        groupedItems[id].count++;
-      });
-      console.log("Сгруппированные элементы:", groupedItems);
-      
-      // Формируем вывод результатов в таблицу
-      let tbodyHTML = "";
-      let totalPrice = 0;
-      for (const [id, itemData] of Object.entries(groupedItems)) {
-        const comp = itemData.component;
-        if (comp) {
-          totalPrice += comp.price * itemData.count;
-          tbodyHTML += `
-            <tr>
-              <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
-              <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
-              <td>${comp.price}р</td>
-              <td>${comp.price * itemData.count}р</td>
-            </tr>
-          `;
-        } else {
-          console.warn("Компонент с ID " + id + " не найден.");
-        }
-      }
-      
-      document.getElementById("results").innerHTML = tbodyHTML;
-      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
-      document.getElementById("resultContainer").style.display = "block";
-      
-      console.log("Подбор завершён успешно.");
-    }
-  });
+      // Загружаем данные из JSON
+      fetch('/track/products.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Ошибка загрузки данных: " + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
+          if (!selectedProduct) {
+            throw new Error("Не найден комплект для выбранных параметров.");
+          }
+          
+          // Если режим stretch-ceiling, объединяем компоненты из stretch-ceiling с компонентами surface
+          let components = selectedProduct.components;
+          if (mountingParam === "stretch-ceiling") {
+            const ceilingProduct = data[type][color]["stretch-ceiling"];
+            components = Object.assign({}, components, ceilingProduct.components);
+          }
+          
+          const lengthOptions = selectedProduct.lengthOptions;
+          // Для фигуры "straight" используем только lengthA (иначе можно добавить длину B)
+          let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
+          console.log("Общая требуемая длина:", totalLength, "см");
+          
+          // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина < totalLength
+          let selectedItems = [];
+          let provided = 0;
+          while (provided < totalLength) {
+            const remainder = totalLength - provided;
+            let piece;
+            if (remainder <= 100) {
+              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+            } else if (remainder <= 200) {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+            } else if (remainder <= 300) {
+              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+            } else {
+              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+            }
+            selectedItems.push(piece);
+            provided += piece.pieceLength;
+          }
+          console.log("Подобранные треки:", selectedItems);
+          
+          // Если более одного элемента, добавляем прямой коннектор между ними
+          let usedConnectors = [];
+          if (selectedItems.length > 1) {
+            for (let i = 0; i < selectedItems.length - 1; i++) {
+              usedConnectors.push(selectedProduct.connectors.straight[0]);
+            }
+          }
+          
+          // Группируем трековые элементы и коннекторы
+          let groupedItems = {};
+          selectedItems.concat(usedConnectors).forEach(itemObj => {
+            const id = itemObj.id;
+            if (!groupedItems[id]) {
+              groupedItems[id] = { count: 0, component: components[id] };
+            }
+            groupedItems[id].count++;
+          });
+          console.log("Сгруппированные элементы:", groupedItems);
+          
+          // Формируем HTML для таблицы результатов
+          let tbodyHTML = "";
+          let totalPrice = 0;
+          for (const [id, itemData] of Object.entries(groupedItems)) {
+            const comp = itemData.component;
+            if (comp) {
+              totalPrice += comp.price * itemData.count;
+              tbodyHTML += `
+                <tr>
+                  <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+                  <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
+                  <td>${comp.price}р</td>
+                  <td>${comp.price * itemData.count}р</td>
+                </tr>
+              `;
+            } else {
+              console.warn("Компонент с ID " + id + " не найден.");
+            }
+          }
+          
+          document.getElementById("results").innerHTML = tbodyHTML;
+          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
+          document.getElementById("resultContainer").style.display = "block";
+          console.log("Подбор завершён успешно.");
+        })
+        .catch(error => {
+          console.error("Ошибка:", error);
+          document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
+        });
+    };
+
+    // Автоматический запуск (если нужно)
+    document.addEventListener("DOMContentLoaded", function() {
+      setTimeout(window.safeShowSelection, 1000);
+    });
   </script>
 </body>
 </html>
