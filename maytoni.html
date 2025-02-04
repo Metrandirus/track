@@ -35,10 +35,10 @@
     }
     .results-table th, .results-table td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 14px; /* Можно уменьшить, если текст не помещается */
+      font-size: 13px; /* уменьшен размер шрифта */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -46,11 +46,11 @@
     }
     .results-table th:nth-child(3),
     .results-table td:nth-child(3) {
-      width: 100px;
+      width: 90px;
     }
     .results-table th:nth-child(2),
     .results-table td:nth-child(2) {
-      width: 50px;
+      width: 40px;
       text-align: center;
     }
     .total-price {
@@ -63,10 +63,9 @@
       display: none;
       overflow: visible;
     }
+    /* Отладочный блок можно убрать, если он не нужен */
     .debug {
-      font-size: 12px;
-      color: red;
-      margin-top: 10px;
+      display: none;
     }
   </style>
 </head>
@@ -87,48 +86,47 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выведены результаты подбора -->
+          <!-- Здесь будут выводиться результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
     
-    <!-- Отладочный блок (при необходимости, можно оставить пустым) -->
+    <!-- Отладочный блок (скрыт) -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Считываем параметры подбора из URL (если они заданы) или используем значения по умолчанию:
+      // Считываем параметры из URL или используем значения по умолчанию
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
-      let mountingParam = params.get("mounting") || "surface";
+      const mountingParam = params.get("mounting") || "surface";
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
       
-      // Для Maytoni UNITY используется комплект "surface"
-      const mounting = mountingParam; // Здесь можно изменить логику, если потребуется
+      // Для Maytoni UNITY используем комплект "surface" (если mounting = stretch-ceiling, можно объединять компоненты)
+      const mounting = mountingParam; 
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из JSON-файла
+      // Загружаем данные из JSON
       fetch('/track/products.json')
         .then(response => {
-          if (!response.ok) { 
-            throw new Error("Ошибка загрузки данных: " + response.status); 
+          if (!response.ok) {
+            throw new Error("Ошибка загрузки данных: " + response.status);
           }
           return response.json();
         })
         .then(data => {
-          // Получаем комплект для Maytoni UNITY (например, data["one-phase"]["black"]["surface"])
           const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
           if (!selectedProduct) {
             throw new Error("Не найден комплект для выбранных параметров.");
           }
           
-          // Если выбран режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling" с комплектом "surface"
+          // Если mounting = stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
           let components = selectedProduct.components;
           if (mountingParam === "stretch-ceiling") {
             const ceilingProduct = data[type][color]["stretch-ceiling"];
@@ -137,47 +135,77 @@
           
           const lengthOptions = selectedProduct.lengthOptions;
           
-          // Простейшая логика подбора для фигуры "straight"
-          let chosenId = "";
-          if (shape === "straight") {
-            if (lengthA <= 100) {
-              chosenId = lengthOptions[0].items[0];
-            } else if (lengthA <= 200) {
-              chosenId = lengthOptions[1].items[0];
-            } else if (lengthA <= 300) {
-              chosenId = lengthOptions[2].items[0];
+          // Рассчитываем общую требуемую длину:
+          // Для "straight" используем lengthA; для остальных – можно доработать по аналогии.
+          let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
+          console.log("Общая требуемая длина:", totalLength, "см");
+          
+          // Расчет составного комплекта (для фигуры "straight"):
+          let selectedItems = [];
+          let provided = 0;
+          while (provided < totalLength) {
+            const remainder = totalLength - provided;
+            let piece;
+            if (remainder <= 100) {
+              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+            } else if (remainder <= 200) {
+              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+            } else if (remainder <= 300) {
+              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
             } else {
-              chosenId = lengthOptions[2].items[0];
+              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
             }
-          } else {
-            // Заглушка для остальных фигур; при необходимости расширьте логику
-            chosenId = lengthOptions[1].items[0];
+            selectedItems.push(piece);
+            provided += piece.pieceLength;
+          }
+          console.log("Выбраны треки:", selectedItems);
+          
+          // Если более одного элемента, добавляем соединительные элементы между ними
+          let usedConnectors = [];
+          if (selectedItems.length > 1) {
+            // Для Maytoni UNITY используем прямой коннектор
+            for (let i = 0; i < selectedItems.length - 1; i++) {
+              usedConnectors.push(selectedProduct.connectors.straight[0]);
+            }
           }
           
-          const comp = components[chosenId];
-          if (!comp) {
-            throw new Error("Не найден компонент с ID " + chosenId);
+          // Группируем элементы
+          let groupedItems = {};
+          selectedItems.concat(usedConnectors).forEach(itemObj => {
+            const id = itemObj.id;
+            if (!groupedItems[id]) {
+              groupedItems[id] = { count: 0, component: components[id] };
+            }
+            groupedItems[id].count++;
+          });
+          console.log("Сгруппированные элементы:", groupedItems);
+          
+          // Выводим результаты в таблицу
+          let tbodyHTML = "";
+          let totalPrice = 0;
+          for (const [id, itemData] of Object.entries(groupedItems)) {
+            const comp = itemData.component;
+            if (comp) {
+              totalPrice += comp.price * itemData.count;
+              tbodyHTML += `
+                <tr>
+                  <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+                  <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
+                  <td>${comp.price}р</td>
+                  <td>${comp.price * itemData.count}р</td>
+                </tr>
+              `;
+            } else {
+              console.warn(`Компонент с ID ${id} не найден.`);
+            }
           }
           
-          // Формируем вывод результата: выводим одну строку с выбранным компонентом
-          const tbody = document.getElementById("results");
-          tbody.innerHTML = `
-            <tr>
-              <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
-              <td style="background-color: white; text-align: center;">1 шт.</td>
-              <td>${comp.price}р</td>
-              <td>${comp.price}р</td>
-            </tr>
-          `;
-          
-          // Обновляем заголовок и итоговую стоимость
+          document.getElementById("results").innerHTML = tbodyHTML;
+          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
           document.getElementById("systemName").textContent = "Maytoni UNITY";
-          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${comp.price}р</div>`;
           document.getElementById("resultContainer").style.display = "block";
-          
-          // Очищаем отладочный блок (не выводим лишние сообщения)
+          // Очищаем отладочный блок
           document.getElementById("debug").textContent = "";
-          
           console.log("Подбор завершён успешно.");
         })
         .catch(error => {
