@@ -2,89 +2,267 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Подбор трековой системы</title>
   <style>
+    /* Общие стили */
     body {
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      display: flex;
+      height: 100vh;
     }
+    /* Контейнер с двумя областями: форма и результаты */
     .container {
-      max-width: 800px;
-      margin: auto;
+      display: flex;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    /* Левая область: форма выбора */
+    .form-container {
+      width: 35%;
       background-color: white;
       padding: 20px;
-      border: 1px solid #ddd;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
     }
-    h2 {
+    .form-container h2 {
       font-size: 18px;
       margin-bottom: 10px;
     }
-    .results-table {
+    .form-container label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .form-container select,
+    .form-container input[type="text"] {
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background-color: white;
-    }
-    .results-table th, .results-table td {
-      border: 1px solid #ddd;
       padding: 8px;
-      text-align: left;
+      margin-top: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
     }
-    .results-table th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    .total-price {
-      font-weight: bold;
-      text-align: right;
+    .shape-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       margin-top: 10px;
     }
-    .result-container {
-      display: none;
+    .shape-options div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ddd;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      width: calc(50% - 5px);
+      box-sizing: border-box;
+    }
+    .shape-options img {
+      width: 50px;
+      height: auto;
+    }
+    .shape-options label {
+      font-size: 12px;
+      margin-top: 5px;
+      text-align: center;
+    }
+    .length-section {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      align-items: center;
+    }
+    .length-section input[type="text"] {
+      width: 45%;
+      padding: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .button-container {
+      margin-top: 20px;
+    }
+    .button-container button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    /* Правая область: контейнер для 5 колонок производителей */
+    .manufacturers-container {
+      width: 65%;
+      padding: 10px;
+      box-sizing: border-box;
+      display: none;  /* Изначально скрыт */
+      gap: 10px;
+      background-color: #e7f5fd;
+      overflow-x: auto;
+    }
+    .manufacturer {
+      flex: 1;
+      border: 1px solid #ccc;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+    }
+    .manufacturer header {
+      background-color: white;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+    }
+    .manufacturer iframe {
+      width: 100%;
+      height: 600px; /* Настройте высоту по необходимости */
+      border: none;
+      flex-grow: 1;
+    }
+    
+    /* Дополнительные стили для отладки */
+    .debug {
+      margin-top: 10px;
+      font-size: 12px;
+      color: red;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2 id="systemName">Начальное название</h2>
-    <div id="resultContainer" class="result-container">
-      <table class="results-table" id="resultsTable">
-        <thead id="tableHeader">
-          <tr>
-            <th>Наименование</th>
-            <th>кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-          </tr>
-        </thead>
-        <tbody id="results">
-          <!-- Результаты будут здесь -->
-        </tbody>
-      </table>
-      <div id="totalPrice" class="total-price"></div>
+    <!-- Левая область: форма выбора -->
+    <div class="form-container">
+      <h2>Подбор трековой системы</h2>
+      
+      <label for="type">Тип:</label>
+      <select id="type" name="type">
+        <option value="one-phase">Однофазный</option>
+        <option value="magnetic">Магнитный</option>
+      </select>
+      
+      <label for="color">Цвет:</label>
+      <select id="color" name="color">
+        <option value="black">Черный</option>
+        <option value="white">Белый</option>
+      </select>
+      
+      <label for="mounting">Способ монтажа:</label>
+      <select id="mounting" name="mounting">
+        <option value="surface">Накладной</option>
+        <option value="recessed">Встраиваемый</option>
+        <option value="stretch-ceiling">В натяжной потолок</option>
+      </select>
+      
+      <label>Фигура:</label>
+      <div class="shape-options">
+        <div>
+          <img src="images/straight.png" alt="Прямая">
+          <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
+          <label for="straight">Прямая</label>
+        </div>
+        <div>
+          <img src="images/L-shape.png" alt="L-образная">
+          <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
+          <label for="L-shape">L-образная</label>
+        </div>
+        <div>
+          <img src="images/T-shape.png" alt="T-образная">
+          <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
+          <label for="T-shape">T-образная</label>
+        </div>
+        <div>
+          <img src="images/P-shape.png" alt="П-образная">
+          <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
+          <label for="P-shape">П-образная</label>
+        </div>
+        <div>
+          <img src="images/rectangle.png" alt="Прямоугольник">
+          <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
+          <label for="rectangle">Прямоугольник</label>
+        </div>
+      </div>
+      <input type="hidden" id="selectedShape" name="selectedShape" value="">
+      
+      <div class="length-section">
+        <label for="lengthA">Длина а (см):</label>
+        <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
+        
+        <label for="lengthB">Длина б (см):</label>
+        <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+      </div>
+      
+      <div class="button-container">
+        <button type="button" onclick="safeShowSelection()">Подобрать</button>
+      </div>
+      
+      <!-- Отладочный блок (опционально) -->
+      <div id="debug" class="debug"></div>
+    </div>
+    
+    <!-- Правая область: 5 колонок для производителей (изначально скрыта) -->
+    <div class="manufacturers-container" id="manufacturersContainer">
+      <div class="manufacturer">
+        <header>Maytoni UNITY</header>
+        <iframe src="maytoni.html"></iframe>
+      </div>
+      <div class="manufacturer">
+        <header>NOVOTECH</header>
+        <iframe src="novotech.html"></iframe>
+      </div>
+      <div class="manufacturer">
+        <header>ST LUCE</header>
+        <iframe src="st_luce.html"></iframe>
+      </div>
+      <div class="manufacturer">
+        <header>AMBRELA</header>
+        <iframe src="ambrela.html"></iframe>
+      </div>
+      <div class="manufacturer">
+        <header>DENKIRS</header>
+        <iframe src="denkirs.html"></iframe>
+      </div>
     </div>
   </div>
   
-  <!-- Скрипт помещён в конце body -->
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      // Проверка наличия элементов
-      var systemNameEl = document.getElementById("systemName");
-      var resultContainerEl = document.getElementById("resultContainer");
-      var resultsEl = document.getElementById("results");
-      var totalPriceEl = document.getElementById("totalPrice");
-      
-      if (!systemNameEl || !resultContainerEl || !resultsEl || !totalPriceEl) {
-        console.error("Один или несколько необходимых элементов не найдены.");
-        return;
+    // Глобальная обработка ошибок
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error("Глобальная ошибка:", message, "в", source + ":" + lineno + ":" + colno, error);
+      alert("Произошла ошибка в работе приложения. Проверьте консоль для подробностей.");
+      return true;
+    };
+
+    // Функция для установки выбранной фигуры
+    function selectShape(shape) {
+      document.getElementById("selectedShape").value = shape;
+      console.log("Выбрана фигура:", shape);
+    }
+    
+    // Функция-обертка для безопасного вызова showSelection
+    function safeShowSelection() {
+      try {
+        showSelection();
+        // После выполнения подбора делаем видимой правую область с производителями
+        document.getElementById("manufacturersContainer").style.display = "flex";
+      } catch (e) {
+        console.error("Ошибка в showSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
-      
-     
-    });
+    }
+    
+    // Здесь разместите вашу реальную логику подбора трековой системы.
+    // Ниже приведена заглушка, которую вы можете заменить на рабочий код.
+    function showSelection() {
+      console.log("Функция showSelection() вызвана.");
+      // Пример: вывод отладочной информации в блок debug
+      document.getElementById("debug").textContent = "Подбор выполнен. Результаты обновлены.";
+      // Здесь можно также обновлять содержимое на основе выбранных параметров.
+      // Например, изменить заголовок результата, заполнить таблицу и т.д.
+    }
   </script>
 </body>
 </html>
