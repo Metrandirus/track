@@ -1,238 +1,26 @@
 {
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Выбор трековой системы</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #e7f5fd;
-      margin: 0;
-      padding: 20px;
+    "one-phase": {
+        "black": {
+            "surface": {
+                "lengthOptions": [
+                    { "min": 0, "max": 100, "items": ["TRX001-111B"] },
+                    { "min": 101, "max": 200, "items": ["TRX001-112B"] },
+                    { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+                ],
+                "connectors": {
+                    "straight": ["TRA001C-11B"],
+                    "L-shape": ["TRA001CL-11B"],
+                    "T-shape": ["TRA001CT-11B"]
+                },
+                "components": {
+                    "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
+                    "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
+                    "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
+                    "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
+                    "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
+                    "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+                }
+            }
+        }
     }
-    .container {
-      border: 1px solid #ddd;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      background-color: white;
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-    }
-    h2 {
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    select, input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .shape-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .shape-options div {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-      width: calc(25% - 10px);
-    }
-    .shape-options img {
-      width: 64px;
-      height: auto;
-    }
-    .shape-options label {
-      font-size: 12px;
-      margin-top: 5px;
-      text-align: center;
-    }
-    .length-section {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .length-section input[type="text"] {
-      width: 100px;
-    }
-    .button-container {
-      margin-top: 20px;
-    }
-    .button-container button {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    /* Стили для отображения результатов */
-    .result-container {
-      margin-top: 20px;
-      display: none;
-    }
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-    }
-    .results-table th, .results-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    .results-table th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    .results-table th:nth-child(3), .results-table td:nth-child(3) {
-      width: 100px;
-    }
-    .results-table th:nth-child(2), .results-table td:nth-child(2) {
-      width: 50px;
-      text-align: center;
-    }
-    .total-price {
-      font-weight: bold;
-      text-align: right;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Выбор трековой системы</h2>
-    
-    <label for="type">Тип:</label>
-    <select id="type" name="type">
-      <option value="one-phase">Однофазный</option>
-      <option value="magnetic">Магнитный</option>
-    </select>
-    
-    <label for="color">Цвет:</label>
-    <select id="color" name="color">
-      <option value="black">Черный</option>
-      <option value="white">Белый</option>
-    </select>
-    
-    <label for="mounting">Способ монтажа:</label>
-    <select id="mounting" name="mounting">
-      <option value="surface">Накладной</option>
-      <option value="recessed">Встраиваемый</option>
-      <option value="stretch-ceiling">В натяжной потолок</option>
-    </select>
-    
-    <label>Фигура:</label>
-    <div class="shape-options">
-      <div>
-        <img src="images/straight.png" alt="Прямая">
-        <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
-        <label for="straight">Прямая</label>
-      </div>
-      <div>
-        <img src="images/L-shape.png" alt="L-образная">
-        <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
-        <label for="L-shape">L-образная</label>
-      </div>
-      <div>
-        <img src="images/T-shape.png" alt="T-образная">
-        <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
-        <label for="T-shape">T-образная</label>
-      </div>
-      <div>
-        <img src="images/P-shape.png" alt="П-образная">
-        <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
-        <label for="P-shape">П-образная</label>
-      </div>
-      <div>
-        <img src="images/rectangle.png" alt="Прямоугольник">
-        <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
-        <label for="rectangle">Прямоугольник</label>
-      </div>
-    </div>
-    <input type="hidden" id="selectedShape" name="selectedShape" value="">
-    
-    <div class="length-section">
-      <label for="lengthA">Длина а (см):</label>
-      <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
-      
-      <label for="lengthB">Длина б (см):</label>
-      <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
-    </div>
-    
-    <div class="button-container">
-      <button type="button" onclick="safeShowSelection()">Подобрать</button>
-    </div>
-    
-    <!-- Здесь можно отобразить результаты -->
-    <div class="result-container" id="resultContainer">
-      <h2 id="systemName"></h2>
-      <table class="results-table" id="resultsTable">
-        <thead id="tableHeader">
-          <tr>
-            <th>Наименование</th>
-            <th>кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-          </tr>
-        </thead>
-        <tbody id="results"></tbody>
-      </table>
-      <div class="total-price" id="totalPrice"></div>
-    </div>
-  </div>
-  
-  <script>
-    // Глобальная обработка ошибок
-    window.onerror = function(message, source, lineno, colno, error) {
-      console.error("Глобальная ошибка:", message, "в", source + ":" + lineno + ":" + colno, error);
-      alert("Произошла ошибка в работе приложения. Проверьте консоль для подробностей.");
-      return true;
-    };
-
-    // Здесь должны быть функции подбора трековой системы,
-    // такие как selectShape(), safeShowSelection() и showSelection().
-    // Для примера добавим базовую реализацию функций.
-    
-    function selectShape(shape) {
-      document.getElementById("selectedShape").value = shape;
-    }
-    
-    function safeShowSelection() {
-      try {
-        showSelection();
-      } catch (e) {
-        console.error("Ошибка в showSelection:", e);
-        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-      }
-    }
-    
-    // Здесь вставьте всю логику функции showSelection() из вашего существующего track.html,
-    // которая отвечает за подбор системы, получение данных из products.json и вывод результатов.
-    // Для краткости пример ниже содержит только заглушку.
-    
-    function showSelection() {
-      // Эту функцию нужно заменить на вашу рабочую реализацию.
-      console.log("Функция showSelection() вызвана. Здесь будет обработка выбора системы.");
-      // Пример: установка названия системы и вывод заглушки в таблицу результатов.
-      document.getElementById("systemName").textContent = "Maytoni UNITY";
-      document.getElementById("results").innerHTML = "<tr><td colspan='8' style='text-align: center;'>Результаты подбора появятся здесь</td></tr>";
-      document.getElementById("totalPrice").innerHTML = "<div>Итого: 0р</div>";
-      document.getElementById("resultContainer").style.display = "block";
-    }
-  </script>
-</body>
-</html>
+}
