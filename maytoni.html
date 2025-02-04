@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Maytoni UNITY – Результаты подбора</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e7f5fd;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background-color: white;
+    }
+    .results-table th, .results-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .results-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    .results-table th:nth-child(3), 
+    .results-table td:nth-child(3) {
+      width: 100px;
+    }
+    .results-table th:nth-child(2), 
+    .results-table td:nth-child(2) {
+      width: 50px;
+      text-align: center;
+    }
+    .total-price {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+    }
+    .result-container {
+      display: none;
+    }
+    .debug {
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Заголовок системы -->
+    <h2 id="systemName">Начальное название</h2>
+    
+    <!-- Контейнер для вывода результатов подбора -->
+    <div id="resultContainer" class="result-container">
+      <table class="results-table" id="resultsTable">
+        <thead id="tableHeader">
+          <tr>
+            <th>Наименование</th>
+            <th>кол.</th>
+            <th>Цена за шт.</th>
+            <th>Общая цена</th>
+          </tr>
+        </thead>
+        <tbody id="results">
+          <!-- Результаты подбора будут выведены здесь -->
+        </tbody>
+      </table>
+      <div id="totalPrice" class="total-price"></div>
+    </div>
+    
+    <!-- Отладочный блок (опционально) -->
+    <div id="debug" class="debug"></div>
+  </div>
+  
+  <script>
+    // Ждем полной загрузки DOM
+    document.addEventListener("DOMContentLoaded", function() {
+      // Ищем все необходимые элементы
+      var systemNameEl = document.getElementById("systemName");
+      var resultContainerEl = document.getElementById("resultContainer");
+      var resultsEl = document.getElementById("results");
+      var totalPriceEl = document.getElementById("totalPrice");
+      var debugEl = document.getElementById("debug");
+      
+      // Если какой-либо элемент не найден, выводим сообщение в консоль
+      if (!systemNameEl) { console.error("Элемент с id 'systemName' не найден."); }
+      if (!resultContainerEl) { console.error("Элемент с id 'resultContainer' не найден."); }
+      if (!resultsEl) { console.error("Элемент с id 'results' не найден."); }
+      if (!totalPriceEl) { console.error("Элемент с id 'totalPrice' не найден."); }
+      if (!debugEl) { console.error("Элемент с id 'debug' не найден."); }
+      
+      // Устанавливаем данные (здесь пример заглушки, замените на реальную логику)
+      systemNameEl.textContent = "Maytoni UNITY";
+      resultsEl.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Результаты подбора для Maytoni UNITY появятся здесь</td></tr>";
+      totalPriceEl.innerHTML = "<div>Итого: 0р</div>";
+      resultContainerEl.style.display = "block";
+      debugEl.textContent = "Подбор выполнен для Maytoni UNITY";
+      
+      console.log("Подбор завершён успешно.");
+    });
+  </script>
+</body>
+</html>
