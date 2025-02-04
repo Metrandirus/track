@@ -84,21 +84,35 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выведены результаты подбора -->
+          <!-- Здесь будут выводиться результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
-    
-    <!-- Отладочный блок (если не нужен – можно убрать) -->
+    <!-- Отладочный блок (если не нужен, можно убрать) -->
     <div id="debug" class="debug"></div>
-    
-    <!-- Кнопка для демонстрации подбора (если требуется) -->
-    <button onclick="safeShowSelection()">Запустить подбор</button>
   </div>
   
   <script>
-    // Объявляем функции в глобальной области, чтобы их можно было вызвать через onclick
+    // Функция для изменения высоты iframe (если потребуется; здесь для maytoni.html не используется)
+    function resizeIframe(iframe) {
+      try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        iframe.style.height = doc.body.scrollHeight + "px";
+      } catch (e) {
+        console.error("Ошибка при изменении высоты iframe:", e);
+      }
+    }
+
+    // Функция для сброса содержимого iframe (если maytoni.html вызывается внутри контейнера с iframe)
+    function resetManufacturers() {
+      var iframes = document.querySelectorAll(".manufacturers-container iframe");
+      iframes.forEach(function(iframe) {
+        iframe.src = iframe.src;
+      });
+    }
+
+    // Объявляем глобальные функции для вызова из родительского документа (если нужно)
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -108,9 +122,11 @@
       }
     };
 
+    // Функция подбора для Maytoni UNITY
     window.showSelection = function() {
       console.log("Начало работы showSelection");
-      // Считываем параметры из URL (если заданы), иначе используются значения по умолчанию
+      
+      // Считываем параметры из URL или используем значения по умолчанию
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -124,7 +140,7 @@
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из JSON (убедитесь, что файл /track/products.json содержит корректный JSON)
+      // Загружаем данные из JSON
       fetch('/track/products.json')
         .then(response => {
           if (!response.ok) {
@@ -138,7 +154,7 @@
             throw new Error("Не найден комплект для выбранных параметров.");
           }
           
-          // Если mounting = stretch-ceiling, объединяем компоненты
+          // Если режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
           let components = selectedProduct.components;
           if (mountingParam === "stretch-ceiling") {
             const ceilingProduct = data[type][color]["stretch-ceiling"];
@@ -146,11 +162,12 @@
           }
           
           const lengthOptions = selectedProduct.lengthOptions;
-          // Рассчитываем требуемую длину
+          
+          // Для фигуры "straight" используем только lengthA
           let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
           console.log("Общая требуемая длина:", totalLength, "см");
           
-          // Подбор для фигуры "straight": подбираем трековые элементы до достижения требуемой длины
+          // Подбор для фигуры "straight": подбираем трековые элементы, пока суммарная длина не достигнет totalLength
           let selectedItems = [];
           let provided = 0;
           while (provided < totalLength) {
@@ -170,7 +187,7 @@
           }
           console.log("Подобранные треки:", selectedItems);
           
-          // Если более одного элемента, добавляем прямые коннекторы между ними
+          // Если более одного элемента, добавляем прямой коннектор между ними
           let usedConnectors = [];
           if (selectedItems.length > 1) {
             for (let i = 0; i < selectedItems.length - 1; i++) {
@@ -178,7 +195,7 @@
             }
           }
           
-          // Группируем треки и коннекторы
+          // Группируем трековые элементы и коннекторы
           let groupedItems = {};
           selectedItems.concat(usedConnectors).forEach(itemObj => {
             const id = itemObj.id;
@@ -189,7 +206,7 @@
           });
           console.log("Сгруппированные элементы:", groupedItems);
           
-          // Формируем HTML для таблицы
+          // Формируем HTML для таблицы результатов
           let tbodyHTML = "";
           let totalPrice = 0;
           for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -212,7 +229,8 @@
           document.getElementById("results").innerHTML = tbodyHTML;
           document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
           document.getElementById("resultContainer").style.display = "block";
-          
+          // Очищаем отладочный блок (не выводим лишние сообщения)
+          document.getElementById("debug").textContent = "";
           console.log("Подбор завершён успешно.");
         })
         .catch(error => {
@@ -220,10 +238,9 @@
           document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
         });
     };
-    
+
     // Если требуется автоматический запуск (например, по таймауту), можно добавить:
     document.addEventListener("DOMContentLoaded", function() {
-      // Запуск через 1 секунду для демонстрации
       setTimeout(window.safeShowSelection, 1000);
     });
   </script>
