@@ -22,7 +22,6 @@
       height: auto;
       overflow: visible;
     }
-    /* Стили таблицы результатов */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -35,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px; /* уменьшенный размер шрифта */
+      font-size: 13px;
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -86,12 +85,12 @@
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
-    <!-- Отладочный блок (если нужен) -->
+    <!-- Отладочный блок (при необходимости) -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
-    /***** Встроенные данные о продуктах (из products.json) *****/
+    /***** Встроенные данные о продуктах *****/
     var products = {
       "one-phase": {
         "black": {
@@ -212,7 +211,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Функция для изменения высоты iframe (не используется в maytoni.html, но оставлена для совместимости)
+    // Функция для изменения высоты iframe (если понадобится; для maytoni.html не используется)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -249,7 +248,6 @@
 
       // Для Maytoni UNITY используем комплект "surface"
       const mounting = mountingParam;
-
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
 
       // Находим выбранный продукт
@@ -266,27 +264,62 @@
       }
 
       const lengthOptions = selectedProduct.lengthOptions;
+
       // Для фигуры "straight" используем только lengthA
       let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
       console.log("Общая требуемая длина:", totalLength, "см");
 
-      // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина не достигнет totalLength
+      // Логика подбора для прямой системы:
+      // Если mounting = "surface": доступны элементы 100, 200, 300 см.
+      // Если требуемая длина <=100, выбираем 1м; <=200, 2м; <=300, 3м.
+      // Если больше 300 см, используем один 3м, затем добавляем 1м элементы до достижения или превышения требуемой длины.
       let selectedItems = [];
       let provided = 0;
-      while (provided < totalLength) {
-        const remainder = totalLength - provided;
-        let piece;
-        if (remainder <= 100) {
-          piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-        } else if (remainder <= 200) {
-          piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-        } else if (remainder <= 300) {
-          piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-        } else {
-          piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+      if (shape === "straight") {
+        if (mounting === "surface") {
+          if (totalLength <= 100) {
+            selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+            provided = 100;
+          } else if (totalLength <= 200) {
+            selectedItems.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+            provided = 200;
+          } else if (totalLength <= 300) {
+            selectedItems.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+            provided = 300;
+          } else {
+            // Если требуется больше 300 см: обязательно один 3м, затем добавляем 1м элементы
+            selectedItems.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+            provided = 300;
+            while (provided < totalLength) {
+              selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+              provided += 100;
+            }
+          }
+        } else if (mounting === "recessed") {
+          // Для встраиваемой системы доступны только 1м и 2м элементы
+          if (totalLength <= 100) {
+            selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+            provided = 100;
+          } else if (totalLength <= 200) {
+            selectedItems.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+            provided = 200;
+          } else {
+            // Если требуется больше 200 см: используем комбинацию 2м и 1м элементов
+            while (provided < totalLength) {
+              let rem = totalLength - provided;
+              if (rem > 100) {
+                selectedItems.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+                provided += 200;
+              } else {
+                selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+                provided += 100;
+              }
+            }
+          }
         }
-        selectedItems.push(piece);
-        provided += piece.pieceLength;
+      } else {
+        // Если не прямая система – можно добавить расширенную логику для других фигур
+        throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
       console.log("Подобранные треки:", selectedItems);
 
