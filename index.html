@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Подбор трековой системы</title>
   <style>
-    /* Общие стили для страницы */
+    /* Общие стили для index.html */
     body {
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
       margin: 0;
-      padding: 0;
-      display: flex;
-      height: 100vh;
+      padding: 20px;
       box-sizing: border-box;
     }
     .container {
@@ -92,32 +90,20 @@
       font-size: 16px;
       cursor: pointer;
     }
-    
-    /* Правая область: блок с названиями производителей */
-    .manufacturers-container {
+    /* Правая область: контейнер для отображения результата из maytoni.html */
+    .result-container {
       width: 65%;
       padding: 10px;
       box-sizing: border-box;
-      display: none; /* изначально скрыт */
+      display: none;  /* Изначально скрыт */
       background-color: #e7f5fd;
     }
-    .manufacturer-titles {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
+    /* Стиль iframe: растягивается по ширине и подстраивается по высоте (если maytoni.html корректно задаёт свою высоту) */
+    .result-container iframe {
+      width: 100%;
+      border: none;
+      overflow: hidden;
     }
-    .manufacturer-title {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      font-size: 14px;
-      font-weight: bold;
-      border: 1px solid #ccc;
-      background-color: white;
-      margin: 2px;
-      box-sizing: border-box;
-    }
-    
     /* Отладочный блок (опционально) */
     .debug {
       margin-top: 10px;
@@ -193,19 +179,13 @@
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
       
-      <!-- Отладочный блок (если нужен) -->
+      <!-- Отладочный блок (при необходимости) -->
       <div id="debug" class="debug"></div>
     </div>
     
-    <!-- Правая область: блок с названиями производителей -->
-    <div class="manufacturers-container" id="manufacturersContainer">
-      <div class="manufacturer-titles">
-        <div class="manufacturer-title">Maytoni UNITY</div>
-        <div class="manufacturer-title">NOVOTECH</div>
-        <div class="manufacturer-title">ST LUCE</div>
-        <div class="manufacturer-title">AMBRELA</div>
-        <div class="manufacturer-title">DENKIRS</div>
-      </div>
+    <!-- Правая область: контейнер для отображения результата из maytoni.html -->
+    <div class="result-container" id="manufacturerResult">
+      <iframe id="iframeMaytoni" src="maytoni.html" style="height:600px;"></iframe>
     </div>
   </div>
   
@@ -216,25 +196,8 @@
       console.log("Выбрана фигура:", shape);
     }
     
-    // Функция-обертка для безопасного вызова подбора
-    function safeShowSelection() {
-      try {
-        // Обновляем src каждого производителя, передавая параметры через URL
-        updateManufacturers();
-        // Делаем видимой правую область
-        document.getElementById("manufacturersContainer").style.display = "block";
-        // Выполняем логику подбора в файле maytoni.html и аналогичных (если там реализована своя логика)
-        // В данном примере мы просто выводим отладочное сообщение
-        showSelection(); 
-      } catch (e) {
-        console.error("Ошибка в safeShowSelection:", e);
-        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-      }
-    }
-    
-    // Функция обновления URL для производителей
-    function updateManufacturers() {
-      // Считываем параметры из формы
+    // Функция обновления URL для iframe maytoni.html с параметрами из формы
+    function updateMaytoniIframe() {
       const type = document.getElementById("type").value;
       const color = document.getElementById("color").value;
       const mounting = document.getElementById("mounting").value;
@@ -243,33 +206,38 @@
       const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
       
       // Формируем строку запроса
-      const query = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}`;
+      const query = "?type=" + type +
+                    "&color=" + color +
+                    "&mounting=" + mounting +
+                    "&shape=" + shape +
+                    "&lengthA=" + lengthA +
+                    "&lengthB=" + lengthB;
       
-      // Для каждого производителя обновляем src с добавлением query-параметров
-      const manufacturers = [
-        { id: "iframeMaytoni", file: "maytoni.html" },
-        { id: "iframeNovotech", file: "novotech.html" },
-        { id: "iframeStLuce", file: "st_luce.html" },
-        { id: "iframeAmbrela", file: "ambrela.html" },
-        { id: "iframeDenkirs", file: "denkirs.html" }
-      ];
-      
-      manufacturers.forEach(function(m) {
-        // Если iframe существует, обновляем его src
-        let iframe = document.getElementById(m.id);
-        if (iframe) {
-          iframe.src = m.file + query;
-          console.log(`Обновлён src для ${m.file}: ${iframe.src}`);
-        }
-      });
+      // Обновляем src для iframe maytoni.html
+      const iframe = document.getElementById("iframeMaytoni");
+      if (iframe) {
+        iframe.src = "maytoni.html" + query;
+        console.log("Обновлён src для maytoni.html:", iframe.src);
+      }
     }
     
-    // Пример функции showSelection (для отладки)
-    // Если в файлах производителей реализована своя логика, здесь можно оставить пустым или использовать postMessage для передачи параметров
-    function showSelection() {
-      console.log("Функция showSelection() вызвана в index.html.");
-      document.getElementById("debug").textContent = "Параметры переданы производителям.";
+    // Функция-обертка для безопасного вызова подбора
+    function safeShowSelection() {
+      try {
+        updateMaytoniIframe();
+        // Делаем видимым контейнер с результатом (столбец maytoni)
+        document.getElementById("manufacturerResult").style.display = "block";
+        document.getElementById("debug").textContent = "Параметры переданы в maytoni.html";
+      } catch (e) {
+        console.error("Ошибка в safeShowSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+      }
     }
+    
+    // Если необходимо, можно автоматически запускать обновление (например, по таймауту)
+    // document.addEventListener("DOMContentLoaded", function() {
+    //   setTimeout(safeShowSelection, 1000);
+    // });
   </script>
 </body>
 </html>
