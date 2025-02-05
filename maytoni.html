@@ -34,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px;
+      font-size: 13px; /* уменьшенный размер шрифта */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -85,7 +85,6 @@
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
-    <!-- Отладочный блок (при необходимости) -->
     <div id="debug" class="debug"></div>
   </div>
   
@@ -211,7 +210,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Функция для изменения высоты iframe (если понадобится; для maytoni.html не используется)
+    // Глобальная функция для изменения высоты iframe (не используется в данном файле, но оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -233,7 +232,53 @@
       }
     };
 
-    // Функция подбора для Maytoni UNITY (логика для фигуры "straight")
+    // Вспомогательные функции для подбора трековых элементов
+    function getTracksForLegSurface(legLength, lengthOptions) {
+      let pieces = [];
+      // Для накладной системы: доступны элементы 1м, 2м и 3м.
+      if (legLength <= 100) {
+        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+      } else if (legLength <= 200) {
+        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+      } else if (legLength <= 300) {
+        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+      } else {
+        // Если требуется больше 300 см: обязательно один 3м, затем добавляем 1м элементы
+        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        let provided = 300;
+        while (provided < legLength) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+          provided += 100;
+        }
+      }
+      return pieces;
+    }
+    
+    function getTracksForLegRecessed(legLength, lengthOptions) {
+      let pieces = [];
+      // Для встраиваемой системы: доступны элементы 1м и 2м.
+      if (legLength <= 100) {
+        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+      } else if (legLength <= 200) {
+        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+      } else {
+        // Если требуется больше 200 см: добавляем 2м элементы, если остаток > 100, иначе 1м
+        let provided = 0;
+        while (provided < legLength) {
+          let rem = legLength - provided;
+          if (rem > 100) {
+            pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+            provided += 200;
+          } else {
+            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+            provided += 100;
+          }
+        }
+      }
+      return pieces;
+    }
+    
+    // Функция подбора для Maytoni UNITY – реализует логику для всех фигур
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
@@ -264,73 +309,109 @@
       }
 
       const lengthOptions = selectedProduct.lengthOptions;
-
-      // Для фигуры "straight" используем только lengthA
-      let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
-      console.log("Общая требуемая длина:", totalLength, "см");
-
-      // Логика подбора для прямой системы:
-      // Если mounting = "surface": доступны элементы 100, 200, 300 см.
-      // Если требуемая длина <=100, выбираем 1м; <=200, 2м; <=300, 3м.
-      // Если больше 300 см, используем один 3м, затем добавляем 1м элементы до достижения или превышения требуемой длины.
       let selectedItems = [];
-      let provided = 0;
+      let usedConnectors = [];
+
+      // Логика подбора в зависимости от фигуры:
       if (shape === "straight") {
+        // Прямая система: учитывается только длина A.
         if (mounting === "surface") {
-          if (totalLength <= 100) {
-            selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-            provided = 100;
-          } else if (totalLength <= 200) {
-            selectedItems.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-            provided = 200;
-          } else if (totalLength <= 300) {
-            selectedItems.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-            provided = 300;
-          } else {
-            // Если требуется больше 300 см: обязательно один 3м, затем добавляем 1м элементы
-            selectedItems.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-            provided = 300;
-            while (provided < totalLength) {
-              selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-              provided += 100;
-            }
-          }
+          selectedItems = getTracksForLegSurface(lengthA, lengthOptions);
         } else if (mounting === "recessed") {
-          // Для встраиваемой системы доступны только 1м и 2м элементы
-          if (totalLength <= 100) {
-            selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-            provided = 100;
-          } else if (totalLength <= 200) {
-            selectedItems.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-            provided = 200;
-          } else {
-            // Если требуется больше 200 см: используем комбинацию 2м и 1м элементов
-            while (provided < totalLength) {
-              let rem = totalLength - provided;
-              if (rem > 100) {
-                selectedItems.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-                provided += 200;
-              } else {
-                selectedItems.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-                provided += 100;
-              }
-            }
+          selectedItems = getTracksForLegRecessed(lengthA, lengthOptions);
+        }
+      } else if (shape === "L-shape") {
+        // L-образная система: состоит из двух элементов (две ноги) + один угловой коннектор.
+        let legATracks, legBTracks;
+        if (mounting === "recessed") {
+          legATracks = getTracksForLegRecessed(lengthA, lengthOptions);
+          legBTracks = getTracksForLegRecessed(lengthB, lengthOptions);
+        } else {
+          legATracks = getTracksForLegSurface(lengthA, lengthOptions);
+          legBTracks = getTracksForLegSurface(lengthB, lengthOptions);
+        }
+        selectedItems = legATracks.concat(legBTracks);
+        // Добавляем угловой коннектор (L-образный)
+        usedConnectors.push(selectedProduct.connectors["L-shape"][0]);
+      } else if (shape === "T-shape") {
+        // T-образная система: длина A – верхний трек, длина B – вертикальный трек, плюс один T-образный коннектор.
+        let topTracks, verticalTracks;
+        if (mounting === "recessed") {
+          topTracks = getTracksForLegRecessed(lengthA, lengthOptions);
+          verticalTracks = getTracksForLegRecessed(lengthB, lengthOptions);
+        } else {
+          topTracks = getTracksForLegSurface(lengthA, lengthOptions);
+          verticalTracks = getTracksForLegSurface(lengthB, lengthOptions);
+        }
+        selectedItems = topTracks.concat(verticalTracks);
+        usedConnectors.push(selectedProduct.connectors["T-shape"][0]);
+        // Если более одного сегмента в топе или вертикали, добавляем прямые коннекторы между ними.
+        if (topTracks.length > 1) {
+          for (let i = 0; i < topTracks.length - 1; i++) {
+            usedConnectors.push(selectedProduct.connectors.straight[0]);
           }
         }
+        if (verticalTracks.length > 1) {
+          for (let i = 0; i < verticalTracks.length - 1; i++) {
+            usedConnectors.push(selectedProduct.connectors.straight[0]);
+          }
+        }
+      } else if (shape === "P-shape") {
+        // P-образная система: "Длина а" – боковые треки (используются дважды), "Длина б" – соединяющий трек,
+        // плюс всегда 2 угловых коннектора.
+        let sideTracks, connectingTracks;
+        if (mounting === "recessed") {
+          sideTracks = getTracksForLegRecessed(lengthA, lengthOptions);
+          connectingTracks = getTracksForLegRecessed(lengthB, lengthOptions);
+        } else {
+          sideTracks = getTracksForLegSurface(lengthA, lengthOptions);
+          connectingTracks = getTracksForLegSurface(lengthB, lengthOptions);
+        }
+        // Боковые треки используются дважды.
+        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
+        // Добавляем 2 угловых коннектора (из L-образного)
+        usedConnectors.push(selectedProduct.connectors["L-shape"][0]);
+        usedConnectors.push(selectedProduct.connectors["L-shape"][0]);
+        // Если между сегментами есть необходимость, добавляем прямые коннекторы
+        if (sideTracks.length > 1) {
+          for (let i = 0; i < sideTracks.length - 1; i++) {
+            usedConnectors.push(selectedProduct.connectors.straight[0]);
+            usedConnectors.push(selectedProduct.connectors.straight[0]);
+          }
+        }
+        if (connectingTracks.length > 1) {
+          for (let i = 0; i < connectingTracks.length - 1; i++) {
+            usedConnectors.push(selectedProduct.connectors.straight[0]);
+          }
+        }
+      } else if (shape === "rectangle") {
+        // Прямоугольная система: задаются две длины (A и B), которые повторяются дважды; добавляются 4 угловых коннектора.
+        let tracksA, tracksB;
+        if (mounting === "recessed") {
+          tracksA = getTracksForLegRecessed(lengthA, lengthOptions);
+          tracksB = getTracksForLegRecessed(lengthB, lengthOptions);
+        } else {
+          tracksA = getTracksForLegSurface(lengthA, lengthOptions);
+          tracksB = getTracksForLegSurface(lengthB, lengthOptions);
+        }
+        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
+        // Добавляем 4 угловых коннектора
+        for (let i = 0; i < 4; i++) {
+          usedConnectors.push(selectedProduct.connectors["L-shape"][0]);
+        }
       } else {
-        // Если не прямая система – можно добавить расширенную логику для других фигур
         throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
-      console.log("Подобранные треки:", selectedItems);
-
-      // Если более одного элемента, добавляем прямой коннектор между ними
-      let usedConnectors = [];
-      if (selectedItems.length > 1) {
+      
+      // Если для любой системы (если итоговая комбинация состоит из более чем одного сегмента) нужно добавить прямые коннекторы между сегментами
+      if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
           usedConnectors.push(selectedProduct.connectors.straight[0]);
         }
       }
-
+      
+      console.log("Подобранные треки:", selectedItems);
+      
       // Группируем трековые элементы и коннекторы
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
