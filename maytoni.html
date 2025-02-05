@@ -22,6 +22,7 @@
       height: auto;
       overflow: visible;
     }
+    /* Стили таблицы результатов */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -85,12 +86,12 @@
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
-    <!-- Отладочный блок (при необходимости можно убрать) -->
+    <!-- Отладочный блок (если нужен) -->
     <div id="debug" class="debug"></div>
   </div>
-
+  
   <script>
-    /***** Встроенные данные о продуктах (из файла products.json) *****/
+    /***** Встроенные данные о продуктах (из products.json) *****/
     var products = {
       "one-phase": {
         "black": {
@@ -209,10 +210,9 @@
         }
       }
     };
-
     /***** Конец встроенных данных *****/
 
-    // Функция для изменения высоты iframe (если потребуется; здесь не используется)
+    // Функция для изменения высоты iframe (не используется в maytoni.html, но оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -224,7 +224,7 @@
       }
     };
 
-    // Глобальная функция safeShowSelection (вызывается родительским документом, если требуется)
+    // Глобальная функция safeShowSelection – вызывается из родительского документа, если требуется
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -237,7 +237,7 @@
     // Функция подбора для Maytoni UNITY (логика для фигуры "straight")
     window.showSelection = function() {
       console.log("Начало работы showSelection");
-      
+
       // Считываем параметры из URL или используем значения по умолчанию
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
@@ -246,30 +246,30 @@
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
-      
+
       // Для Maytoni UNITY используем комплект "surface"
       const mounting = mountingParam;
-      
+
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
-      
+
       // Находим выбранный продукт
       const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
       if (!selectedProduct) {
         throw new Error("Не найден комплект для выбранных параметров.");
       }
-      
+
       // Если режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
       let components = selectedProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
         components = Object.assign({}, components, ceilingProduct.components);
       }
-      
+
       const lengthOptions = selectedProduct.lengthOptions;
       // Для фигуры "straight" используем только lengthA
       let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
       console.log("Общая требуемая длина:", totalLength, "см");
-      
+
       // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина не достигнет totalLength
       let selectedItems = [];
       let provided = 0;
@@ -289,15 +289,15 @@
         provided += piece.pieceLength;
       }
       console.log("Подобранные треки:", selectedItems);
-      
-      // Если выбрано более одного элемента, добавляем прямой коннектор между ними
+
+      // Если более одного элемента, добавляем прямой коннектор между ними
       let usedConnectors = [];
       if (selectedItems.length > 1) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
           usedConnectors.push(selectedProduct.connectors.straight[0]);
         }
       }
-      
+
       // Группируем трековые элементы и коннекторы
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
@@ -308,7 +308,7 @@
         groupedItems[id].count++;
       });
       console.log("Сгруппированные элементы:", groupedItems);
-      
+
       // Формируем HTML для таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
@@ -328,16 +328,14 @@
           console.warn("Компонент с ID " + id + " не найден.");
         }
       }
-      
+
       document.getElementById("results").innerHTML = tbodyHTML;
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
       document.getElementById("resultContainer").style.display = "block";
-      // Очищаем отладочный блок
-      document.getElementById("debug").textContent = "";
       console.log("Подбор завершён успешно.");
     };
 
-    // Автоматический запуск (если нужно)
+    // Автоматический запуск (если требуется)
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
