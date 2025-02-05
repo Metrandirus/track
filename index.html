@@ -10,9 +10,7 @@
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
       margin: 0;
-      padding: 0;
-      display: flex;
-      height: 100vh;
+      padding: 20px;
       box-sizing: border-box;
     }
     .container {
@@ -92,39 +90,30 @@
       font-size: 16px;
       cursor: pointer;
     }
-    
-    /* Правая область: контейнер для 5 колонок производителей */
+    /* Правая область: вместо iframe теперь просто названия производителей */
     .manufacturers-container {
       width: 65%;
       padding: 10px;
       box-sizing: border-box;
-      display: none; /* Изначально скрыт */
-      gap: 10px;
+      display: none; /* Изначально скрыта */
       background-color: #e7f5fd;
-      overflow: hidden;
     }
-    .manufacturer {
-      flex: 1;
-      border: 1px solid #ccc;
-      background-color: white;
+    .manufacturer-titles {
       display: flex;
-      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
     }
-    .manufacturer header {
-      background-color: white;
+    .manufacturer-title {
+      flex: 1;
       text-align: center;
       padding: 10px;
-      font-weight: bold;
-      border-bottom: 1px solid #ccc;
       font-size: 14px;
+      font-weight: bold;
+      border: 1px solid #ccc;
+      background-color: white;
+      margin: 2px;
+      box-sizing: border-box;
     }
-    .manufacturer iframe {
-      width: 100%;
-      height: 600px; /* Настройте высоту по необходимости */
-      border: none;
-      overflow: hidden;
-    }
-    
     /* Отладочный блок (опционально) */
     .debug {
       margin-top: 10px;
@@ -135,7 +124,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Левая область: Форма выбора трековой системы -->
+    <!-- Левая область: форма выбора трековой системы -->
     <div class="form-container">
       <h2>Подбор трековой системы</h2>
       
@@ -204,190 +193,56 @@
       <div id="debug" class="debug"></div>
     </div>
     
-    <!-- Правая область: 5 колонок для производителей (изначально скрыта) -->
+    <!-- Правая область: столбец с названиями производителей -->
     <div class="manufacturers-container" id="manufacturersContainer">
-      <div class="manufacturer">
-        <header>Maytoni UNITY</header>
-        <iframe src="maytoni.html" id="iframeMaytoni" onload="resizeIframe(this)"></iframe>
-      </div>
-      <div class="manufacturer">
-        <header>NOVOTECH</header>
-        <iframe src="novotech.html" id="iframeNovotech" onload="resizeIframe(this)"></iframe>
-      </div>
-      <div class="manufacturer">
-        <header>ST LUCE</header>
-        <iframe src="st_luce.html" id="iframeStLuce" onload="resizeIframe(this)"></iframe>
-      </div>
-      <div class="manufacturer">
-        <header>AMBRELA</header>
-        <iframe src="ambrela.html" id="iframeAmbrela" onload="resizeIframe(this)"></iframe>
-      </div>
-      <div class="manufacturer">
-        <header>DENKIRS</header>
-        <iframe src="denkirs.html" id="iframeDenkirs" onload="resizeIframe(this)"></iframe>
+      <div class="manufacturer-titles">
+        <div class="manufacturer-title">Maytoni UNITY</div>
+        <div class="manufacturer-title">NOVOTECH</div>
+        <div class="manufacturer-title">ST LUCE</div>
+        <div class="manufacturer-title">AMBRELA</div>
+        <div class="manufacturer-title">DENKIRS</div>
       </div>
     </div>
   </div>
   
   <script>
-    // Глобальная функция изменения высоты iframe
-    function resizeIframe(iframe) {
-      try {
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
-        // Если содержимое еще не загружено, можно установить минимальную высоту
-        if (doc && doc.body && doc.body.scrollHeight) {
-          iframe.style.height = doc.body.scrollHeight + "px";
-        }
-      } catch (e) {
-        console.error("Ошибка при изменении высоты iframe:", e);
-      }
-    }
-    
     // Функция для установки выбранной фигуры
     function selectShape(shape) {
       document.getElementById("selectedShape").value = shape;
       console.log("Выбрана фигура:", shape);
     }
     
-    // Функция для сброса содержимого всех iframe (перезагрузка их src)
-    function resetManufacturers() {
-      var iframes = document.querySelectorAll(".manufacturers-container iframe");
-      iframes.forEach(function(iframe) {
-        iframe.src = iframe.src;
-      });
-    }
-    
-    // Функция-обёртка для безопасного вызова подбора
-    window.safeShowSelection = function() {
+    // Функция-обертка для безопасного вызова подбора
+    function safeShowSelection() {
       try {
         showSelection();
-        // После выполнения подбора делаем видимой правую область
-        document.getElementById("manufacturersContainer").style.display = "flex";
-        // Сбрасываем содержимое iframe, чтобы убрать старые результаты
-        resetManufacturers();
+        // После подбора делаем правую область видимой
+        document.getElementById("manufacturersContainer").style.display = "block";
+        // Здесь можно добавить сброс предыдущего содержимого, если оно использовалось ранее
       } catch (e) {
         console.error("Ошибка в showSelection:", e);
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
-    };
+    }
     
-    // Функция подбора для Maytoni UNITY
-    window.showSelection = function() {
+    // Функция подбора (здесь можно вставить вашу реальную логику подбора)
+    function showSelection() {
       console.log("Функция showSelection() вызвана.");
-      // Считываем параметры из URL или используем значения по умолчанию
+      // Пример: вывод параметров подбора в отладочный блок
       const params = new URLSearchParams(window.location.search);
-      const type = params.get("type") || "one-phase";
-      const color = params.get("color") || "black";
-      let mountingParam = params.get("mounting") || "surface";
-      const shape = params.get("shape") || "straight";
-      const lengthA = parseFloat(params.get("lengthA")) || 150;
-      const lengthB = parseFloat(params.get("lengthB")) || 0;
-      
-      // Для Maytoni UNITY используем комплект "surface"
-      const mounting = mountingParam;
+      const type = params.get("type") || document.getElementById("type").value || "one-phase";
+      const color = params.get("color") || document.getElementById("color").value || "black";
+      const mounting = params.get("mounting") || document.getElementById("mounting").value || "surface";
+      const shape = params.get("shape") || document.getElementById("selectedShape").value || "straight";
+      const lengthA = parseFloat(params.get("lengthA")) || parseFloat(document.getElementById("lengthA").value) || 150;
+      const lengthB = parseFloat(params.get("lengthB")) || parseFloat(document.getElementById("lengthB").value) || 0;
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из JSON
-      fetch('/track/products.json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Ошибка загрузки данных: " + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
-          if (!selectedProduct) {
-            throw new Error("Не найден комплект для выбранных параметров.");
-          }
-          
-          // Если режим stretch-ceiling, объединяем компоненты из stretch-ceiling с компонентами surface
-          let components = selectedProduct.components;
-          if (mountingParam === "stretch-ceiling") {
-            const ceilingProduct = data[type][color]["stretch-ceiling"];
-            components = Object.assign({}, components, ceilingProduct.components);
-          }
-          
-          const lengthOptions = selectedProduct.lengthOptions;
-          // Для фигуры "straight" используем только lengthA (иначе можно добавить длину B)
-          let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
-          console.log("Общая требуемая длина:", totalLength, "см");
-          
-          // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина < totalLength
-          let selectedItems = [];
-          let provided = 0;
-          while (provided < totalLength) {
-            const remainder = totalLength - provided;
-            let piece;
-            if (remainder <= 100) {
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else if (remainder <= 200) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            } else if (remainder <= 300) {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            } else {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            }
-            selectedItems.push(piece);
-            provided += piece.pieceLength;
-          }
-          console.log("Подобранные треки:", selectedItems);
-          
-          // Если более одного элемента, добавляем прямой коннектор между ними
-          let usedConnectors = [];
-          if (selectedItems.length > 1) {
-            for (let i = 0; i < selectedItems.length - 1; i++) {
-              usedConnectors.push(selectedProduct.connectors.straight[0]);
-            }
-          }
-          
-          // Группируем трековые элементы и коннекторы
-          let groupedItems = {};
-          selectedItems.concat(usedConnectors).forEach(itemObj => {
-            const id = itemObj.id;
-            if (!groupedItems[id]) {
-              groupedItems[id] = { count: 0, component: components[id] };
-            }
-            groupedItems[id].count++;
-          });
-          console.log("Сгруппированные элементы:", groupedItems);
-          
-          // Формируем HTML для таблицы результатов
-          let tbodyHTML = "";
-          let totalPrice = 0;
-          for (const [id, itemData] of Object.entries(groupedItems)) {
-            const comp = itemData.component;
-            if (comp) {
-              totalPrice += comp.price * itemData.count;
-              tbodyHTML += `
-                <tr>
-                  <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
-                  <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
-                  <td>${comp.price}р</td>
-                  <td>${comp.price * itemData.count}р</td>
-                </tr>
-              `;
-            } else {
-              console.warn("Компонент с ID " + id + " не найден.");
-            }
-          }
-          
-          document.getElementById("results").innerHTML = tbodyHTML;
-          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
-          document.getElementById("resultContainer").style.display = "block";
-          console.log("Подбор завершён успешно.");
-        })
-        .catch(error => {
-          console.error("Ошибка:", error);
-          document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
-        });
-    };
-
-    // Автоматический запуск (если нужно)
-    document.addEventListener("DOMContentLoaded", function() {
-      setTimeout(window.safeShowSelection, 1000);
-    });
+      // Здесь должна быть ваша логика подбора трековой системы
+      // Пример: просто выводим сообщение в отладочный блок
+      document.getElementById("debug").textContent = "Параметры подбора переданы. (Логика подбора не реализована в данном примере.)";
+    }
   </script>
 </body>
 </html>
