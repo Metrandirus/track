@@ -22,10 +22,7 @@
       height: auto;
       overflow: visible;
     }
-    h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
+    /* Стили таблицы результатов */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -84,35 +81,29 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Результаты подбора будут выведены здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
-    <!-- Отладочный блок (если не нужен, можно убрать) -->
+    <!-- Отладочный блок (при необходимости можно оставить пустым) -->
     <div id="debug" class="debug"></div>
   </div>
   
   <script>
-    // Функция для изменения высоты iframe (если потребуется; здесь для maytoni.html не используется)
-    function resizeIframe(iframe) {
+    // Функция для изменения высоты iframe (если понадобится; для maytoni.html в данном случае не используется)
+    window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
-        iframe.style.height = doc.body.scrollHeight + "px";
+        if (doc && doc.body && doc.body.scrollHeight) {
+          iframe.style.height = doc.body.scrollHeight + "px";
+        }
       } catch (e) {
         console.error("Ошибка при изменении высоты iframe:", e);
       }
-    }
+    };
 
-    // Функция для сброса содержимого iframe (если maytoni.html вызывается внутри контейнера с iframe)
-    function resetManufacturers() {
-      var iframes = document.querySelectorAll(".manufacturers-container iframe");
-      iframes.forEach(function(iframe) {
-        iframe.src = iframe.src;
-      });
-    }
-
-    // Объявляем глобальные функции для вызова из родительского документа (если нужно)
+    // Глобальная функция safeShowSelection – вызывается из родительского документа, если требуется
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -162,12 +153,11 @@
           }
           
           const lengthOptions = selectedProduct.lengthOptions;
-          
-          // Для фигуры "straight" используем только lengthA
+          // Для фигуры "straight" используем только lengthA (для остальных можно доработать)
           let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
           console.log("Общая требуемая длина:", totalLength, "см");
           
-          // Подбор для фигуры "straight": подбираем трековые элементы, пока суммарная длина не достигнет totalLength
+          // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина не достигнет totalLength
           let selectedItems = [];
           let provided = 0;
           while (provided < totalLength) {
@@ -229,8 +219,6 @@
           document.getElementById("results").innerHTML = tbodyHTML;
           document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
           document.getElementById("resultContainer").style.display = "block";
-          // Очищаем отладочный блок (не выводим лишние сообщения)
-          document.getElementById("debug").textContent = "";
           console.log("Подбор завершён успешно.");
         })
         .catch(error => {
@@ -239,7 +227,7 @@
         });
     };
 
-    // Если требуется автоматический запуск (например, по таймауту), можно добавить:
+    // Автоматический запуск (если нужно)
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
