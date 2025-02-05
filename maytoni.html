@@ -100,9 +100,9 @@
               { "min": 201, "max": 300, "items": ["TRX001-113B"] }
             ],
             "connectors": {
-              "straight": [{ id: "TRA001C-11B" }],
-              "L-shape": [{ id: "TRA001CL-11B" }],
-              "T-shape": [{ id: "TRA001CT-11B" }]
+              "straight": ["TRA001C-11B"],
+              "L-shape": ["TRA001CL-11B"],
+              "T-shape": ["TRA001CT-11B"]
             },
             "components": {
               "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
@@ -120,9 +120,9 @@
               { "min": 101, "max": 200, "items": ["TRX004-112B"] }
             ],
             "connectors": {
-              "straight": [{ id: "TRA002C-11B" }],
-              "L-shape": [{ id: "TRA002CL-11B" }],
-              "T-shape": [{ id: "TRA002CT-11B" }]
+              "straight": ["TRA002C-11B"],
+              "L-shape": ["TRA002CL-11B"],
+              "T-shape": ["TRA002CT-11B"]
             },
             "components": {
               "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м TRX004-111B", "price": 1600, "image": "images/TRX004-111B.png" },
@@ -139,9 +139,9 @@
               { "min": 201, "max": 300, "items": ["TRX003-113B"] }
             ],
             "connectors": {
-              "straight": [{ id: "TRA003C-11B" }],
-              "L-shape": [{ id: "TRA003CL-11B" }],
-              "T-shape": [{ id: "TRA003CT-11B" }]
+              "straight": ["TRA003C-11B"],
+              "L-shape": ["TRA003CL-11B"],
+              "T-shape": ["TRA003CT-11B"]
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
@@ -157,9 +157,9 @@
               { "min": 201, "max": 300, "items": ["TRX001-113W"] }
             ],
             "connectors": {
-              "straight": [{ id: "TRA001C-11W" }],
-              "L-shape": [{ id: "TRA001CL-11W" }],
-              "T-shape": [{ id: "TRA001CT-11W" }]
+              "straight": ["TRA001C-11W"],
+              "L-shape": ["TRA001CL-11W"],
+              "T-shape": ["TRA001CT-11W"]
             },
             "components": {
               "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
@@ -177,9 +177,9 @@
               { "min": 101, "max": 200, "items": ["TRX004-112W"] }
             ],
             "connectors": {
-              "straight": [{ id: "TRA002C-11W" }],
-              "L-shape": [{ id: "TRA002CL-11W" }],
-              "T-shape": [{ id: "TRA002CT-11W" }]
+              "straight": ["TRA002C-11W"],
+              "L-shape": ["TRA002CL-11W"],
+              "T-shape": ["TRA002CT-11W"]
             },
             "components": {
               "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м TRX004-111W", "price": 1650, "image": "images/TRX004-111W.png" },
@@ -191,12 +191,12 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Здесь можно задать длину, если нужно; если нет – оставляем пустым
+              // Если нет данных для stretch-ceiling, можно оставить пустым или задать по аналогии
             ],
             "connectors": {
-              "straight": [{ id: "TRA003C-11W" }],
-              "L-shape": [{ id: "TRA003CL-11W" }],
-              "T-shape": [{ id: "TRA003CT-11W" }]
+              "straight": ["TRA003C-11W"],
+              "L-shape": ["TRA003CL-11W"],
+              "T-shape": ["TRA003CT-11W"]
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
@@ -220,6 +220,12 @@
       }
     };
 
+    // Вспомогательная функция для оборачивания коннектора
+    function wrapConnector(conn) {
+      // Если conn уже является объектом с полем id, возвращаем его, иначе оборачиваем строку в объект.
+      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
+    }
+
     // Глобальная функция safeShowSelection – вызывается из родительского документа, если требуется
     window.safeShowSelection = function() {
       try {
@@ -230,7 +236,7 @@
       }
     };
 
-    // Вспомогательные функции для подбора трековых элементов для накладного и встраиваемого монтажа
+    // Вспомогательные функции для подбора трековых элементов
     function getTracksForLegSurface(legLength, lengthOptions) {
       let pieces = [];
       // Для накладного монтажа: доступны 1м, 2м и 3м.
@@ -309,7 +315,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Логика подбора в зависимости от фигуры
+      // Логика подбора в зависимости от фигуры:
       if (shape === "straight") {
         // Прямая система: учитывается только длина A.
         if (mounting === "surface") {
@@ -329,7 +335,7 @@
         }
         selectedItems = legATracks.concat(legBTracks);
         if (selectedProduct.connectors["L-shape"] && selectedProduct.connectors["L-shape"].length > 0) {
-          usedConnectors.push({ id: selectedProduct.connectors["L-shape"][0] });
+          usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
         }
       } else if (shape === "T-shape") {
         // T-образная система: длина A – верхний трек, длина B – вертикальный трек, плюс один T-образный коннектор.
@@ -343,20 +349,21 @@
         }
         selectedItems = topTracks.concat(verticalTracks);
         if (selectedProduct.connectors["T-shape"] && selectedProduct.connectors["T-shape"].length > 0) {
-          usedConnectors.push({ id: selectedProduct.connectors["T-shape"][0] });
+          usedConnectors.push(wrapConnector(selectedProduct.connectors["T-shape"][0]));
         }
         if (topTracks.length > 1) {
           for (let i = 0; i < topTracks.length - 1; i++) {
-            usedConnectors.push({ id: selectedProduct.connectors.straight[0] });
+            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
           }
         }
         if (verticalTracks.length > 1) {
           for (let i = 0; i < verticalTracks.length - 1; i++) {
-            usedConnectors.push({ id: selectedProduct.connectors.straight[0] });
+            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
           }
         }
       } else if (shape === "P-shape") {
-        // P-образная система: длина A – боковые треки (используются дважды), длина B – соединяющий трек, плюс 2 угловых коннектора.
+        // P-образная система: длина A – боковые треки (используются дважды), длина B – соединяющий трек,
+        // плюс всегда 2 угловых коннектора.
         let sideTracks, connectingTracks;
         if (mounting === "recessed") {
           sideTracks = getTracksForLegRecessed(lengthA, lengthOptions);
@@ -367,18 +374,18 @@
         }
         selectedItems = sideTracks.concat(sideTracks, connectingTracks);
         if (selectedProduct.connectors["L-shape"] && selectedProduct.connectors["L-shape"].length > 0) {
-          usedConnectors.push({ id: selectedProduct.connectors["L-shape"][0] });
-          usedConnectors.push({ id: selectedProduct.connectors["L-shape"][0] });
+          usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
+          usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
         }
         if (sideTracks.length > 1) {
           for (let i = 0; i < sideTracks.length - 1; i++) {
-            usedConnectors.push({ id: selectedProduct.connectors.straight[0] });
-            usedConnectors.push({ id: selectedProduct.connectors.straight[0] });
+            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
           }
         }
         if (connectingTracks.length > 1) {
           for (let i = 0; i < connectingTracks.length - 1; i++) {
-            usedConnectors.push({ id: selectedProduct.connectors.straight[0] });
+            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
           }
         }
       } else if (shape === "rectangle") {
@@ -394,7 +401,7 @@
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
         if (selectedProduct.connectors["L-shape"] && selectedProduct.connectors["L-shape"].length > 0) {
           for (let i = 0; i < 4; i++) {
-            usedConnectors.push({ id: selectedProduct.connectors["L-shape"][0] });
+            usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
           }
         }
       } else {
@@ -404,12 +411,12 @@
       // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
       if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
-          usedConnectors.push({ id: selectedProduct.connectors.straight[0] });
+          usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
         }
       }
       
       console.log("Подобранные треки:", selectedItems);
-      
+
       // Группируем трековые элементы и коннекторы
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
