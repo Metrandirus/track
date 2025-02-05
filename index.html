@@ -10,7 +10,9 @@
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      display: flex;
+      height: 100vh;
       box-sizing: border-box;
     }
     .container {
@@ -90,12 +92,13 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Правая область: вместо iframe теперь просто названия производителей */
+    
+    /* Правая область: блок с названиями производителей */
     .manufacturers-container {
       width: 65%;
       padding: 10px;
       box-sizing: border-box;
-      display: none; /* Изначально скрыта */
+      display: none; /* изначально скрыт */
       background-color: #e7f5fd;
     }
     .manufacturer-titles {
@@ -114,6 +117,7 @@
       margin: 2px;
       box-sizing: border-box;
     }
+    
     /* Отладочный блок (опционально) */
     .debug {
       margin-top: 10px;
@@ -189,11 +193,11 @@
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
       
-      <!-- Отладочный блок (опционально) -->
+      <!-- Отладочный блок (если нужен) -->
       <div id="debug" class="debug"></div>
     </div>
     
-    <!-- Правая область: столбец с названиями производителей -->
+    <!-- Правая область: блок с названиями производителей -->
     <div class="manufacturers-container" id="manufacturersContainer">
       <div class="manufacturer-titles">
         <div class="manufacturer-title">Maytoni UNITY</div>
@@ -215,33 +219,56 @@
     // Функция-обертка для безопасного вызова подбора
     function safeShowSelection() {
       try {
-        showSelection();
-        // После подбора делаем правую область видимой
+        // Обновляем src каждого производителя, передавая параметры через URL
+        updateManufacturers();
+        // Делаем видимой правую область
         document.getElementById("manufacturersContainer").style.display = "block";
-        // Здесь можно добавить сброс предыдущего содержимого, если оно использовалось ранее
+        // Выполняем логику подбора в файле maytoni.html и аналогичных (если там реализована своя логика)
+        // В данном примере мы просто выводим отладочное сообщение
+        showSelection(); 
       } catch (e) {
-        console.error("Ошибка в showSelection:", e);
+        console.error("Ошибка в safeShowSelection:", e);
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     }
     
-    // Функция подбора (здесь можно вставить вашу реальную логику подбора)
+    // Функция обновления URL для производителей
+    function updateManufacturers() {
+      // Считываем параметры из формы
+      const type = document.getElementById("type").value;
+      const color = document.getElementById("color").value;
+      const mounting = document.getElementById("mounting").value;
+      const shape = document.getElementById("selectedShape").value;
+      const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
+      const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
+      
+      // Формируем строку запроса
+      const query = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}`;
+      
+      // Для каждого производителя обновляем src с добавлением query-параметров
+      const manufacturers = [
+        { id: "iframeMaytoni", file: "maytoni.html" },
+        { id: "iframeNovotech", file: "novotech.html" },
+        { id: "iframeStLuce", file: "st_luce.html" },
+        { id: "iframeAmbrela", file: "ambrela.html" },
+        { id: "iframeDenkirs", file: "denkirs.html" }
+      ];
+      
+      manufacturers.forEach(function(m) {
+        // Если iframe существует, обновляем его src
+        let iframe = document.getElementById(m.id);
+        if (iframe) {
+          iframe.src = m.file + query;
+          console.log(`Обновлён src для ${m.file}: ${iframe.src}`);
+        }
+      });
+    }
+    
+    // Пример функции showSelection (для отладки)
+    // Если в файлах производителей реализована своя логика, здесь можно оставить пустым или использовать postMessage для передачи параметров
     function showSelection() {
-      console.log("Функция showSelection() вызвана.");
-      // Пример: вывод параметров подбора в отладочный блок
-      const params = new URLSearchParams(window.location.search);
-      const type = params.get("type") || document.getElementById("type").value || "one-phase";
-      const color = params.get("color") || document.getElementById("color").value || "black";
-      const mounting = params.get("mounting") || document.getElementById("mounting").value || "surface";
-      const shape = params.get("shape") || document.getElementById("selectedShape").value || "straight";
-      const lengthA = parseFloat(params.get("lengthA")) || parseFloat(document.getElementById("lengthA").value) || 150;
-      const lengthB = parseFloat(params.get("lengthB")) || parseFloat(document.getElementById("lengthB").value) || 0;
-      
-      console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
-      
-      // Здесь должна быть ваша логика подбора трековой системы
-      // Пример: просто выводим сообщение в отладочный блок
-      document.getElementById("debug").textContent = "Параметры подбора переданы. (Логика подбора не реализована в данном примере.)";
+      console.log("Функция showSelection() вызвана в index.html.");
+      document.getElementById("debug").textContent = "Параметры переданы производителям.";
     }
   </script>
 </body>
