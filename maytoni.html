@@ -22,7 +22,6 @@
       height: auto;
       overflow: visible;
     }
-    /* Стили таблицы результатов */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -81,17 +80,139 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Результаты подбора будут выведены здесь -->
+          <!-- Здесь будут выводиться результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
-    <!-- Отладочный блок (при необходимости можно оставить пустым) -->
+    <!-- Отладочный блок (при необходимости можно убрать) -->
     <div id="debug" class="debug"></div>
   </div>
-  
+
   <script>
-    // Функция для изменения высоты iframe (если понадобится; для maytoni.html в данном случае не используется)
+    /***** Встроенные данные о продуктах (из файла products.json) *****/
+    var products = {
+      "one-phase": {
+        "black": {
+          "surface": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
+              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
+              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+            ],
+            "connectors": {
+              "straight": ["TRA001C-11B"],
+              "L-shape": ["TRA001CL-11B"],
+              "T-shape": ["TRA001CT-11B"]
+            },
+            "components": {
+              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
+              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
+              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
+              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
+              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+            }
+          },
+          "recessed": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX004-111B"] },
+              { "min": 101, "max": 200, "items": ["TRX004-112B"] }
+            ],
+            "connectors": {
+              "straight": ["TRA002C-11B"],
+              "L-shape": ["TRA002CL-11B"],
+              "T-shape": ["TRA002CT-11B"]
+            },
+            "components": {
+              "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м TRX004-111B", "price": 1600, "image": "images/TRX004-111B.png" },
+              "TRX004-112B": { "name": "Шинопровод встраиваемый черный 2м TRX004-112B", "price": 2600, "image": "images/TRX004-112B.png" },
+              "TRA002C-11B": { "name": "Коннектор прямой черный для встраивания TRA002C-11B", "price": 110, "image": "images/TRA002C-11B.png" },
+              "TRA002CL-11B": { "name": "Коннектор угловой черный для встраивания TRA002CL-11B", "price": 160, "image": "images/TRA002CL-11B.png" },
+              "TRA002CT-11B": { "name": "Коннектор Т-образный черный для встраивания TRA002CT-11B", "price": 210, "image": "images/TRA002CT-11B.png" }
+            }
+          },
+          "stretch-ceiling": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX003-111B"] },
+              { "min": 101, "max": 200, "items": ["TRX003-112B"] },
+              { "min": 201, "max": 300, "items": ["TRX003-113B"] }
+            ],
+            "connectors": {
+              "straight": ["TRA003C-11B"],
+              "L-shape": ["TRA003CL-11B"],
+              "T-shape": ["TRA003CT-11B"]
+            },
+            "additionalComponents": ["TRA001MP-112S"],
+            "components": {
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+            }
+          }
+        },
+        "white": {
+          "surface": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
+              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
+              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
+            ],
+            "connectors": {
+              "straight": ["TRA001C-11W"],
+              "L-shape": ["TRA001CL-11W"],
+              "T-shape": ["TRA001CT-11W"]
+            },
+            "components": {
+              "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
+              "TRX001-112W": { "name": "Шинопровод накладной белый 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
+              "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
+              "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
+              "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
+              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" },
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+            }
+          },
+          "recessed": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX004-111W"] },
+              { "min": 101, "max": 200, "items": ["TRX004-112W"] }
+            ],
+            "connectors": {
+              "straight": ["TRA002C-11W"],
+              "L-shape": ["TRA002CL-11W"],
+              "T-shape": ["TRA002CT-11W"]
+            },
+            "components": {
+              "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м TRX004-111W", "price": 1650, "image": "images/TRX004-111W.png" },
+              "TRX004-112W": { "name": "Шинопровод встраиваемый белый 2м TRX004-112W", "price": 2650, "image": "images/TRX004-112W.png" },
+              "TRA002C-11W": { "name": "Коннектор прямой белый для встраивания TRA002C-11W", "price": 115, "image": "images/TRA002C-11W.png" },
+              "TRA002CL-11W": { "name": "Коннектор угловой белый для встраивания TRA002CL-11W", "price": 165, "image": "images/TRA002CL-11W.png" },
+              "TRA002CT-11W": { "name": "Коннектор Т-образный белый для встраивания TRA002CT-11W", "price": 215, "image": "images/TRA002CT-11W.png" }
+            }
+          },
+          "stretch-ceiling": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX003-111W"] },
+              { "min": 101, "max": 200, "items": ["TRX003-112W"] },
+              { "min": 201, "max": 300, "items": ["TRX003-113W"] }
+            ],
+            "connectors": {
+              "straight": ["TRA003C-11W"],
+              "L-shape": ["TRA003CL-11W"],
+              "T-shape": ["TRA003CT-11W"]
+            },
+            "additionalComponents": ["TRA001MP-112S"],
+            "components": {
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+            }
+          }
+        }
+      }
+    };
+
+    /***** Конец встроенных данных *****/
+
+    // Функция для изменения высоты iframe (если потребуется; здесь не используется)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -103,7 +224,7 @@
       }
     };
 
-    // Глобальная функция safeShowSelection – вызывается из родительского документа, если требуется
+    // Глобальная функция safeShowSelection (вызывается родительским документом, если требуется)
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -113,7 +234,7 @@
       }
     };
 
-    // Функция подбора для Maytoni UNITY
+    // Функция подбора для Maytoni UNITY (логика для фигуры "straight")
     window.showSelection = function() {
       console.log("Начало работы showSelection");
       
@@ -131,100 +252,89 @@
       
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
       
-      // Загружаем данные из JSON
-      fetch('/track/products.json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Ошибка загрузки данных: " + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const selectedProduct = data[type] && data[type][color] && data[type][color][mounting];
-          if (!selectedProduct) {
-            throw new Error("Не найден комплект для выбранных параметров.");
-          }
-          
-          // Если режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
-          let components = selectedProduct.components;
-          if (mountingParam === "stretch-ceiling") {
-            const ceilingProduct = data[type][color]["stretch-ceiling"];
-            components = Object.assign({}, components, ceilingProduct.components);
-          }
-          
-          const lengthOptions = selectedProduct.lengthOptions;
-          // Для фигуры "straight" используем только lengthA (для остальных можно доработать)
-          let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
-          console.log("Общая требуемая длина:", totalLength, "см");
-          
-          // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина не достигнет totalLength
-          let selectedItems = [];
-          let provided = 0;
-          while (provided < totalLength) {
-            const remainder = totalLength - provided;
-            let piece;
-            if (remainder <= 100) {
-              piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
-            } else if (remainder <= 200) {
-              piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
-            } else if (remainder <= 300) {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            } else {
-              piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
-            }
-            selectedItems.push(piece);
-            provided += piece.pieceLength;
-          }
-          console.log("Подобранные треки:", selectedItems);
-          
-          // Если более одного элемента, добавляем прямой коннектор между ними
-          let usedConnectors = [];
-          if (selectedItems.length > 1) {
-            for (let i = 0; i < selectedItems.length - 1; i++) {
-              usedConnectors.push(selectedProduct.connectors.straight[0]);
-            }
-          }
-          
-          // Группируем трековые элементы и коннекторы
-          let groupedItems = {};
-          selectedItems.concat(usedConnectors).forEach(itemObj => {
-            const id = itemObj.id;
-            if (!groupedItems[id]) {
-              groupedItems[id] = { count: 0, component: components[id] };
-            }
-            groupedItems[id].count++;
-          });
-          console.log("Сгруппированные элементы:", groupedItems);
-          
-          // Формируем HTML для таблицы результатов
-          let tbodyHTML = "";
-          let totalPrice = 0;
-          for (const [id, itemData] of Object.entries(groupedItems)) {
-            const comp = itemData.component;
-            if (comp) {
-              totalPrice += comp.price * itemData.count;
-              tbodyHTML += `
-                <tr>
-                  <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
-                  <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
-                  <td>${comp.price}р</td>
-                  <td>${comp.price * itemData.count}р</td>
-                </tr>
-              `;
-            } else {
-              console.warn("Компонент с ID " + id + " не найден.");
-            }
-          }
-          
-          document.getElementById("results").innerHTML = tbodyHTML;
-          document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
-          document.getElementById("resultContainer").style.display = "block";
-          console.log("Подбор завершён успешно.");
-        })
-        .catch(error => {
-          console.error("Ошибка:", error);
-          document.getElementById("results").innerHTML = `<tr><td colspan="4" style="text-align: center;">Ошибка: ${error.message}</td></tr>`;
-        });
+      // Находим выбранный продукт
+      const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
+      if (!selectedProduct) {
+        throw new Error("Не найден комплект для выбранных параметров.");
+      }
+      
+      // Если режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
+      let components = selectedProduct.components;
+      if (mountingParam === "stretch-ceiling") {
+        const ceilingProduct = products[type][color]["stretch-ceiling"];
+        components = Object.assign({}, components, ceilingProduct.components);
+      }
+      
+      const lengthOptions = selectedProduct.lengthOptions;
+      // Для фигуры "straight" используем только lengthA
+      let totalLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
+      console.log("Общая требуемая длина:", totalLength, "см");
+      
+      // Подбор для фигуры "straight": выбираем трековые элементы, пока суммарная длина не достигнет totalLength
+      let selectedItems = [];
+      let provided = 0;
+      while (provided < totalLength) {
+        const remainder = totalLength - provided;
+        let piece;
+        if (remainder <= 100) {
+          piece = { id: lengthOptions[0].items[0], pieceLength: 100 };
+        } else if (remainder <= 200) {
+          piece = { id: lengthOptions[1].items[0], pieceLength: 200 };
+        } else if (remainder <= 300) {
+          piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+        } else {
+          piece = { id: lengthOptions[2].items[0], pieceLength: 300 };
+        }
+        selectedItems.push(piece);
+        provided += piece.pieceLength;
+      }
+      console.log("Подобранные треки:", selectedItems);
+      
+      // Если выбрано более одного элемента, добавляем прямой коннектор между ними
+      let usedConnectors = [];
+      if (selectedItems.length > 1) {
+        for (let i = 0; i < selectedItems.length - 1; i++) {
+          usedConnectors.push(selectedProduct.connectors.straight[0]);
+        }
+      }
+      
+      // Группируем трековые элементы и коннекторы
+      let groupedItems = {};
+      selectedItems.concat(usedConnectors).forEach(itemObj => {
+        const id = itemObj.id;
+        if (!groupedItems[id]) {
+          groupedItems[id] = { count: 0, component: components[id] };
+        }
+        groupedItems[id].count++;
+      });
+      console.log("Сгруппированные элементы:", groupedItems);
+      
+      // Формируем HTML для таблицы результатов
+      let tbodyHTML = "";
+      let totalPrice = 0;
+      for (const [id, itemData] of Object.entries(groupedItems)) {
+        const comp = itemData.component;
+        if (comp) {
+          totalPrice += comp.price * itemData.count;
+          tbodyHTML += `
+            <tr>
+              <td><img src="${comp.image}" alt="" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
+              <td>${comp.price}р</td>
+              <td>${comp.price * itemData.count}р</td>
+            </tr>
+          `;
+        } else {
+          console.warn("Компонент с ID " + id + " не найден.");
+        }
+      }
+      
+      document.getElementById("results").innerHTML = tbodyHTML;
+      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
+      document.getElementById("resultContainer").style.display = "block";
+      // Очищаем отладочный блок
+      document.getElementById("debug").textContent = "";
+      console.log("Подбор завершён успешно.");
     };
 
     // Автоматический запуск (если нужно)
