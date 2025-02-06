@@ -34,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px;
+      font-size: 13px; /* уменьшенный размер шрифта */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Результаты подбора будут здесь -->
+          <!-- Результаты подбора будут выведены здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -147,6 +147,29 @@
             "components": {
               "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
+          },
+          "hanging": {
+            // Для подвесного монтажа используем те же lengthOptions, connectors и components, что и в surface
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
+              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
+              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+            ],
+            "connectors": {
+              "straight": ["TRA001C-11B"],
+              "L-shape": ["TRA001CL-11B"],
+              "T-shape": ["TRA001CT-11B"]
+            },
+            "components": {
+              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
+              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
+              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
+              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
+              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+            }
+            // Для подвесного монтажа подвесы будут добавляться дополнительно
           }
         },
         "white": {
@@ -191,7 +214,7 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Оставляем пустым, если нет данных
+              // Если нет данных, оставляем пустым
             ],
             "connectors": {
               "straight": ["TRA003C-11W"],
@@ -202,13 +225,35 @@
             "components": {
               "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
+          },
+          "hanging": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
+              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
+              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
+            ],
+            "connectors": {
+              "straight": ["TRA001C-11W"],
+              "L-shape": ["TRA001CL-11W"],
+              "T-shape": ["TRA001CT-11W"]
+            },
+            "components": {
+              "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
+              "TRX001-112W": { "name": "Шинопровод накладной белый 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
+              "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
+              "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
+              "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
+              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" },
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+            }
+            // Подвесы будут добавляться отдельно
           }
         }
       }
     };
     /***** Конец встроенных данных *****/
 
-    // Функция изменения высоты iframe (оставлена для совместимости)
+    // Глобальная функция изменения высоты iframe (оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -235,7 +280,7 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функции для подбора трековых элементов
+    // Вспомогательные функции для подбора трековых элементов
     function getTracksForLegSurface(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -276,8 +321,14 @@
       }
       return pieces;
     }
-    
-    // Основная функция подбора
+
+    // Глобальная переменная с данными о подвесах (для hanging)
+    var suspensionMapping = {
+      "TRA001CW-11B": { "name": "Подвес черный TRA001CW-11B", "price": 490, "image": "images/TRA001CW-11B.png" },
+      "TRA001CW-11W": { "name": "Подвес белый TRA001CW-11W", "price": 490, "image": "images/TRA001CW-11W.png" }
+    };
+
+    // Основная функция подбора для Maytoni UNITY
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
@@ -291,15 +342,15 @@
 
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Если mountingParam == "stretch-ceiling", для подбора треков используем данные surface
-      let effectiveProduct = (mountingParam === "stretch-ceiling") ?
+      // Для режимов stretch-ceiling и hanging для подбора треков используем данные surface
+      let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products[type] && products[type][color] && products[type][color]["surface"]) :
           (products[type] && products[type][color] && products[type][color][mountingParam]);
       if (!effectiveProduct) {
         throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
       }
 
-      // Объединяем компоненты: для stretch-ceiling объединяем компоненты surface и stretch-ceiling
+      // Объединяем компоненты: для stretch-ceiling объединяем компоненты из surface и stretch-ceiling
       let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
@@ -310,7 +361,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор по фигурам
+      // Подбор трековых элементов по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForLegRecessed(lengthA, lengthOptions) :
@@ -402,23 +453,36 @@
         }
       }
       
-      console.log("Подобранные треки (до профилей):", selectedItems);
+      console.log("Подобранные треки (до профилей/подвесов):", selectedItems);
 
-      // Если режим stretch-ceiling – добавляем профили.
+      // Если режим stretch-ceiling – добавляем профили
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let profileCount = Math.ceil(trackLength / 200);
-        console.log("Общая длина треков:", trackLength, "см, профилей (до корректировки):", profileCount);
-        // Здесь больше не принуждаем чётность – используем просто Math.ceil.
-        console.log("Профилей для добавления:", profileCount);
+        console.log("Общая длина треков:", trackLength, "см, профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
       }
+      
+      // Если режим hanging – добавляем подвесы
+      if (mountingParam === "hanging") {
+        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
+        // Количество подвесов = Math.ceil(trackLength / 2) + 1, минимум 2
+        let suspCount = Math.ceil(trackLength / 2) + 1;
+        if (suspCount < 2) suspCount = 2;
+        console.log("Общая длина треков:", trackLength, "см, подвесов для добавления:", suspCount);
+        // Выбираем артикул подвеса в зависимости от цвета:
+        // Для black – TRA001CW-11B, для white – TRA001CW-11W
+        let suspensionId = (color === "black") ? "TRA001CW-11B" : "TRA001CW-11W";
+        for (let i = 0; i < suspCount; i++) {
+          selectedItems.push({ id: suspensionId });
+        }
+      }
+      
+      console.log("Подобранные треки (с профилями/подвесами):", selectedItems);
 
-      console.log("Подобранные треки (с профилями, если stretch-ceiling):", selectedItems);
-
-      // Группируем элементы
+      // Группируем элементы (треки, коннекторы, профили и подвесы)
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -426,14 +490,16 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
+        // Если компонент не найден в обычных компонентах, попробуем suspensionMapping (для подвесов)
+        let comp = components[id] || suspensionMapping[id];
         if (!groupedItems[id]) {
-          groupedItems[id] = { count: 0, component: components[id] };
+          groupedItems[id] = { count: 0, component: comp };
         }
         groupedItems[id].count++;
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы
+      // Формируем HTML таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
