@@ -191,7 +191,7 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Если нет данных для stretch-ceiling, можно оставить пустым или задать по аналогии
+              // Если нет данных для stretch-ceiling, можно оставить пустым
             ],
             "connectors": {
               "straight": ["TRA003C-11W"],
@@ -208,7 +208,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Глобальная функция для изменения высоты iframe (не используется в данном файле, но оставлена для совместимости)
+    // Глобальная функция для изменения высоты iframe (не используется здесь, но оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -220,12 +220,6 @@
       }
     };
 
-    // Вспомогательная функция для оборачивания коннектора
-    function wrapConnector(conn) {
-      // Если conn уже является объектом с полем id, возвращаем его, иначе оборачиваем строку в объект.
-      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
-    }
-
     // Глобальная функция safeShowSelection – вызывается из родительского документа, если требуется
     window.safeShowSelection = function() {
       try {
@@ -235,6 +229,11 @@
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     };
+
+    // Вспомогательная функция для оборачивания коннекторов
+    function wrapConnector(conn) {
+      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
+    }
 
     // Вспомогательные функции для подбора трековых элементов
     function getTracksForLegSurface(legLength, lengthOptions) {
@@ -247,7 +246,6 @@
       } else if (legLength <= 300) {
         pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
       } else {
-        // Если требуется больше 300 см: один 3м, затем 1м элементы
         pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
         let provided = 300;
         while (provided < legLength) {
@@ -281,11 +279,11 @@
       return pieces;
     }
     
-    // Функция подбора для Maytoni UNITY – реализует логику для всех фигур
+    // Функция подбора для Maytoni UNITY – реализует логику для всех фигур, включая режим "stretch-ceiling"
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
-      // Считываем параметры из URL или используем значения по умолчанию
+      // Считываем параметры из URL или значения по умолчанию
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -294,7 +292,7 @@
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
 
-      // Для Maytoni UNITY используем комплект "surface"
+      // Для режима stretch-ceiling используем ту же логику, что и для surface
       const mounting = mountingParam;
       console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
 
@@ -324,7 +322,7 @@
           selectedItems = getTracksForLegRecessed(lengthA, lengthOptions);
         }
       } else if (shape === "L-shape") {
-        // L-образная система: две ноги (A и B) + обязательно один угловой коннектор.
+        // L-образная система: две ноги (A и B) + 1 угловой коннектор.
         let legATracks, legBTracks;
         if (mounting === "recessed") {
           legATracks = getTracksForLegRecessed(lengthA, lengthOptions);
@@ -338,7 +336,7 @@
           usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
         }
       } else if (shape === "T-shape") {
-        // T-образная система: длина A – верхний трек, длина B – вертикальный трек, плюс один T-образный коннектор.
+        // T-образная система: верхний (A) и вертикальный (B) треки, плюс T-образный коннектор и прямые коннекторы при необходимости.
         let topTracks, verticalTracks;
         if (mounting === "recessed") {
           topTracks = getTracksForLegRecessed(lengthA, lengthOptions);
@@ -362,8 +360,7 @@
           }
         }
       } else if (shape === "P-shape") {
-        // P-образная система: длина A – боковые треки (используются дважды), длина B – соединяющий трек,
-        // плюс всегда 2 угловых коннектора.
+        // P-образная система: боковые треки (A, дважды) и соединяющий трек (B), плюс 2 угловых коннектора и прямые коннекторы между сегментами.
         let sideTracks, connectingTracks;
         if (mounting === "recessed") {
           sideTracks = getTracksForLegRecessed(lengthA, lengthOptions);
@@ -389,7 +386,7 @@
           }
         }
       } else if (shape === "rectangle") {
-        // Прямоугольная система: длины A и B повторяются дважды; добавляются 4 угловых коннектора.
+        // Прямоугольная система: треки длины A и B повторяются дважды; добавляются 4 угловых коннектора.
         let tracksA, tracksB;
         if (mounting === "recessed") {
           tracksA = getTracksForLegRecessed(lengthA, lengthOptions);
@@ -417,6 +414,22 @@
       
       console.log("Подобранные треки:", selectedItems);
 
+      // Если выбран режим stretch-ceiling, добавляем профили
+      if (mountingParam === "stretch-ceiling") {
+        // Вычисляем общую длину трековой системы
+        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
+        // Каждый профиль имеет длину 200 см
+        let profileCount = Math.ceil(trackLength / 200);
+        // Если полученное количество нечётное, округляем до ближайшего чётного (чтобы профили поставлялись палками по 2 м)
+        if (profileCount % 2 !== 0) {
+          profileCount++;
+        }
+        console.log("Общая длина треков:", trackLength, "см, профилей:", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
+        }
+      }
+      
       // Группируем трековые элементы и коннекторы
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
