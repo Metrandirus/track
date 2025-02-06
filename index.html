@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Подбор трековой системы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Общие стили для страницы */
+    /* Стили для всей страницы */
     body {
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
@@ -15,16 +15,18 @@
     }
     .container {
       display: flex;
-      width: 100%;
-      box-sizing: border-box;
+      flex-wrap: wrap;
+      gap: 20px;
     }
     /* Левая область: форма выбора */
     .form-container {
-      width: 35%;
+      flex: 1 1 300px;
       background-color: white;
       padding: 20px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      border: 1px solid #ddd;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
       box-sizing: border-box;
+      max-width: 350px;
     }
     .form-container h2 {
       font-size: 18px;
@@ -76,7 +78,7 @@
       align-items: center;
     }
     .length-section input[type="text"] {
-      width: 45%;
+      flex: 1;
       padding: 8px;
       font-size: 14px;
       box-sizing: border-box;
@@ -90,44 +92,36 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Правая область: контейнер для названий производителей и результата (iframe) */
-    .result-container {
-      width: 65%;
-      padding: 10px;
-      box-sizing: border-box;
-      background-color: #e7f5fd;
-      display: none;  /* изначально скрыта */
-      height: 100vh;  /* занимает всю высоту экрана */
-      overflow: hidden;
+    /* Правая область: область для отображения результатов – 5 столбцов с производителями */
+    .manufacturers-container {
+      flex: 2 1 500px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    /* Блок с названиями производителей */
-    .manufacturer-titles {
+    .manufacturer-column {
+      flex: 1 1 calc(20% - 10px);
+      background-color: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
       display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin-bottom: 10px;
-      height: 60px; /* фиксированная высота для заголовков */
+      flex-direction: column;
+      height: 80vh;
     }
     .manufacturer-title {
-      flex: 1;
+      background-color: #f4f4f4;
+      padding: 5px;
       text-align: center;
-      padding: 10px;
-      font-size: 14px;
       font-weight: bold;
-      border: 1px solid #ccc;
-      background-color: white;
-      margin: 2px;
-      box-sizing: border-box;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
     }
-    /* Стиль для iframe результата */
-    .result-iframe {
-      width: 100%;
-      /* Высота iframe = 100vh минус высота заголовков и отступов (например, 60px + 20px) */
-      height: calc(100vh - 80px);
+    .manufacturer-iframe {
+      flex: 1;
       border: none;
-      overflow: hidden;
+      width: 100%;
     }
-    /* Отладочный блок (при необходимости) */
     .debug {
       margin-top: 10px;
       font-size: 12px;
@@ -137,29 +131,26 @@
 </head>
 <body>
   <div class="container">
-    <!-- Левая область: форма выбора трековой системы -->
+    <!-- Левая область: форма выбора -->
     <div class="form-container">
       <h2>Подбор трековой системы</h2>
-      
       <label for="type">Тип:</label>
       <select id="type" name="type">
         <option value="one-phase">Однофазный</option>
         <option value="magnetic">Магнитный</option>
       </select>
-      
       <label for="color">Цвет:</label>
       <select id="color" name="color">
         <option value="black">Черный</option>
         <option value="white">Белый</option>
       </select>
-      
       <label for="mounting">Способ монтажа:</label>
       <select id="mounting" name="mounting">
         <option value="surface">Накладной</option>
         <option value="recessed">Встраиваемый</option>
         <option value="stretch-ceiling">В натяжной потолок</option>
+        <option value="hanging">Подвесной</option>
       </select>
-      
       <label>Фигура:</label>
       <div class="shape-options">
         <div>
@@ -189,75 +180,91 @@
         </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
-      
       <div class="length-section">
         <label for="lengthA">Длина а (см):</label>
         <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
-        
+      </div>
+      <div class="length-section">
         <label for="lengthB">Длина б (см):</label>
         <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
       </div>
-      
       <div class="button-container">
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
-      
-      <!-- Отладочный блок (при необходимости) -->
       <div id="debug" class="debug"></div>
     </div>
-    
-    <!-- Правая область: блок с названиями производителей и результатом из maytoni.html -->
-    <div class="result-container" id="resultContainer">
-      <!-- Заголовки производителей -->
-      <div class="manufacturer-titles">
-        <div class="manufacturer-title">Maytoni UNITY</div>
-        <div class="manufacturer-title">NOVOTECH</div>
-        <div class="manufacturer-title">ST LUCE</div>
-        <div class="manufacturer-title">AMBRELA</div>
-        <div class="manufacturer-title">DENKIRS</div>
-      </div>
-      <!-- iframe для отображения результата подбора для Maytoni UNITY -->
-      <iframe id="iframeMaytoni" class="result-iframe" src="maytoni.html"></iframe>
+
+    <!-- Правая область: блок с 5 столбцами производителей -->
+    <div class="manufacturers-container" id="manufacturersContainer">
+      <!-- Здесь будут динамически создаваться столбцы -->
     </div>
   </div>
-  
+
   <script>
     // Функция для установки выбранной фигуры
     function selectShape(shape) {
       document.getElementById("selectedShape").value = shape;
       console.log("Выбрана фигура:", shape);
     }
-    
-    // Функция обновления URL для iframe maytoni.html с параметрами из формы
-    function updateMaytoniIframe() {
-      const type = document.getElementById("type").value;
-      const color = document.getElementById("color").value;
-      const mounting = document.getElementById("mounting").value;
-      const shape = document.getElementById("selectedShape").value;
-      const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
-      const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
-      
-      // Формируем строку запроса
-      const query = "?type=" + type +
-                    "&color=" + color +
-                    "&mounting=" + mounting +
-                    "&shape=" + shape +
-                    "&lengthA=" + lengthA +
-                    "&lengthB=" + lengthB;
-      
-      const iframe = document.getElementById("iframeMaytoni");
-      if (iframe) {
-        iframe.src = "maytoni.html" + query;
-        console.log("Обновлён src для maytoni.html:", iframe.src);
-      }
+
+    // Определяем набор производителей для каждого типа системы
+    const manufacturersData = {
+      "one-phase": [
+        { title: "Maytoni UNITY", file: "maytoni.html" },
+        { title: "NOVOTECH", file: "novotech.html" },
+        { title: "ST LUCE", file: "stluce.html" },
+        { title: "AMBRELA", file: "ambrela.html" },
+        { title: "DENKIRS", file: "denkirs.html" }
+      ],
+      "magnetic": [
+        { title: "Maytoni S35", file: "maytoni_s35.html" },
+        { title: "Maytoni EXILITY", file: "maytoni_exility.html" },
+        { title: "ST LUCE 220", file: "st_luce_220.html" },
+        { title: "ST LUCE 48", file: "st_luce_48.html" },
+        { title: "DENKIRS 220", file: "denkirs_220.html" }
+      ]
+    };
+
+    // Функция обновления iframe для каждого производителя
+    function updateManufacturerIframes(queryString, manufacturerList) {
+      const container = document.getElementById("manufacturersContainer");
+      container.innerHTML = ""; // очистка предыдущих столбцов
+      manufacturerList.forEach(man => {
+        const col = document.createElement("div");
+        col.className = "manufacturer-column";
+        col.innerHTML = `
+          <div class="manufacturer-title">${man.title}</div>
+          <iframe class="manufacturer-iframe" src="${man.file + queryString}"></iframe>
+        `;
+        container.appendChild(col);
+      });
     }
-    
-    // Функция-обертка для безопасного вызова подбора
+
+    // Функция обновления параметров и отображения результата
     function safeShowSelection() {
       try {
-        updateMaytoniIframe();
-        // Делаем видимой правую область с результатом
-        document.getElementById("resultContainer").style.display = "block";
+        // Считываем параметры формы
+        const type = document.getElementById("type").value;
+        const color = document.getElementById("color").value;
+        const mounting = document.getElementById("mounting").value;
+        const shape = document.getElementById("selectedShape").value;
+        const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
+        const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
+        
+        // Формируем query-строку для передачи параметров
+        const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}`;
+        console.log("Query-string:", queryString);
+        
+        // Выбираем набор производителей в зависимости от типа системы
+        const manufacturerList = manufacturersData[type] || [];
+        if (manufacturerList.length === 0) {
+          document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
+          return;
+        }
+        // Обновляем iframes для каждого производителя
+        updateManufacturerIframes(queryString, manufacturerList);
+        // Делаем видимой правую область с результатами
+        document.getElementById("manufacturersContainer").style.display = "flex";
         document.getElementById("debug").textContent = "";
       } catch (e) {
         console.error("Ошибка в safeShowSelection:", e);
