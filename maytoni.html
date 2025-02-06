@@ -191,7 +191,7 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Если нет данных для stretch-ceiling, можно оставить пустым
+              // Если нет данных для stretch-ceiling, оставляем пустым
             ],
             "connectors": {
               "straight": ["TRA003C-11W"],
@@ -230,7 +230,7 @@
       }
     };
 
-    // Вспомогательная функция для оборачивания коннекторов
+    // Вспомогательная функция для оборачивания коннектора (если строка – оборачиваем в объект)
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
@@ -279,11 +279,11 @@
       return pieces;
     }
     
-    // Функция подбора для Maytoni UNITY – реализует логику для всех фигур, включая режим "stretch-ceiling"
+    // Функция подбора для Maytoni UNITY – реализует логику для всех фигур, включая режим stretch-ceiling
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
-      // Считываем параметры из URL или значения по умолчанию
+      // Считываем параметры из URL или используем значения по умолчанию
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -292,12 +292,12 @@
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
 
-      // Для режима stretch-ceiling используем ту же логику, что и для surface
-      const mounting = mountingParam;
-      console.log("Параметры подбора:", { type, color, mounting, shape, lengthA, lengthB });
+      // Для режима stretch-ceiling используем ту же логику подбора, что и для surface
+      let effectiveMounting = (mountingParam === "stretch-ceiling") ? "surface" : mountingParam;
+      console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
       // Находим выбранный продукт
-      const selectedProduct = products[type] && products[type][color] && products[type][color][mounting];
+      const selectedProduct = products[type] && products[type][color] && products[type][color][mountingParam];
       if (!selectedProduct) {
         throw new Error("Не найден комплект для выбранных параметров.");
       }
@@ -316,15 +316,15 @@
       // Логика подбора в зависимости от фигуры:
       if (shape === "straight") {
         // Прямая система: учитывается только длина A.
-        if (mounting === "surface") {
+        if (effectiveMounting === "surface") {
           selectedItems = getTracksForLegSurface(lengthA, lengthOptions);
-        } else if (mounting === "recessed") {
+        } else if (effectiveMounting === "recessed") {
           selectedItems = getTracksForLegRecessed(lengthA, lengthOptions);
         }
       } else if (shape === "L-shape") {
         // L-образная система: две ноги (A и B) + 1 угловой коннектор.
         let legATracks, legBTracks;
-        if (mounting === "recessed") {
+        if (effectiveMounting === "recessed") {
           legATracks = getTracksForLegRecessed(lengthA, lengthOptions);
           legBTracks = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -336,9 +336,9 @@
           usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
         }
       } else if (shape === "T-shape") {
-        // T-образная система: верхний (A) и вертикальный (B) треки, плюс T-образный коннектор и прямые коннекторы при необходимости.
+        // T-образная система: верхний (A) и вертикальный (B) треки, плюс T-образный коннектор.
         let topTracks, verticalTracks;
-        if (mounting === "recessed") {
+        if (effectiveMounting === "recessed") {
           topTracks = getTracksForLegRecessed(lengthA, lengthOptions);
           verticalTracks = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -360,9 +360,9 @@
           }
         }
       } else if (shape === "P-shape") {
-        // P-образная система: боковые треки (A, дважды) и соединяющий трек (B), плюс 2 угловых коннектора и прямые коннекторы между сегментами.
+        // P-образная система: боковые треки (A, дважды) и соединяющий трек (B), плюс 2 угловых коннектора.
         let sideTracks, connectingTracks;
-        if (mounting === "recessed") {
+        if (effectiveMounting === "recessed") {
           sideTracks = getTracksForLegRecessed(lengthA, lengthOptions);
           connectingTracks = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -388,7 +388,7 @@
       } else if (shape === "rectangle") {
         // Прямоугольная система: треки длины A и B повторяются дважды; добавляются 4 угловых коннектора.
         let tracksA, tracksB;
-        if (mounting === "recessed") {
+        if (effectiveMounting === "recessed") {
           tracksA = getTracksForLegRecessed(lengthA, lengthOptions);
           tracksB = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -412,15 +412,12 @@
         }
       }
       
-      console.log("Подобранные треки:", selectedItems);
+      console.log("Подобранные треки (до профилей):", selectedItems);
 
-      // Если выбран режим stretch-ceiling, добавляем профили
+      // Если выбран режим stretch-ceiling, добавляем профили к результату (профиль = 200 см)
       if (mountingParam === "stretch-ceiling") {
-        // Вычисляем общую длину трековой системы
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        // Каждый профиль имеет длину 200 см
         let profileCount = Math.ceil(trackLength / 200);
-        // Если полученное количество нечётное, округляем до ближайшего чётного (чтобы профили поставлялись палками по 2 м)
         if (profileCount % 2 !== 0) {
           profileCount++;
         }
@@ -429,6 +426,8 @@
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
       }
+      
+      console.log("Подобранные треки (с профилями, если stretch-ceiling):", selectedItems);
       
       // Группируем трековые элементы и коннекторы
       let groupedItems = {};
