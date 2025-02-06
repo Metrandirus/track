@@ -34,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px; /* уменьшенный размер шрифта */
+      font-size: 13px;
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -149,6 +149,7 @@
             }
           },
           "hanging": {
+            // Для подвесного монтажа используем те же данные, что и для surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["TRX001-111B"] },
               { "min": 101, "max": 200, "items": ["TRX001-112B"] },
@@ -168,7 +169,7 @@
               "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
               "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
-            // Для подвесного монтажа подвесы будут добавляться отдельно.
+            // Подвесы будут добавляться отдельно для режима hanging.
           }
         },
         "white": {
@@ -452,20 +453,19 @@
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let profileCount = Math.ceil(trackLength / 200);
-        console.log("Общая длина треков:", trackLength, "см, профилей для добавления:", profileCount);
+        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см, профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
       }
-
+      
       // Если режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
+        // Для подвесного монтажа рассчитываем общую длину трековых элементов (только тех, у кого задан pieceLength)
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        // Новая формула: подвесов = max(2, 1 + ceil(trackLength/2))
-        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 2));
-        console.log("Общая длина треков:", trackLength, "см, подвесов для добавления:", suspCount);
-        // Выбираем артикул подвеса в зависимости от цвета:
-        // Для black – TRA001CW-11B, для white – TRA001CW-11W
+        // Рассчитываем количество подвесов: suspCount = max(2, 1 + ceil(trackLength/200))
+        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
+        console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
         let suspensionId = (color === "black") ? "TRA001CW-11B" : "TRA001CW-11W";
         for (let i = 0; i < suspCount; i++) {
           selectedItems.push({ id: suspensionId });
@@ -482,7 +482,7 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
-        // Ищем компонент сначала в обычных компонентах, затем в suspensionMapping (для подвесов)
+        // Если компонент не найден в обычных компонентах, ищем в suspensionMapping (для подвесов)
         let comp = components[id] || suspensionMapping[id];
         if (!groupedItems[id]) {
           groupedItems[id] = { count: 0, component: comp };
@@ -491,7 +491,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов
+      // Формируем HTML таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -517,7 +517,7 @@
       console.log("Подбор завершён успешно.");
     };
 
-    // Дополнительная глобальная переменная для подвесов, если компонент не найден в обычных компонентах
+    // Глобальная переменная для подвесов (если компонент не найден в обычных компонентах)
     var suspensionMapping = {
       "TRA001CW-11B": { "name": "Подвес черный TRA001CW-11B", "price": 490, "image": "images/TRA001CW-11B.png" },
       "TRA001CW-11W": { "name": "Подвес белый TRA001CW-11W", "price": 490, "image": "images/TRA001CW-11W.png" }
