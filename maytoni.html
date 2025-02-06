@@ -34,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px;
+      font-size: 13px; /* уменьшенный размер шрифта */
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Результаты подбора -->
+          <!-- Здесь будут выводиться результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -208,7 +208,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Глобальная функция для изменения высоты iframe (не используется, но оставлена для совместимости)
+    // Глобальная функция для изменения высоты iframe (не используется здесь, но оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -281,7 +281,6 @@
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
-      // Считываем параметры
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -292,15 +291,15 @@
 
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режима stretch-ceiling используем конфигурацию surface для подбора треков
+      // Для режима stretch-ceiling используем данные из surface для подбора треков
       let effectiveProduct = (mountingParam === "stretch-ceiling") ?
-            (products[type] && products[type][color] && products[type][color]["surface"]) :
-            (products[type] && products[type][color] && products[type][color][mountingParam]);
+          (products[type] && products[type][color] && products[type][color]["surface"]) :
+          (products[type] && products[type][color] && products[type][color][mountingParam]);
       if (!effectiveProduct) {
         throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
       }
 
-      // Выбираем компоненты: если stretch-ceiling, объединяем surface и stretch-ceiling компоненты
+      // Объединяем компоненты: для stretch-ceiling объединяем компоненты из surface и stretch-ceiling
       let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
@@ -326,8 +325,8 @@
           legBTracks = getTracksForLegSurface(lengthB, lengthOptions);
         }
         selectedItems = legATracks.concat(legBTracks);
-        if (selectedProduct.connectors["L-shape"] && selectedProduct.connectors["L-shape"].length > 0) {
-          usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
       } else if (shape === "T-shape") {
         let topTracks, verticalTracks;
@@ -339,17 +338,17 @@
           verticalTracks = getTracksForLegSurface(lengthB, lengthOptions);
         }
         selectedItems = topTracks.concat(verticalTracks);
-        if (selectedProduct.connectors["T-shape"] && selectedProduct.connectors["T-shape"].length > 0) {
-          usedConnectors.push(wrapConnector(selectedProduct.connectors["T-shape"][0]));
+        if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
         }
         if (topTracks.length > 1) {
           for (let i = 0; i < topTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
         if (verticalTracks.length > 1) {
           for (let i = 0; i < verticalTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
       } else if (shape === "P-shape") {
@@ -362,19 +361,19 @@
           connectingTracks = getTracksForLegSurface(lengthB, lengthOptions);
         }
         selectedItems = sideTracks.concat(sideTracks, connectingTracks);
-        if (selectedProduct.connectors["L-shape"] && selectedProduct.connectors["L-shape"].length > 0) {
-          usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
-          usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
         if (sideTracks.length > 1) {
           for (let i = 0; i < sideTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
-            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
         if (connectingTracks.length > 1) {
           for (let i = 0; i < connectingTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
       } else if (shape === "rectangle") {
@@ -387,9 +386,9 @@
           tracksB = getTracksForLegSurface(lengthB, lengthOptions);
         }
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        if (selectedProduct.connectors["L-shape"] && selectedProduct.connectors["L-shape"].length > 0) {
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           for (let i = 0; i < 4; i++) {
-            usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
           }
         }
       } else {
@@ -399,7 +398,7 @@
       // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
       if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
-          usedConnectors.push(wrapConnector(selectedProduct.connectors.straight[0]));
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
       }
       
