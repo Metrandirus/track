@@ -34,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px; /* уменьшенный размер шрифта */
+      font-size: 13px;
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Результаты подбора будут здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -111,7 +111,7 @@
               "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
               "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
               "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
           },
           "recessed": {
@@ -145,7 +145,7 @@
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
           }
         },
@@ -168,7 +168,7 @@
               "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
               "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
               "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" },
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
           },
           "recessed": {
@@ -191,7 +191,7 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Если нет данных для stretch-ceiling, оставляем пустым
+              // Оставляем пустым, если нет данных
             ],
             "connectors": {
               "straight": ["TRA003C-11W"],
@@ -200,7 +200,7 @@
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 300, "image": "images/TRA001MP-112S.png" }
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
           }
         }
@@ -208,7 +208,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Глобальная функция для изменения высоты iframe (не используется здесь, но оставлена для совместимости)
+    // Функция изменения высоты iframe (оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -220,7 +220,7 @@
       }
     };
 
-    // Глобальная функция safeShowSelection – вызывается извне
+    // Глобальная функция safeShowSelection
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -230,12 +230,12 @@
       }
     };
 
-    // Вспомогательная функция для оборачивания коннекторов
+    // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Вспомогательные функции для подбора трековых элементов
+    // Функции для подбора трековых элементов
     function getTracksForLegSurface(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -277,7 +277,7 @@
       return pieces;
     }
     
-    // Функция подбора для всех фигур, включая режим stretch-ceiling
+    // Основная функция подбора
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
@@ -291,7 +291,7 @@
 
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режима stretch-ceiling используем данные из surface для подбора треков
+      // Если mountingParam == "stretch-ceiling", для подбора треков используем данные surface
       let effectiveProduct = (mountingParam === "stretch-ceiling") ?
           (products[type] && products[type][color] && products[type][color]["surface"]) :
           (products[type] && products[type][color] && products[type][color][mountingParam]);
@@ -299,7 +299,7 @@
         throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
       }
 
-      // Объединяем компоненты: для stretch-ceiling объединяем компоненты из surface и stretch-ceiling
+      // Объединяем компоненты: для stretch-ceiling объединяем компоненты surface и stretch-ceiling
       let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
@@ -310,7 +310,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Логика подбора по фигурам:
+      // Подбор по фигурам
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForLegRecessed(lengthA, lengthOptions) :
@@ -395,7 +395,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
       
-      // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
+      // Если элементов больше одного и прямые коннекторы не добавлены, добавляем их.
       if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -404,14 +404,13 @@
       
       console.log("Подобранные треки (до профилей):", selectedItems);
 
-      // Если выбран режим stretch-ceiling, добавляем профили.
+      // Если режим stretch-ceiling – добавляем профили.
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let profileCount = Math.ceil(trackLength / 200);
-        if (profileCount % 2 !== 0) {
-          profileCount++;
-        }
-        console.log("Общая длина треков:", trackLength, "см, профилей:", profileCount);
+        console.log("Общая длина треков:", trackLength, "см, профилей (до корректировки):", profileCount);
+        // Здесь больше не принуждаем чётность – используем просто Math.ceil.
+        console.log("Профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
@@ -419,7 +418,7 @@
 
       console.log("Подобранные треки (с профилями, если stretch-ceiling):", selectedItems);
 
-      // Группируем трековые элементы и коннекторы
+      // Группируем элементы
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -434,7 +433,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов
+      // Формируем HTML для таблицы
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -460,7 +459,6 @@
       console.log("Подбор завершён успешно.");
     };
 
-    // Автоматический запуск (если требуется)
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
