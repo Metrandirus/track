@@ -34,7 +34,7 @@
       padding: 6px 8px;
       text-align: left;
       word-wrap: break-word;
-      font-size: 13px; /* уменьшенный размер шрифта */
+      font-size: 13px;
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -208,7 +208,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Глобальная функция для изменения высоты iframe (не используется здесь, но оставлена для совместимости)
+    // Глобальная функция для изменения высоты iframe (не используется, но оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -220,7 +220,7 @@
       }
     };
 
-    // Глобальная функция safeShowSelection – вызывается из родительского документа, если требуется
+    // Глобальная функция safeShowSelection – вызывается извне
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -230,7 +230,7 @@
       }
     };
 
-    // Вспомогательная функция для оборачивания коннектора (если строка – оборачиваем в объект)
+    // Вспомогательная функция для оборачивания коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
@@ -238,7 +238,6 @@
     // Вспомогательные функции для подбора трековых элементов
     function getTracksForLegSurface(legLength, lengthOptions) {
       let pieces = [];
-      // Для накладного монтажа: доступны 1м, 2м и 3м.
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
       } else if (legLength <= 200) {
@@ -258,7 +257,6 @@
     
     function getTracksForLegRecessed(legLength, lengthOptions) {
       let pieces = [];
-      // Для встраиваемого монтажа: доступны 1м и 2м.
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
       } else if (legLength <= 200) {
@@ -279,11 +277,11 @@
       return pieces;
     }
     
-    // Функция подбора для Maytoni UNITY – реализует логику для всех фигур, включая режим stretch-ceiling
+    // Функция подбора для всех фигур, включая режим stretch-ceiling
     window.showSelection = function() {
       console.log("Начало работы showSelection");
 
-      // Считываем параметры из URL или используем значения по умолчанию
+      // Считываем параметры
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -292,39 +290,35 @@
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
 
-      // Для режима stretch-ceiling используем ту же логику подбора, что и для surface
-      let effectiveMounting = (mountingParam === "stretch-ceiling") ? "surface" : mountingParam;
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Находим выбранный продукт
-      const selectedProduct = products[type] && products[type][color] && products[type][color][mountingParam];
-      if (!selectedProduct) {
-        throw new Error("Не найден комплект для выбранных параметров.");
+      // Для режима stretch-ceiling используем конфигурацию surface для подбора треков
+      let effectiveProduct = (mountingParam === "stretch-ceiling") ?
+            (products[type] && products[type][color] && products[type][color]["surface"]) :
+            (products[type] && products[type][color] && products[type][color][mountingParam]);
+      if (!effectiveProduct) {
+        throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
       }
 
-      // Если режим stretch-ceiling, объединяем компоненты из блока "stretch-ceiling"
-      let components = selectedProduct.components;
+      // Выбираем компоненты: если stretch-ceiling, объединяем surface и stretch-ceiling компоненты
+      let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
         components = Object.assign({}, components, ceilingProduct.components);
       }
 
-      const lengthOptions = selectedProduct.lengthOptions;
+      const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Логика подбора в зависимости от фигуры:
+      // Логика подбора по фигурам:
       if (shape === "straight") {
-        // Прямая система: учитывается только длина A.
-        if (effectiveMounting === "surface") {
-          selectedItems = getTracksForLegSurface(lengthA, lengthOptions);
-        } else if (effectiveMounting === "recessed") {
-          selectedItems = getTracksForLegRecessed(lengthA, lengthOptions);
-        }
+        selectedItems = (mountingParam === "recessed") ?
+                        getTracksForLegRecessed(lengthA, lengthOptions) :
+                        getTracksForLegSurface(lengthA, lengthOptions);
       } else if (shape === "L-shape") {
-        // L-образная система: две ноги (A и B) + 1 угловой коннектор.
         let legATracks, legBTracks;
-        if (effectiveMounting === "recessed") {
+        if (mountingParam === "recessed") {
           legATracks = getTracksForLegRecessed(lengthA, lengthOptions);
           legBTracks = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -336,9 +330,8 @@
           usedConnectors.push(wrapConnector(selectedProduct.connectors["L-shape"][0]));
         }
       } else if (shape === "T-shape") {
-        // T-образная система: верхний (A) и вертикальный (B) треки, плюс T-образный коннектор.
         let topTracks, verticalTracks;
-        if (effectiveMounting === "recessed") {
+        if (mountingParam === "recessed") {
           topTracks = getTracksForLegRecessed(lengthA, lengthOptions);
           verticalTracks = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -360,9 +353,8 @@
           }
         }
       } else if (shape === "P-shape") {
-        // P-образная система: боковые треки (A, дважды) и соединяющий трек (B), плюс 2 угловых коннектора.
         let sideTracks, connectingTracks;
-        if (effectiveMounting === "recessed") {
+        if (mountingParam === "recessed") {
           sideTracks = getTracksForLegRecessed(lengthA, lengthOptions);
           connectingTracks = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -386,9 +378,8 @@
           }
         }
       } else if (shape === "rectangle") {
-        // Прямоугольная система: треки длины A и B повторяются дважды; добавляются 4 угловых коннектора.
         let tracksA, tracksB;
-        if (effectiveMounting === "recessed") {
+        if (mountingParam === "recessed") {
           tracksA = getTracksForLegRecessed(lengthA, lengthOptions);
           tracksB = getTracksForLegRecessed(lengthB, lengthOptions);
         } else {
@@ -414,7 +405,7 @@
       
       console.log("Подобранные треки (до профилей):", selectedItems);
 
-      // Если выбран режим stretch-ceiling, добавляем профили к результату (профиль = 200 см)
+      // Если выбран режим stretch-ceiling, добавляем профили.
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let profileCount = Math.ceil(trackLength / 200);
@@ -426,9 +417,9 @@
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
       }
-      
+
       console.log("Подобранные треки (с профилями, если stretch-ceiling):", selectedItems);
-      
+
       // Группируем трековые элементы и коннекторы
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
