@@ -149,7 +149,6 @@
             }
           },
           "hanging": {
-            // Для подвесного монтажа используем те же lengthOptions, connectors и components, что и в surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["TRX001-111B"] },
               { "min": 101, "max": 200, "items": ["TRX001-112B"] },
@@ -169,7 +168,7 @@
               "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
               "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
-            // Для подвесного монтажа подвесы будут добавляться дополнительно
+            // Для подвесного монтажа подвесы будут добавляться отдельно.
           }
         },
         "white": {
@@ -214,7 +213,7 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Если нет данных, оставляем пустым
+              // Оставляем пустым, если нет данных
             ],
             "connectors": {
               "straight": ["TRA003C-11W"],
@@ -253,7 +252,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Глобальная функция изменения высоты iframe (оставлена для совместимости)
+    // Функция изменения высоты iframe (оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -280,7 +279,7 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Вспомогательные функции для подбора трековых элементов
+    // Функции для подбора трековых элементов
     function getTracksForLegSurface(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -321,13 +320,7 @@
       }
       return pieces;
     }
-
-    // Глобальная переменная с данными о подвесах (для hanging)
-    var suspensionMapping = {
-      "TRA001CW-11B": { "name": "Подвес черный TRA001CW-11B", "price": 490, "image": "images/TRA001CW-11B.png" },
-      "TRA001CW-11W": { "name": "Подвес белый TRA001CW-11W", "price": 490, "image": "images/TRA001CW-11W.png" }
-    };
-
+    
     // Основная функция подбора для Maytoni UNITY
     window.showSelection = function() {
       console.log("Начало работы showSelection");
@@ -342,7 +335,7 @@
 
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режимов stretch-ceiling и hanging для подбора треков используем данные surface
+      // Для режимов stretch-ceiling и hanging для подбора трековых элементов используем данные surface
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products[type] && products[type][color] && products[type][color]["surface"]) :
           (products[type] && products[type][color] && products[type][color][mountingParam]);
@@ -361,7 +354,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор трековых элементов по фигурам:
+      // Логика подбора по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForLegRecessed(lengthA, lengthOptions) :
@@ -446,7 +439,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
       
-      // Если элементов больше одного и прямые коннекторы не добавлены, добавляем их.
+      // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
       if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -455,7 +448,7 @@
       
       console.log("Подобранные треки (до профилей/подвесов):", selectedItems);
 
-      // Если режим stretch-ceiling – добавляем профили
+      // Если режим stretch-ceiling – добавляем профили.
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let profileCount = Math.ceil(trackLength / 200);
@@ -464,13 +457,12 @@
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
       }
-      
-      // Если режим hanging – добавляем подвесы
+
+      // Если режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        // Количество подвесов = Math.ceil(trackLength / 2) + 1, минимум 2
-        let suspCount = Math.ceil(trackLength / 2) + 1;
-        if (suspCount < 2) suspCount = 2;
+        // Новая формула: подвесов = max(2, 1 + ceil(trackLength/2))
+        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 2));
         console.log("Общая длина треков:", trackLength, "см, подвесов для добавления:", suspCount);
         // Выбираем артикул подвеса в зависимости от цвета:
         // Для black – TRA001CW-11B, для white – TRA001CW-11W
@@ -482,7 +474,7 @@
       
       console.log("Подобранные треки (с профилями/подвесами):", selectedItems);
 
-      // Группируем элементы (треки, коннекторы, профили и подвесы)
+      // Группируем элементы (треки, коннекторы, профили, подвесы)
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -490,7 +482,7 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
-        // Если компонент не найден в обычных компонентах, попробуем suspensionMapping (для подвесов)
+        // Ищем компонент сначала в обычных компонентах, затем в suspensionMapping (для подвесов)
         let comp = components[id] || suspensionMapping[id];
         if (!groupedItems[id]) {
           groupedItems[id] = { count: 0, component: comp };
@@ -499,7 +491,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML таблицы результатов
+      // Формируем HTML для таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -523,6 +515,12 @@
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}р</div>`;
       document.getElementById("resultContainer").style.display = "block";
       console.log("Подбор завершён успешно.");
+    };
+
+    // Дополнительная глобальная переменная для подвесов, если компонент не найден в обычных компонентах
+    var suspensionMapping = {
+      "TRA001CW-11B": { "name": "Подвес черный TRA001CW-11B", "price": 490, "image": "images/TRA001CW-11B.png" },
+      "TRA001CW-11W": { "name": "Подвес белый TRA001CW-11W", "price": 490, "image": "images/TRA001CW-11W.png" }
     };
 
     document.addEventListener("DOMContentLoaded", function() {
