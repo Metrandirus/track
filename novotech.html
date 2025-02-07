@@ -73,7 +73,7 @@
       <table class="results-table" id="resultsTable">
         <thead id="tableHeader">
           <tr>
-            <th>Артикул</th>
+            <th>Наименование</th>
             <th>кол.</th>
             <th>Цена за шт.</th>
             <th>Общая цена</th>
@@ -207,7 +207,7 @@
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
       } else {
-        // Если legLength > 100 см, добавляем 2м элемент, а затем, если остаток меньше 100, добавляем 1м
+        // Если legLength > 100 см, добавляем сначала 2м элемент, затем, если остаток меньше 100, добавляем 1м
         pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
         let provided = 200;
         while (provided < legLength) {
@@ -255,7 +255,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор по фигурам с использованием функции getTracksForNovotech
+      // Подбор по фигурам с использованием функции getTracksForNovotech:
       if (shape === "straight") {
         selectedItems = getTracksForNovotech(lengthA, lengthOptions);
       } else if (shape === "L-shape") {
@@ -314,7 +314,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
       
-      // Если элементов больше одного и прямые коннекторы не добавлены, добавляем их.
+      // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
       if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -323,13 +323,13 @@
       
       console.log("Подобранные треки (до подвесов):", selectedItems);
 
-      // Если режим stretch-ceiling – добавляем профили (здесь можно добавить логику, если потребуется)
+      // Если режим stretch-ceiling – добавляем профили (если предусмотрено)
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let profileCount = Math.ceil(trackLength / 200);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см, профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
-          // Если для NOVOTECH профили не предусмотрены, можно пропустить или добавить отдельный компонент
+          // Если для NOVOTECH профили не предусмотрены, можно добавить отдельный компонент.
           selectedItems.push({ id: "NOVOTECH_PROFILE", pieceLength: 200 });
         }
       }
@@ -337,7 +337,7 @@
       // Если режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        // Подвесов = max(2, 1 + ceil(trackLength/200))
+        // Подвесов = max(2, 1 + ceil(trackLength / 200))
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
         let suspensionId = (color === "black") ? "135152" : "135151";
@@ -365,17 +365,17 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов:
-      // Вместо названия (comp.name) выводим артикул (id)
+      // Формируем HTML для таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
         const comp = itemData.component;
         if (comp) {
           totalPrice += comp.price * itemData.count;
+          // Отображаем наименование вместе с артикулом
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.png" alt="${id}" style="width:50px; height:auto; margin-right:10px;">${id}</td>
+              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
               <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
               <td>${comp.price}р</td>
               <td>${comp.price * itemData.count}р</td>
