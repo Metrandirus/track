@@ -315,7 +315,8 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функции для подбора трековых элементов для ST LUCE
+    // Функция для подбора трековых элементов для ST LUCE (накладной)
+    // Изменён алгоритм: если legLength > 300, используем только 3м элементы
     function getTracksForStLuceSurface(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -325,16 +326,15 @@
       } else if (legLength <= 300) {
         pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
       } else {
-        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        let provided = 300;
-        while (provided < legLength) {
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-          provided += 100;
+        let count = Math.ceil(legLength / 300);
+        for (let i = 0; i < count; i++) {
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
         }
       }
       return pieces;
     }
     
+    // Аналогичная функция для встраиваемых треков
     function getTracksForStLuceRecessed(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -344,11 +344,9 @@
       } else if (legLength <= 300) {
         pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
       } else {
-        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        let provided = 300;
-        while (provided < legLength) {
-          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-          provided += 100;
+        let count = Math.ceil(legLength / 300);
+        for (let i = 0; i < count; i++) {
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
         }
       }
       return pieces;
