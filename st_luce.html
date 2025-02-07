@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>ST LUCE – Подбор трековой системы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Общие стили для st_luce.html */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #e7f5fd;
+      overflow: visible;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      height: auto;
+      overflow: visible;
+    }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background-color: white;
+      table-layout: auto;
+    }
+    .results-table th, .results-table td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: left;
+      word-wrap: break-word;
+      font-size: 13px;
+    }
+    .results-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    .results-table th:nth-child(3),
+    .results-table td:nth-child(3) {
+      width: 90px;
+    }
+    .results-table th:nth-child(2),
+    .results-table td:nth-child(2) {
+      width: 40px;
+      text-align: center;
+    }
+    .total-price {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .result-container {
+      display: none;
+      overflow: visible;
+    }
+    .debug {
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Контейнер для вывода результатов подбора -->
+    <div id="resultContainer" class="result-container">
+      <table class="results-table" id="resultsTable">
+        <thead id="tableHeader">
+          <tr>
+            <th>Наименование</th>
+            <th>кол.</th>
+            <th>Цена за шт.</th>
+            <th>Общая цена</th>
+          </tr>
+        </thead>
+        <tbody id="results">
+          <!-- Результаты подбора будут выведены здесь -->
+        </tbody>
+      </table>
+      <div id="totalPrice" class="total-price"></div>
+    </div>
+    <div id="debug" class="debug"></div>
+  </div>
+  
+  <script>
+    /***** Встроенные данные для ST LUCE *****/
+    var products = {
+      "st_luce": {
+        "black": {
+          "surface": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["ST001.419.00"] },  // 1м накладной черный
+              { "min": 101, "max": 200, "items": ["ST001.429.00"] },  // 2м накладной черный
+              { "min": 201, "max": 300, "items": ["ST001.439.00"] }   // 3м накладной черный
+            ],
+            "connectors": {
+              "straight": ["ST002.419.00"],  // прямой белый? Для черного – используем: ST002.419.00
+              "L-shape": ["ST002.429.00"],   // угловой черный
+              "T-shape": ["ST002.439.00"]    // T-образный черный
+            },
+            "components": {
+              "ST001.419.00": { "name": "Шинопровод накладной черный 1м", "price": 950, "image": "images/ST001.419.00.png" },
+              "ST001.429.00": { "name": "Шинопровод накладной черный 2м", "price": 1900, "image": "images/ST001.429.00.png" },
+              "ST001.439.00": { "name": "Шинопровод накладной черный 3м", "price": 2820, "image": "images/ST001.439.00.png" },
+              "ST002.419.00": { "name": "Коннектор прямой черный (накладной)", "price": 200, "image": "images/ST002.419.00.png" },
+              "ST002.429.00": { "name": "Коннектор угловой черный (накладной)", "price": 240, "image": "images/ST002.429.00.png" },
+              "ST002.439.00": { "name": "Коннектор T-образный черный (накладной)", "price": 370, "image": "images/ST002.439.00.png" }
+            }
+          },
+          "recessed": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["ST012.419.00"] },  // 1м встраиваемый черный
+              { "min": 101, "max": 200, "items": ["ST012.429.00"] },  // 2м встраиваемый черный
+              { "min": 201, "max": 300, "items": ["ST012.439.00"] }   // 3м встраиваемый черный
+            ],
+            "connectors": {
+              "straight": ["ST013.419.00"],  // прямой встраиваемый черный
+              "L-shape": ["ST013.429.00"],   // угловой встраиваемый черный
+              "T-shape": ["ST013.439.00"]    // T-образный встраиваемый черный
+            },
+            "components": {
+              "ST012.419.00": { "name": "Шинопровод встраиваемый черный 1м", "price": 990, "image": "images/ST012.419.00.png" },
+              "ST012.429.00": { "name": "Шинопровод встраиваемый черный 2м", "price": 1980, "image": "images/ST012.429.00.png" },
+              "ST012.439.00": { "name": "Шинопровод встраиваемый черный 3м", "price": 2970, "image": "images/ST012.439.00.png" },
+              "ST013.419.00": { "name": "Коннектор прямой черный (встраиваемый)", "price": 240, "image": "images/ST013.419.00.png" },
+              "ST013.429.00": { "name": "Коннектор угловой черный (встраиваемый)", "price": 300, "image": "images/ST013.429.00.png" },
+              "ST013.439.00": { "name": "Коннектор T-образный черный (встраиваемый)", "price": 500, "image": "images/ST013.439.00.png" }
+            }
+          },
+          "stretch-ceiling": {
+            // Для stretch-ceiling используем базу из surface
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["ST001.419.00"] },
+              { "min": 101, "max": 200, "items": ["ST001.429.00"] },
+              { "min": 201, "max": 300, "items": ["ST001.439.00"] }
+            ],
+            "connectors": {
+              "straight": ["ST002.419.00"],
+              "L-shape": ["ST002.429.00"],
+              "T-shape": ["ST002.439.00"]
+            },
+            "components": {
+              // Базовые треки – те же, что в surface
+              "ST001.419.00": { "name": "Шинопровод накладной черный 1м", "price": 950, "image": "images/ST001.419.00.png" },
+              "ST001.429.00": { "name": "Шинопровод накладной черный 2м", "price": 1900, "image": "images/ST001.429.00.png" },
+              "ST001.439.00": { "name": "Шинопровод накладной черный 3м", "price": 2820, "image": "images/ST001.439.00.png" },
+              "ST002.419.00": { "name": "Коннектор прямой черный (накладной)", "price": 200, "image": "images/ST002.419.00.png" },
+              "ST002.429.00": { "name": "Коннектор угловой черный (накладной)", "price": 240, "image": "images/ST002.429.00.png" },
+              "ST002.439.00": { "name": "Коннектор T-образный черный (накладной)", "price": 370, "image": "images/ST002.439.00.png" }
+              // Дополнительные компоненты (профили, end caps, угол-соединитель) добавляются через логику.
+            }
+          }
+        },
+        "white": {
+          "surface": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["ST001.519.00"] },  // 1м накладной белый
+              { "min": 101, "max": 200, "items": ["ST001.529.00"] },  // 2м накладной белый
+              { "min": 201, "max": 300, "items": ["ST001.539.00"] }   // 3м накладной белый
+            ],
+            "connectors": {
+              "straight": ["ST002.519.00"],  // прямой белый
+              "L-shape": ["ST002.529.00"],   // угловой белый
+              "T-shape": ["ST002.539.00"]    // T-образный белый
+            },
+            "components": {
+              "ST001.519.00": { "name": "Шинопровод накладной белый 1м", "price": 850, "image": "images/ST001.519.00.png" },
+              "ST001.529.00": { "name": "Шинопровод накладной белый 2м", "price": 1900, "image": "images/ST001.529.00.png" },
+              "ST001.539.00": { "name": "Шинопровод накладной белый 3м", "price": 2820, "image": "images/ST001.539.00.png" },
+              "ST002.519.00": { "name": "Коннектор прямой белый (накладной)", "price": 200, "image": "images/ST002.519.00.png" },
+              "ST002.529.00": { "name": "Коннектор угловой белый (накладной)", "price": 240, "image": "images/ST002.529.00.png" },
+              "ST002.539.00": { "name": "Коннектор T-образный белый (накладной)", "price": 370, "image": "images/ST002.539.00.png" }
+            }
+          },
+          "recessed": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["ST012.519.00"] },  // 1м встраиваемый белый
+              { "min": 101, "max": 200, "items": ["ST012.529.00"] },  // 2м встраиваемый белый
+              { "min": 201, "max": 300, "items": ["ST012.539.00"] }   // 3м встраиваемый белый
+            ],
+            "connectors": {
+              "straight": ["ST013.519.00"],  // прямой белый встраиваемый
+              "L-shape": ["ST013.529.00"],   // угловой белый встраиваемый
+              "T-shape": ["ST013.539.00"]    // T-образный белый встраиваемый
+            },
+            "components": {
+              "ST012.519.00": { "name": "Шинопровод встраиваемый белый 1м", "price": 990, "image": "images/ST012.519.00.png" },
+              "ST012.529.00": { "name": "Шинопровод встраиваемый белый 2м", "price": 1980, "image": "images/ST012.529.00.png" },
+              "ST012.539.00": { "name": "Шинопровод встраиваемый белый 3м", "price": 2970, "image": "images/ST012.539.00.png" },
+              "ST013.519.00": { "name": "Коннектор прямой белый (встраиваемый)", "price": 240, "image": "images/ST013.519.00.png" },
+              "ST013.529.00": { "name": "Коннектор угловой белый (встраиваемый)", "price": 300, "image": "images/ST013.529.00.png" },
+              "ST013.539.00": { "name": "Коннектор T-образный белый (встраиваемый)", "price": 500, "image": "images/ST013.539.00.png" }
+            }
+          },
+          "stretch-ceiling": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["ST001.519.00"] },
+              { "min": 101, "max": 200, "items": ["ST001.529.00"] },
+              { "min": 201, "max": 300, "items": ["ST001.539.00"] }
+            ],
+            "connectors": {
+              "straight": ["ST002.519.00"],
+              "L-shape": ["ST002.529.00"],
+              "T-shape": ["ST002.539.00"]
+            },
+            "components": {
+              "ST001.519.00": { "name": "Шинопровод накладной белый 1м", "price": 850, "image": "images/ST001.519.00.png" },
+              "ST001.529.00": { "name": "Шинопровод накладной белый 2м", "price": 1900, "image": "images/ST001.529.00.png" },
+              "ST001.539.00": { "name": "Шинопровод накладной белый 3м", "price": 2820, "image": "images/ST001.539.00.png" },
+              "ST002.519.00": { "name": "Коннектор прямой белый (накладной)", "price": 200, "image": "images/ST002.519.00.png" },
+              "ST002.529.00": { "name": "Коннектор угловой белый (накладной)", "price": 240, "image": "images/ST002.529.00.png" },
+              "ST002.539.00": { "name": "Коннектор T-образный белый (накладной)", "price": 370, "image": "images/ST002.539.00.png" }
+              // Дополнительные компоненты для stretch-ceiling (профили, end caps, угол-соединитель) добавляются через логику.
+            }
+          }
+        }
+      }
+    };
+    /***** Конец встроенных данных *****/
+
+    // Функция проверки режима монтажа для ST LUCE – доступны только surface, recessed и stretch-ceiling.
+    function checkMountingForStLuce(mountingParam) {
+      if (mountingParam !== "surface" && mountingParam !== "recessed" && mountingParam !== "stretch-ceiling") {
+        document.getElementById("resultContainer").style.display = "none";
+        document.getElementById("debug").textContent = "Для ST LUCE доступны только режимы surface, recessed и stretch-ceiling.";
+        return false;
+      }
+      return true;
+    }
+
+    // Функция изменения высоты iframe (оставлена для совместимости)
+    window.resizeIframe = function(iframe) {
+      try {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (doc && doc.body && doc.body.scrollHeight) {
+          iframe.style.height = doc.body.scrollHeight + "px";
+        }
+      } catch (e) {
+        console.error("Ошибка при изменении высоты iframe:", e);
+      }
+    };
+
+    // Глобальная функция safeShowSelection для ST LUCE
+    window.safeShowSelection = function() {
+      try {
+        showSelection();
+      } catch (e) {
+        console.error("Ошибка в showSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+      }
+    };
+
+    // Функция-обёртка для коннекторов
+    function wrapConnector(conn) {
+      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
+    }
+
+    // Функции для подбора трековых элементов для ST LUCE
+    function getTracksForStLuceSurface(legLength, lengthOptions) {
+      let pieces = [];
+      if (legLength <= 100) {
+        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+      } else if (legLength <= 200) {
+        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+      } else if (legLength <= 300) {
+        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+      } else {
+        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        let provided = 300;
+        while (provided < legLength) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+          provided += 100;
+        }
+      }
+      return pieces;
+    }
+    
+    function getTracksForStLuceRecessed(legLength, lengthOptions) {
+      let pieces = [];
+      if (legLength <= 100) {
+        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+      } else if (legLength <= 200) {
+        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+      } else if (legLength <= 300) {
+        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+      } else {
+        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        let provided = 300;
+        while (provided < legLength) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+          provided += 100;
+        }
+      }
+      return pieces;
+    }
+
+    // Функция для расчёта профилей для mounting "stretch-ceiling" для ST LUCE
+    // Если общий trackLength <= 300 см, используем 2м профиль (ST045.429.00, 3890₽), иначе 3м профиль (ST045.439.00, 5590₽)
+    function calculateProfilesStLuce(trackLength) {
+      let profileData;
+      if (trackLength <= 300) {
+        profileData = { id: "ST045.429.00", pieceLength: 200, price: 3890 };
+      } else {
+        profileData = { id: "ST045.439.00", pieceLength: 300, price: 5590 };
+      }
+      let count = Math.ceil(trackLength / profileData.pieceLength);
+      return { count: count, data: profileData };
+    }
+
+    // Функция для расчёта end caps (торцевых заглушек) для mounting "stretch-ceiling" для ST LUCE
+    // Если форма не "rectangle", то: для T-shape – 2 комплекта, иначе 1 комплект.
+    // Для black используем "ST045.189.00", для white – "ST001.189.00", цена 260₽.
+    function calculateEndCapsStLuce(shape, color) {
+      if (shape === "rectangle") return 0;
+      let sets = (shape === "T-shape") ? 2 : 1;
+      return sets;
+    }
+
+    // Функция для расчёта профильного угол-соединителя для ST LUCE.
+    // Если в результирующей группе уже есть угловой коннектор (из surface), добавляем столько единиц, сколько их было.
+    function calculateProfileCornerStLuce(groupedItems, effectiveProduct) {
+      let angularKey = effectiveProduct.connectors["L-shape"][0];
+      if (groupedItems[angularKey]) {
+        return groupedItems[angularKey].count;
+      }
+      return 0;
+    }
+
+    // Основная функция подбора для ST LUCE
+    window.showSelection = function() {
+      console.log("Начало работы showSelection (ST LUCE)");
+
+      const params = new URLSearchParams(window.location.search);
+      const type = "st_luce";
+      const color = params.get("color") || "black";
+      let mountingParam = params.get("mounting") || "surface";
+      if (!checkMountingForStLuce(mountingParam)) {
+        return;
+      }
+      const shape = params.get("shape") || "straight";
+      const lengthA = parseFloat(params.get("lengthA")) || 150;
+      const lengthB = parseFloat(params.get("lengthB")) || 0;
+
+      console.log("Параметры подбора (ST LUCE):", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
+
+      // Для mounting "stretch-ceiling" базовые треки берём из surface
+      let effectiveProduct = (mountingParam === "stretch-ceiling") ?
+          (products.st_luce && products.st_luce[color] && products.st_luce[color]["surface"]) :
+          (products.st_luce && products.st_luce[color] && products.st_luce[color][mountingParam]);
+      if (!effectiveProduct) {
+        throw new Error("Не найден комплект для ST LUCE с выбранными параметрами.");
+      }
+
+      let components = effectiveProduct.components;
+      // Для stretch-ceiling компоненты базовые – из surface; дальнейшие добавляются через логику.
+      const lengthOptions = effectiveProduct.lengthOptions;
+      let selectedItems = [];
+      let usedConnectors = [];
+
+      // Подбор по фигурам:
+      if (shape === "straight") {
+        if (mountingParam === "recessed") {
+          selectedItems = getTracksForStLuceRecessed(lengthA, lengthOptions);
+        } else {
+          selectedItems = getTracksForStLuceSurface(lengthA, lengthOptions);
+        }
+      } else if (shape === "L-shape") {
+        let legATracks, legBTracks;
+        if (mountingParam === "recessed") {
+          legATracks = getTracksForStLuceRecessed(lengthA, lengthOptions);
+          legBTracks = getTracksForStLuceRecessed(lengthB, lengthOptions);
+        } else {
+          legATracks = getTracksForStLuceSurface(lengthA, lengthOptions);
+          legBTracks = getTracksForStLuceSurface(lengthB, lengthOptions);
+        }
+        selectedItems = legATracks.concat(legBTracks);
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+        }
+      } else if (shape === "T-shape") {
+        let topTracks, verticalTracks;
+        if (mountingParam === "recessed") {
+          topTracks = getTracksForStLuceRecessed(lengthA, lengthOptions);
+          verticalTracks = getTracksForStLuceRecessed(lengthB, lengthOptions);
+        } else {
+          topTracks = getTracksForStLuceSurface(lengthA, lengthOptions);
+          verticalTracks = getTracksForStLuceSurface(lengthB, lengthOptions);
+        }
+        selectedItems = topTracks.concat(verticalTracks);
+        if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
+        }
+        if (topTracks.length > 1) {
+          for (let i = 0; i < topTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        if (verticalTracks.length > 1) {
+          for (let i = 0; i < verticalTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+      } else if (shape === "P-shape") {
+        let sideTracks = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthA, lengthOptions) : getTracksForStLuceSurface(lengthA, lengthOptions);
+        let connectingTracks = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthB, lengthOptions) : getTracksForStLuceSurface(lengthB, lengthOptions);
+        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+        }
+        if (sideTracks.length > 1) {
+          for (let i = 0; i < sideTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        if (connectingTracks.length > 1) {
+          for (let i = 0; i < connectingTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+      } else if (shape === "rectangle") {
+        let tracksA = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthA, lengthOptions) : getTracksForStLuceSurface(lengthA, lengthOptions);
+        let tracksB = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthB, lengthOptions) : getTracksForStLuceSurface(lengthB, lengthOptions);
+        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          for (let i = 0; i < 4; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+          }
+        }
+      } else {
+        throw new Error("Логика для фигуры '" + shape + "' не реализована.");
+      }
+      
+      // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
+      if (selectedItems.length > 1 && usedConnectors.length === 0) {
+        for (let i = 0; i < selectedItems.length - 1; i++) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+        }
+      }
+      
+      console.log("Подобранные треки (до end caps, профилей, углов):", selectedItems);
+
+      // Если режим stretch-ceiling – добавляем профили, end caps и угол-соединители.
+      if (mountingParam === "stretch-ceiling") {
+        // Вычисляем общую длину трековых элементов (только тех, у кого задан pieceLength)
+        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
+        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
+        // Выбираем профиль: если trackLength <= 300, используем 2м профиль, иначе 3м профиль.
+        let profileData;
+        if (trackLength <= 300) {
+          profileData = { id: "ST045.429.00", pieceLength: 200, price: 3890 };
+        } else {
+          profileData = { id: "ST045.439.00", pieceLength: 300, price: 5590 };
+        }
+        let profileCount = Math.ceil(trackLength / profileData.pieceLength);
+        console.log("Профилей для добавления:", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: profileData.id, pieceLength: profileData.pieceLength });
+        }
+        // Добавляем end caps, если форма не "rectangle"
+        if (shape !== "rectangle") {
+          let endCapsCount = (shape === "T-shape") ? 2 : 1;
+          let endCapsId = (color === "black") ? "ST045.189.00" : "ST001.189.00";
+          for (let i = 0; i < endCapsCount; i++) {
+            selectedItems.push({ id: endCapsId });
+          }
+        }
+        // Добавляем угол-соединитель профиля для каждого углового коннектора
+        let tempGrouped = {};
+        selectedItems.forEach(itemObj => {
+          let id = itemObj.id;
+          if (!id) return;
+          if (!tempGrouped[id]) {
+            tempGrouped[id] = 0;
+          }
+          tempGrouped[id]++;
+        });
+        let angularKey = effectiveProduct.connectors["L-shape"][0];
+        if (tempGrouped[angularKey]) {
+          let cornerCount = tempGrouped[angularKey];
+          for (let i = 0; i < cornerCount; i++) {
+            selectedItems.push({ id: "ST045.199.00" });
+          }
+        }
+      }
+      
+      console.log("Подобранные треки (с профилями/end caps/углами):", selectedItems);
+
+      // Если режим hanging – добавляем подвесы.
+      if (mountingParam === "hanging") {
+        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
+        // Подвесов = max(2, 1 + ceil(trackLength / 200))
+        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
+        console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
+        let suspensionId = (color === "black") ? "ST002.459.00" : "ST002.559.00";
+        for (let i = 0; i < suspCount; i++) {
+          selectedItems.push({ id: suspensionId });
+        }
+      }
+      
+      console.log("Финальный результат подбора (ST LUCE):", selectedItems);
+
+      // Группируем все элементы (треки, коннекторы, профили, end caps, подвесы, угол-соединители)
+      let groupedItems = {};
+      selectedItems.concat(usedConnectors).forEach(itemObj => {
+        let id = itemObj.id;
+        if (!id) {
+          console.warn("Обнаружен элемент без id:", itemObj);
+          return;
+        }
+        let comp = components[id] || suspensionMapping[id] || {};
+        if (!groupedItems[id]) {
+          groupedItems[id] = { count: 0, component: comp };
+        }
+        groupedItems[id].count++;
+      });
+      console.log("Сгруппированные элементы:", groupedItems);
+
+      // Формируем HTML для таблицы результатов: отображаем наименование + артикул.
+      let tbodyHTML = "";
+      let totalPrice = 0;
+      for (const [id, itemData] of Object.entries(groupedItems)) {
+        const comp = itemData.component;
+        if (comp && comp.name) {
+          totalPrice += comp.price * itemData.count;
+          tbodyHTML += `
+            <tr>
+              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
+              <td style="background-color: white; text-align: center;">${itemData.count} шт.</td>
+              <td>${comp.price}₽</td>
+              <td>${comp.price * itemData.count}₽</td>
+            </tr>
+          `;
+        } else {
+          console.warn("Компонент с ID " + id + " не найден или не имеет имени.");
+        }
+      }
+
+      document.getElementById("results").innerHTML = tbodyHTML;
+      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
+      document.getElementById("resultContainer").style.display = "block";
+      console.log("Подбор завершён успешно (ST LUCE).");
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+      setTimeout(window.safeShowSelection, 1000);
+    });
+  </script>
+</body>
+</html>
