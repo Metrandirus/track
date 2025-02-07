@@ -110,8 +110,7 @@
               "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
               "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
               "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
             }
           },
           "recessed": {
@@ -250,7 +249,7 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Функция для подбора трековых элементов для Maytoni (доступны варианты 1м, 2м и 3м)
+    // Функция для подбора трековых элементов для Maytoni (варианты 1м, 2м, 3м)
     function getTracksForMaytoni(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -300,7 +299,7 @@
       }
     };
 
-    // Основная функция подбора для Maytoni с логикой для разных фигур
+    // Основная функция подбора для Maytoni с логикой для разных фигур, включая T-shape и P-shape
     window.showSelection = function() {
       console.log("Начало работы showSelection (Maytoni)");
 
@@ -355,19 +354,16 @@
       else if (shape === "T-shape") {
         // T-образная система:
         // Длина A – верхний шинопровод, который делится пополам, а длина B – вертикальный шинопровод.
-        let topLength = lengthA / 2;
         let topTracks = (mountingParam === "recessed") ?
-                        getTracksForMaytoniRecessed(topLength, lengthOptions) :
-                        getTracksForMaytoniSurface(topLength, lengthOptions);
+                        getTracksForMaytoniRecessed(lengthA / 2, lengthOptions) :
+                        getTracksForMaytoniSurface(lengthA / 2, lengthOptions);
         let verticalTracks = (mountingParam === "recessed") ?
                              getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                              getTracksForMaytoniSurface(lengthB, lengthOptions);
         selectedItems = topTracks.concat(verticalTracks);
-        // Добавляем Т-образный коннектор
         if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
         }
-        // Если в верхнем или вертикальном блоке несколько сегментов, добавляем прямые коннекторы между ними
         if (topTracks.length > 1) {
           for (let i = 0; i < topTracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -381,28 +377,24 @@
       }
       else if (shape === "P-shape") {
         // P-образная система:
-        // Длина A – боковые треки, которые используются дважды, а длина B – соединяющий трек.
+        // Длина A – боковые треки (используются дважды), а длина B – соединяющий трек.
         let sideTracks = (mountingParam === "recessed") ?
                          getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                          getTracksForMaytoniSurface(lengthA, lengthOptions);
         let connectingTracks = (mountingParam === "recessed") ?
                                getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                                getTracksForMaytoniSurface(lengthB, lengthOptions);
-        // Учитываем, что боковые треки используются дважды.
         selectedItems = sideTracks.concat(sideTracks, connectingTracks);
-        // Добавляем два угловых коннектора
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Если между сегментами боковых треков требуется соединение, добавляем по два прямых коннектора
         if (sideTracks.length > 1) {
           for (let i = 0; i < sideTracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
-        // Если у соединяющего трека более одного сегмента, добавляем прямой коннектор между ними
         if (connectingTracks.length > 1) {
           for (let i = 0; i < connectingTracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -444,17 +436,17 @@
       
       console.log("Подобранные треки (до дополнительных компонентов):", selectedItems);
 
-      // Если режим hanging – можно добавить подвесы (обычно Maytoni не использует hanging)
+      // Если режим hanging – можно добавить подвесы (Maytoni обычно не использует hanging)
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        // Здесь можно добавить логику для подвесов при необходимости.
+        // Логика для подвесов может быть добавлена при необходимости.
       }
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
 
-      // Группируем элементы (треки, коннекторы, и т.д.)
+      // Группируем элементы (треки, коннекторы и т.д.)
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -469,7 +461,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов. В первой колонке выводим наименование и артикул.
+      // Формируем HTML для таблицы результатов. В первой колонке выводим: наименование и артикул.
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
