@@ -110,7 +110,8 @@
               "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
               "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
               "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
             }
           },
           "recessed": {
@@ -241,8 +242,7 @@
               "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
               "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
               "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" },
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" }
             }
           }
         }
@@ -278,7 +278,7 @@
       return pieces;
     }
     
-    // Для recessed и surface используем одинаковую логику для Maytoni
+    // Для recessed и surface используем одну и ту же логику
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
       return getTracksForMaytoni(legLength, lengthOptions);
     }
@@ -300,7 +300,7 @@
       }
     };
 
-    // Основная функция подбора для Maytoni
+    // Основная функция подбора для Maytoni с логикой для разных фигур
     window.showSelection = function() {
       console.log("Начало работы showSelection (Maytoni)");
 
@@ -339,7 +339,8 @@
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                         getTracksForMaytoniSurface(lengthA, lengthOptions);
-      } else if (shape === "L-shape") {
+      }
+      else if (shape === "L-shape") {
         let legATracks = (mountingParam === "recessed") ?
                          getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                          getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -350,28 +351,85 @@
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-      } else if (shape === "rectangle") {
-        // Реализуем логику для прямоугольной системы:
-        // Для каждой из длин (A и B) выбираем трековые сегменты, затем повторяем их по два раза
+      }
+      else if (shape === "T-shape") {
+        // T-образная система:
+        // Длина A – верхний шинопровод, который делится пополам, а длина B – вертикальный шинопровод.
+        let topLength = lengthA / 2;
+        let topTracks = (mountingParam === "recessed") ?
+                        getTracksForMaytoniRecessed(topLength, lengthOptions) :
+                        getTracksForMaytoniSurface(topLength, lengthOptions);
+        let verticalTracks = (mountingParam === "recessed") ?
+                             getTracksForMaytoniRecessed(lengthB, lengthOptions) :
+                             getTracksForMaytoniSurface(lengthB, lengthOptions);
+        selectedItems = topTracks.concat(verticalTracks);
+        // Добавляем Т-образный коннектор
+        if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
+        }
+        // Если в верхнем или вертикальном блоке несколько сегментов, добавляем прямые коннекторы между ними
+        if (topTracks.length > 1) {
+          for (let i = 0; i < topTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        if (verticalTracks.length > 1) {
+          for (let i = 0; i < verticalTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+      }
+      else if (shape === "P-shape") {
+        // P-образная система:
+        // Длина A – боковые треки, которые используются дважды, а длина B – соединяющий трек.
+        let sideTracks = (mountingParam === "recessed") ?
+                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
+                         getTracksForMaytoniSurface(lengthA, lengthOptions);
+        let connectingTracks = (mountingParam === "recessed") ?
+                               getTracksForMaytoniRecessed(lengthB, lengthOptions) :
+                               getTracksForMaytoniSurface(lengthB, lengthOptions);
+        // Учитываем, что боковые треки используются дважды.
+        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
+        // Добавляем два угловых коннектора
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+        }
+        // Если между сегментами боковых треков требуется соединение, добавляем по два прямых коннектора
+        if (sideTracks.length > 1) {
+          for (let i = 0; i < sideTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        // Если у соединяющего трека более одного сегмента, добавляем прямой коннектор между ними
+        if (connectingTracks.length > 1) {
+          for (let i = 0; i < connectingTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+      }
+      else if (shape === "rectangle") {
+        // Прямоугольная система:
+        // Для каждой из длин A и B выбираем сегменты, затем повторяем их дважды
         let tracksA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                       getTracksForMaytoniSurface(lengthA, lengthOptions);
         let tracksB = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                       getTracksForMaytoniSurface(lengthB, lengthOptions);
-        // Выбираем два раза сегменты для длины A и два раза для длины B
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
         // Добавляем 4 угловых коннектора для прямоугольной системы
         for (let i = 0; i < 4; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
       }
-      // Если не реализована логика для других фигур, генерируем ошибку
       else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Добавляем прямые коннекторы, если число сегментов (с pieceLength) больше 1
+      // Если итоговая комбинация состоит из более чем одного сегмента (с pieceLength),
+      // добавляем недостающие прямые коннекторы (число соединений = число сегментов - 1)
       {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -386,17 +444,17 @@
       
       console.log("Подобранные треки (до дополнительных компонентов):", selectedItems);
 
-      // Если режим hanging – можно добавить подвесы (Maytoni обычно не использует hanging)
+      // Если режим hanging – можно добавить подвесы (обычно Maytoni не использует hanging)
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        // Здесь можно добавить логику для подвесов, если требуется
+        // Здесь можно добавить логику для подвесов при необходимости.
       }
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
 
-      // Группируем элементы (треки, коннекторы и т.д.)
+      // Группируем элементы (треки, коннекторы, и т.д.)
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -411,7 +469,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов
+      // Формируем HTML для таблицы результатов. В первой колонке выводим наименование и артикул.
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
