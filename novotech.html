@@ -94,10 +94,10 @@
       "novotech": {
         "black": {
           "surface": {
-            // Доступны только 1м и 2м варианты
+            // Доступны только варианты 1м и 2м
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["135136"] },  // 1м черный
-              { "min": 101, "max": 200, "items": ["135138"] }  // 2м черный
+              { "min": 101, "max": 200, "items": ["135138"] }   // 2м черный
             ],
             "connectors": {
               "straight": ["135140"],  // прямой черный
@@ -113,7 +113,7 @@
             }
           },
           "hanging": {
-            // Для подвесного монтажа используются те же данные, что и для surface
+            // Для подвесного монтажа используются те же треки, connectors и components, что и в surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["135136"] },
               { "min": 101, "max": 200, "items": ["135138"] }
@@ -136,7 +136,7 @@
           "surface": {
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["135135"] },  // 1м белый
-              { "min": 101, "max": 200, "items": ["135137"] }  // 2м белый
+              { "min": 101, "max": 200, "items": ["135137"] }   // 2м белый
             ],
             "connectors": {
               "straight": ["135139"],  // прямой белый
@@ -174,6 +174,17 @@
     };
     /***** Конец встроенных данных *****/
 
+    // Для NOVOTECH недоступны режимы recessed и stretch-ceiling.
+    // Если выбран mounting, отличный от "surface" или "hanging", выводим сообщение и прекращаем подбор.
+    function checkMountingForNovotech(mountingParam) {
+      if (mountingParam !== "surface" && mountingParam !== "hanging") {
+        document.getElementById("resultContainer").style.display = "none";
+        document.getElementById("debug").textContent = "Для NOVOTECH доступны только режимы surface и hanging.";
+        return false;
+      }
+      return true;
+    }
+
     // Функция изменения высоты iframe (оставлена для совместимости)
     window.resizeIframe = function(iframe) {
       try {
@@ -207,7 +218,8 @@
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
       } else {
-        // Если legLength > 100 см, добавляем сначала 2м элемент, затем, если остаток меньше 100, добавляем 1м
+        // Если legLength > 100 см, сначала добавляем 2м элемент, затем, если остаток <= 100, добавляем 1м,
+        // иначе – ещё 2м
         pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
         let provided = 200;
         while (provided < legLength) {
@@ -224,6 +236,12 @@
       return pieces;
     }
 
+    // Глобальная переменная для подвесов NOVOTECH
+    var suspensionMapping = {
+      "135152": { "name": "Подвес черный NOVOTECH", "price": 430, "image": "images/135152.png" },
+      "135151": { "name": "Подвес белый NOVOTECH", "price": 430, "image": "images/135151.png" }
+    };
+
     // Основная функция подбора для NOVOTECH
     window.showSelection = function() {
       console.log("Начало работы showSelection (NOVOTECH)");
@@ -233,13 +251,19 @@
       const type = "novotech";
       const color = params.get("color") || "black";
       let mountingParam = params.get("mounting") || "surface";
+      
+      // Если выбран режим, отличный от "surface" или "hanging", выводим сообщение и прекращаем подбор
+      if (!checkMountingForNovotech(mountingParam)) {
+        return;
+      }
+      
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
 
       console.log("Параметры подбора (NOVOTECH):", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для NOVOTECH треки доступны в режимах surface и hanging – используем данные surface
+      // Для NOVOTECH треки доступны только в режимах surface и hanging – используем данные из "surface"
       let effectiveProduct = (mountingParam === "hanging") ?
           (products.novotech && products.novotech[color] && products.novotech[color]["surface"]) :
           (products.novotech && products.novotech[color] && products.novotech[color][mountingParam]) ||
@@ -248,14 +272,14 @@
         throw new Error("Не найден комплект для NOVOTECH с выбранными параметрами.");
       }
 
-      // Для hanging оставляем данные surface
+      // Для hanging оставляем данные surface (без объединения, т.к. для NOVOTECH нет stretch-ceiling)
       let components = effectiveProduct.components;
 
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор по фигурам с использованием функции getTracksForNovotech:
+      // Подбор по фигурам с использованием getTracksForNovotech:
       if (shape === "straight") {
         selectedItems = getTracksForNovotech(lengthA, lengthOptions);
       } else if (shape === "L-shape") {
@@ -314,7 +338,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
       
-      // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
+      // Если элементов больше одного и прямые коннекторы не добавлены, добавляем их.
       if (selectedItems.length > 1 && usedConnectors.length === 0) {
         for (let i = 0; i < selectedItems.length - 1; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -323,21 +347,10 @@
       
       console.log("Подобранные треки (до подвесов):", selectedItems);
 
-      // Если режим stretch-ceiling – добавляем профили (если предусмотрено)
-      if (mountingParam === "stretch-ceiling") {
-        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        let profileCount = Math.ceil(trackLength / 200);
-        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см, профилей для добавления:", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          // Если для NOVOTECH профили не предусмотрены, можно добавить отдельный компонент.
-          selectedItems.push({ id: "NOVOTECH_PROFILE", pieceLength: 200 });
-        }
-      }
-      
-      // Если режим hanging – добавляем подвесы.
+      // Для режима hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        // Подвесов = max(2, 1 + ceil(trackLength / 200))
+        // Подвесов = max(2, 1 + ceil(trackLength/200))
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
         let suspensionId = (color === "black") ? "135152" : "135151";
@@ -372,7 +385,6 @@
         const comp = itemData.component;
         if (comp) {
           totalPrice += comp.price * itemData.count;
-          // Отображаем наименование вместе с артикулом
           tbodyHTML += `
             <tr>
               <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
