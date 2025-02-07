@@ -210,12 +210,14 @@
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              // Для NOVOTECH stretch-ceiling данных нет – можно оставить пустым
+              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
+              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
+              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
             ],
             "connectors": {
-              "straight": ["TRA003C-11W"],
-              "L-shape": ["TRA003CL-11W"],
-              "T-shape": ["TRA003CT-11W"]
+              "straight": ["TRA001C-11W"],
+              "L-shape": ["TRA001CL-11W"],
+              "T-shape": ["TRA001CT-11W"]
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
@@ -258,7 +260,6 @@
       } else if (legLength <= 300) {
         pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
       } else {
-        // Для длин >300 см: используем целые 3м сегменты и обрабатываем остаток
         let fullPieces = Math.floor(legLength / 300);
         for (let i = 0; i < fullPieces; i++) {
           pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
@@ -269,7 +270,7 @@
             pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
           } else if (remainder <= 200) {
             pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else { // remainder от 201 до 300
+          } else {
             pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
           }
         }
@@ -277,7 +278,7 @@
       return pieces;
     }
     
-    // Для recessed можно использовать ту же логику
+    // Для recessed и surface используем одинаковую логику для Maytoni
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
       return getTracksForMaytoni(legLength, lengthOptions);
     }
@@ -322,7 +323,6 @@
       }
 
       let components = effectiveProduct.components;
-      // Для stretch-ceiling объединяем компоненты
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
         if (ceilingProduct && ceilingProduct.components) {
@@ -334,7 +334,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор по фигурам
+      // Логика подбора по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
@@ -350,13 +350,28 @@
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
+      } else if (shape === "rectangle") {
+        // Реализуем логику для прямоугольной системы:
+        // Для каждой из длин (A и B) выбираем трековые сегменты, затем повторяем их по два раза
+        let tracksA = (mountingParam === "recessed") ?
+                      getTracksForMaytoniRecessed(lengthA, lengthOptions) :
+                      getTracksForMaytoniSurface(lengthA, lengthOptions);
+        let tracksB = (mountingParam === "recessed") ?
+                      getTracksForMaytoniRecessed(lengthB, lengthOptions) :
+                      getTracksForMaytoniSurface(lengthB, lengthOptions);
+        // Выбираем два раза сегменты для длины A и два раза для длины B
+        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
+        // Добавляем 4 угловых коннектора для прямоугольной системы
+        for (let i = 0; i < 4; i++) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+        }
       }
-      // Можно добавить обработку других фигур (T-shape, P-shape, rectangle) по аналогии.
+      // Если не реализована логика для других фигур, генерируем ошибку
       else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Добавляем прямые коннекторы: для соединения каждого сегмента (n-1)
+      // Добавляем прямые коннекторы, если число сегментов (с pieceLength) больше 1
       {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -371,12 +386,12 @@
       
       console.log("Подобранные треки (до дополнительных компонентов):", selectedItems);
 
-      // Если режим hanging – добавляем подвесы (если требуется, здесь Maytoni может не поддерживать hanging)
+      // Если режим hanging – можно добавить подвесы (Maytoni обычно не использует hanging)
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        // В Maytoni, подвесы обычно не используются – можно оставить или добавить по необходимости.
+        // Здесь можно добавить логику для подвесов, если требуется
       }
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
@@ -396,7 +411,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов. В первой колонке выводим наименование.
+      // Формируем HTML для таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
