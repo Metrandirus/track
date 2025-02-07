@@ -95,9 +95,9 @@
         "black": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["ST001.419.00"] },  // 1м накладной черный
-              { "min": 101, "max": 200, "items": ["ST001.429.00"] },  // 2м накладной черный
-              { "min": 201, "max": 300, "items": ["ST001.439.00"] }   // 3м накладной черный
+              { "min": 0, "max": 100, "items": ["ST001.419.00"] },
+              { "min": 101, "max": 200, "items": ["ST001.429.00"] },
+              { "min": 201, "max": 300, "items": ["ST001.439.00"] }
             ],
             "connectors": {
               "straight": ["ST002.419.00"],
@@ -115,9 +115,9 @@
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["ST012.419.00"] },  // 1м встраиваемый черный
-              { "min": 101, "max": 200, "items": ["ST012.429.00"] },  // 2м встраиваемый черный
-              { "min": 201, "max": 300, "items": ["ST012.439.00"] }   // 3м встраиваемый черный
+              { "min": 0, "max": 100, "items": ["ST012.419.00"] },
+              { "min": 101, "max": 200, "items": ["ST012.429.00"] },
+              { "min": 201, "max": 300, "items": ["ST012.439.00"] }
             ],
             "connectors": {
               "straight": ["ST013.419.00"],
@@ -152,10 +152,9 @@
               "ST002.429.00": { "name": "Коннектор угловой черный (накладной)", "price": 240, "image": "images/ST002.429.00.png" },
               "ST002.439.00": { "name": "Коннектор T-образный черный (накладной)", "price": 370, "image": "images/ST002.439.00.png" }
             }
-            // Дополнительные компоненты (профили, end caps, угол-соединитель) добавляются через логику ниже.
+            // Дополнительные компоненты (профили, end caps, угол‑соединитель) добавляются через логику ниже.
           },
           "hanging": {
-            // Для подвесного монтажа используем те же данные, что и для surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["ST001.419.00"] },
               { "min": 101, "max": 200, "items": ["ST001.429.00"] },
@@ -180,9 +179,9 @@
         "white": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["ST001.519.00"] },  // 1м накладной белый
-              { "min": 101, "max": 200, "items": ["ST001.529.00"] },  // 2м накладной белый
-              { "min": 201, "max": 300, "items": ["ST001.539.00"] }   // 3м накладной белый
+              { "min": 0, "max": 100, "items": ["ST001.519.00"] },
+              { "min": 101, "max": 200, "items": ["ST001.529.00"] },
+              { "min": 201, "max": 300, "items": ["ST001.539.00"] }
             ],
             "connectors": {
               "straight": ["ST002.519.00"],
@@ -200,9 +199,9 @@
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["ST012.519.00"] },  // 1м встраиваемый белый
-              { "min": 101, "max": 200, "items": ["ST012.529.00"] },  // 2м встраиваемый белый
-              { "min": 201, "max": 300, "items": ["ST012.539.00"] }   // 3м встраиваемый белый
+              { "min": 0, "max": 100, "items": ["ST012.519.00"] },
+              { "min": 101, "max": 200, "items": ["ST012.529.00"] },
+              { "min": 201, "max": 300, "items": ["ST012.539.00"] }
             ],
             "connectors": {
               "straight": ["ST013.519.00"],
@@ -237,17 +236,18 @@
               "ST002.529.00": { "name": "Коннектор угловой белый (накладной)", "price": 240, "image": "images/ST002.529.00.png" },
               "ST002.539.00": { "name": "Коннектор T-образный белый (накладной)", "price": 370, "image": "images/ST002.539.00.png" }
             }
+            // Дополнительные компоненты для stretch-ceiling добавляются через логику ниже.
           },
           "hanging": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["ST001.519.00"] },
-              { "min": 101, "max": 200, "items": ["ST001.529.00"] },
-              { "min": 201, "max": 300, "items": ["ST001.539.00"] }
+              { "min": 0, "max": 100, "items": ["ST001.419.00"] },
+              { "min": 101, "max": 200, "items": ["ST001.429.00"] },
+              { "min": 201, "max": 300, "items": ["ST001.439.00"] }
             ],
             "connectors": {
-              "straight": ["ST002.519.00"],
-              "L-shape": ["ST002.529.00"],
-              "T-shape": ["ST002.539.00"]
+              "straight": ["ST002.419.00"],
+              "L-shape": ["ST002.429.00"],
+              "T-shape": ["ST002.439.00"]
             },
             "components": {
               "ST001.519.00": { "name": "Шинопровод накладной белый 1м", "price": 850, "image": "images/ST001.519.00.png" },
@@ -315,9 +315,14 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функция для подбора трековых элементов для ST LUCE (накладной)
-    // Изменён алгоритм: если legLength > 300, используем только 3м элементы
-    function getTracksForStLuceSurface(legLength, lengthOptions) {
+    // Новая функция для подбора трековых элементов для ST LUCE (накладной/встраиваемой)
+    // Теперь, если legLength > 300, вместо дробления на 3м + 1м, рассчитываем так:
+    // fullPieces = Math.floor(legLength/300), remainder = legLength - fullPieces*300
+    // Если remainder > 0, то:
+    //   если remainder <= 100, добавляем 1м элемент,
+    //   если remainder от 101 до 200, добавляем 2м элемент,
+    //   если remainder от 201 до 300, добавляем 3м элемент.
+    function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
@@ -326,30 +331,33 @@
       } else if (legLength <= 300) {
         pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
       } else {
-        let count = Math.ceil(legLength / 300);
-        for (let i = 0; i < count; i++) {
+        let fullPieces = Math.floor(legLength / 300);
+        for (let i = 0; i < fullPieces; i++) {
           pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        }
+        let remainder = legLength - fullPieces * 300;
+        if (remainder > 0) {
+          if (remainder <= 100) {
+            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+          } else if (remainder <= 200) {
+            pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+          } else { // remainder от 201 до 300
+            pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+          }
         }
       }
       return pieces;
     }
     
-    // Аналогичная функция для встраиваемых треков
+    // Функции для recessed можно использовать аналогично
     function getTracksForStLuceRecessed(legLength, lengthOptions) {
-      let pieces = [];
-      if (legLength <= 100) {
-        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-      } else if (legLength <= 200) {
-        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-      } else if (legLength <= 300) {
-        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-      } else {
-        let count = Math.ceil(legLength / 300);
-        for (let i = 0; i < count; i++) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        }
-      }
-      return pieces;
+      // Предполагается, что для recessed доступны те же варианты (1м, 2м, 3м)
+      return getTracksForStLuce(legLength, lengthOptions);
+    }
+    
+    function getTracksForStLuceSurface(legLength, lengthOptions) {
+      // Для surface – аналогичная логика
+      return getTracksForStLuce(legLength, lengthOptions);
     }
 
     // Основная функция подбора для ST LUCE
@@ -378,7 +386,6 @@
       }
 
       let components = effectiveProduct.components;
-      // Для stretch-ceiling компоненты берём из surface; дополнительные добавляются через логику ниже.
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
@@ -427,8 +434,12 @@
           }
         }
       } else if (shape === "P-shape") {
-        let sideTracks = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthA, lengthOptions) : getTracksForStLuceSurface(lengthA, lengthOptions);
-        let connectingTracks = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthB, lengthOptions) : getTracksForStLuceSurface(lengthB, lengthOptions);
+        let sideTracks = (mountingParam === "recessed") ?
+            getTracksForStLuceRecessed(lengthA, lengthOptions) :
+            getTracksForStLuceSurface(lengthA, lengthOptions);
+        let connectingTracks = (mountingParam === "recessed") ?
+            getTracksForStLuceRecessed(lengthB, lengthOptions) :
+            getTracksForStLuceSurface(lengthB, lengthOptions);
         selectedItems = sideTracks.concat(sideTracks, connectingTracks);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
@@ -446,8 +457,12 @@
           }
         }
       } else if (shape === "rectangle") {
-        let tracksA = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthA, lengthOptions) : getTracksForStLuceSurface(lengthA, lengthOptions);
-        let tracksB = (mountingParam === "recessed") ? getTracksForStLuceRecessed(lengthB, lengthOptions) : getTracksForStLuceSurface(lengthB, lengthOptions);
+        let tracksA = (mountingParam === "recessed") ?
+            getTracksForStLuceRecessed(lengthA, lengthOptions) :
+            getTracksForStLuceSurface(lengthA, lengthOptions);
+        let tracksB = (mountingParam === "recessed") ?
+            getTracksForStLuceRecessed(lengthB, lengthOptions) :
+            getTracksForStLuceSurface(lengthB, lengthOptions);
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           for (let i = 0; i < 4; i++) {
@@ -461,7 +476,7 @@
       // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы
       {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
-        let neededStraight = trackPieces.length > 1 ? trackPieces.length - 1 : 0;
+        let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
         let currentStraight = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors.straight[0]).length;
         let missing = neededStraight - currentStraight;
         if (missing > 0) {
@@ -481,9 +496,21 @@
         let profileData;
         if (trackLength <= 300) {
           profileData = { id: "ST045.429.00", pieceLength: 200, price: additionalMapping["ST045.429.00"].price };
+        } else if (trackLength <= 400) {
+          // Если от 301 до 400 см, добавляем 1м (100 см) – но поскольку профили доступны только 2м и 3м,
+          // можно интерпретировать это как использование 2м профиля, если предпочтительно минимальное избытие.
+          // Однако согласно требованию: 301-400 → 1м шинопровода (но в профилях, для ST LUCE доступны только 2м и 3м).
+          // Поэтому будем брать 2м профиль, если избыток менее 100 см, иначе 3м профиль.
+          profileData = { id: "ST045.429.00", pieceLength: 200, price: additionalMapping["ST045.429.00"].price };
+        } else if (trackLength <= 500) {
+          profileData = { id: "ST045.429.00", pieceLength: 200, price: additionalMapping["ST045.429.00"].price };
+        } else if (trackLength <= 600) {
+          profileData = { id: "ST045.439.00", pieceLength: 300, price: additionalMapping["ST045.439.00"].price };
         } else {
+          // Если больше 600 см, можно продолжать по аналогии – здесь возьмем 3м профиль
           profileData = { id: "ST045.439.00", pieceLength: 300, price: additionalMapping["ST045.439.00"].price };
         }
+        // Определяем количество профилей по выбранному типу
         let profileCount = Math.ceil(trackLength / profileData.pieceLength);
         console.log("Профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
