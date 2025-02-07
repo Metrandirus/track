@@ -152,7 +152,7 @@
               "ST002.429.00": { "name": "Коннектор угловой черный (накладной)", "price": 240, "image": "images/ST002.429.00.png" },
               "ST002.439.00": { "name": "Коннектор T-образный черный (накладной)", "price": 370, "image": "images/ST002.439.00.png" }
             }
-            // Дополнительные компоненты (профили, end caps, угол-соединитель) будут добавлены через логику ниже.
+            // Дополнительные компоненты (профили, end caps, угол-соединитель) добавляются через логику ниже.
           },
           "hanging": {
             // Для подвесного монтажа используем те же данные, что и для surface
@@ -237,7 +237,6 @@
               "ST002.529.00": { "name": "Коннектор угловой белый (накладной)", "price": 240, "image": "images/ST002.529.00.png" },
               "ST002.539.00": { "name": "Коннектор T-образный белый (накладной)", "price": 370, "image": "images/ST002.539.00.png" }
             }
-            // Дополнительные компоненты для stretch-ceiling (профили, end caps, угол-соединитель) добавляются через логику ниже.
           },
           "hanging": {
             "lengthOptions": [
@@ -274,7 +273,7 @@
       "ST045.189.00": { "name": "Торцевая заглушка черная", "price": 260, "image": "images/ST045.189.00.png" },
       "ST001.189.00": { "name": "Торцевая заглушка белая", "price": 260, "image": "images/ST001.189.00.png" },
       "ST045.199.00": { "name": "Угол-соединитель профиля", "price": 760, "image": "images/ST045.199.00.png" },
-      // Добавляем профили для stretch-ceiling:
+      // Профили для stretch-ceiling:
       "ST045.429.00": { "name": "Профиль 2м ST LUCE", "price": 3890, "image": "images/ST045.429.00.png" },
       "ST045.439.00": { "name": "Профиль 3м ST LUCE", "price": 5590, "image": "images/ST045.439.00.png" }
     };
@@ -381,7 +380,7 @@
       }
 
       let components = effectiveProduct.components;
-      // Для stretch-ceiling компоненты базовые берём из surface; дополнительные добавляются через логику ниже.
+      // Для stretch-ceiling компоненты берём из surface; дополнительные добавляются через логику ниже.
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
@@ -461,10 +460,16 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована.");
       }
       
-      // Если итоговая комбинация состоит из более чем одного сегмента и прямые коннекторы не добавлены, добавляем их.
-      if (selectedItems.length > 1 && usedConnectors.length === 0) {
-        for (let i = 0; i < selectedItems.length - 1; i++) {
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+      // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы
+      {
+        let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
+        let neededStraight = trackPieces.length > 1 ? trackPieces.length - 1 : 0;
+        let currentStraight = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors.straight[0]).length;
+        let missing = neededStraight - currentStraight;
+        if (missing > 0) {
+          for (let i = 0; i < missing; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
         }
       }
       
@@ -475,12 +480,11 @@
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         // Выбираем профиль в зависимости от общей длины:
-        // Если trackLength <= 300 см – используем 2‑метровый профиль, иначе – 3‑метровый
         let profileData;
         if (trackLength <= 300) {
-          profileData = { id: "ST045.429.00", pieceLength: 200, price: 3890 };
+          profileData = { id: "ST045.429.00", pieceLength: 200, price: additionalMapping["ST045.429.00"].price };
         } else {
-          profileData = { id: "ST045.439.00", pieceLength: 300, price: 5590 };
+          profileData = { id: "ST045.439.00", pieceLength: 300, price: additionalMapping["ST045.439.00"].price };
         }
         let profileCount = Math.ceil(trackLength / profileData.pieceLength);
         console.log("Профилей для добавления:", profileCount);
