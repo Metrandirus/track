@@ -134,6 +134,7 @@
             }
           },
           "stretch-ceiling": {
+            // Для stretch-ceiling используем базу из surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["ST001.419.00"] },
               { "min": 101, "max": 200, "items": ["ST001.429.00"] },
@@ -152,10 +153,10 @@
               "ST002.429.00": { "name": "Коннектор угловой черный (накладной)", "price": 240, "image": "images/ST002.429.00.png" },
               "ST002.439.00": { "name": "Коннектор T-образный черный (накладной)", "price": 370, "image": "images/ST002.439.00.png" }
             }
-            // Дополнительные компоненты (профили, end caps, угол-соединитель) добавляются через логику ниже.
+            // Дополнительные компоненты (профили, end caps, угол-соединитель) будут добавлены через логику ниже.
           },
           "hanging": {
-            // Для подвесного монтажа используются те же данные, что и для surface
+            // Для подвесного монтажа используем те же данные, что и для surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["ST001.419.00"] },
               { "min": 101, "max": 200, "items": ["ST001.429.00"] },
@@ -174,7 +175,7 @@
               "ST002.429.00": { "name": "Коннектор угловой черный", "price": 240, "image": "images/ST002.429.00.png" },
               "ST002.439.00": { "name": "Коннектор T-образный черный", "price": 370, "image": "images/ST002.439.00.png" }
             }
-            // Подвесы добавляются отдельно для режима hanging.
+            // Подвесы будут добавляться отдельно.
           }
         },
         "white": {
@@ -257,20 +258,25 @@
               "ST002.529.00": { "name": "Коннектор угловой белый", "price": 240, "image": "images/ST002.529.00.png" },
               "ST002.539.00": { "name": "Коннектор T-образный белый", "price": 370, "image": "images/ST002.539.00.png" }
             }
-            // Подвесы будут добавляться отдельно для режима hanging.
+            // Подвесы добавляются отдельно для режима hanging.
           }
         }
       }
     };
     /***** Конец встроенных данных *****/
 
-    // Добавляем глобальную переменную для подвесов для ST LUCE
+    // Дополнительное сопоставление для ST LUCE (подвесы, торцевые заглушки, угол‑соединитель профиля)
     var suspensionMapping = {
       "ST002.459.00": { "name": "Подвес черный ST LUCE", "price": 440, "image": "images/ST002.459.00.png" },
       "ST002.559.00": { "name": "Подвес белый ST LUCE", "price": 440, "image": "images/ST002.559.00.png" }
     };
+    var additionalMapping = {
+      "ST045.189.00": { "name": "Торцевая заглушка черная", "price": 260, "image": "images/ST045.189.00.png" },
+      "ST001.189.00": { "name": "Торцевая заглушка белая", "price": 260, "image": "images/ST001.189.00.png" },
+      "ST045.199.00": { "name": "Угол-соединитель профиля", "price": 760, "image": "images/ST045.199.00.png" }
+    };
 
-    // Функция проверки режима монтажа для ST LUCE – доступны только surface, recessed и stretch-ceiling, а также hanging.
+    // Функция проверки режима монтажа для ST LUCE
     function checkMountingForStLuce(mountingParam) {
       if (mountingParam !== "surface" && mountingParam !== "recessed" && mountingParam !== "stretch-ceiling" && mountingParam !== "hanging") {
         document.getElementById("resultContainer").style.display = "none";
@@ -346,34 +352,6 @@
       return pieces;
     }
     
-    // Функция для расчёта профилей для mounting "stretch-ceiling" для ST LUCE
-    function calculateProfilesStLuce(trackLength) {
-      let profileData;
-      if (trackLength <= 300) {
-        profileData = { id: "ST045.429.00", pieceLength: 200, price: 3890 };
-      } else {
-        profileData = { id: "ST045.439.00", pieceLength: 300, price: 5590 };
-      }
-      let count = Math.ceil(trackLength / profileData.pieceLength);
-      return { count: count, data: profileData };
-    }
-
-    // Функция для расчёта end caps для mounting "stretch-ceiling" для ST LUCE
-    function calculateEndCapsStLuce(shape, color) {
-      if (shape === "rectangle") return 0;
-      let sets = (shape === "T-shape") ? 2 : 1;
-      return sets;
-    }
-
-    // Функция для расчёта профильного угол-соединителя для ST LUCE.
-    function calculateProfileCornerStLuce(groupedItems, effectiveProduct) {
-      let angularKey = effectiveProduct.connectors["L-shape"][0];
-      if (groupedItems[angularKey]) {
-        return groupedItems[angularKey].count;
-      }
-      return 0;
-    }
-
     // Основная функция подбора для ST LUCE
     window.showSelection = function() {
       console.log("Начало работы showSelection (ST LUCE)");
@@ -391,7 +369,7 @@
 
       console.log("Параметры подбора (ST LUCE):", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режима stretch-ceiling и hanging базовые треки берём из surface
+      // Для режимов stretch-ceiling и hanging базовые треки берём из surface
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products.st_luce && products.st_luce[color] && products.st_luce[color]["surface"]) :
           (products.st_luce && products.st_luce[color] && products.st_luce[color][mountingParam]);
@@ -400,7 +378,7 @@
       }
 
       let components = effectiveProduct.components;
-      // Для stretch-ceiling компоненты берём из surface; дополнительные добавляются через логику.
+      // Для stretch-ceiling компоненты базовые берём из surface; дополнительные добавляются через логику ниже.
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
@@ -489,10 +467,11 @@
       
       console.log("Подобранные треки (до дополнительных компонентов):", selectedItems);
 
-      // Если режим stretch-ceiling – добавляем профили, end caps и угол-соединители.
+      // Логика для режима stretch-ceiling: добавляем профили, торцевые заглушки и угол‑соединители
       if (mountingParam === "stretch-ceiling") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
+        // Выбираем профиль в зависимости от общей длины
         let profileData;
         if (trackLength <= 300) {
           profileData = { id: "ST045.429.00", pieceLength: 200, price: 3890 };
@@ -512,26 +491,20 @@
             selectedItems.push({ id: endCapsId });
           }
         }
-        // Добавляем угол-соединитель профиля для каждого углового коннектора
-        let tempGrouped = {};
-        selectedItems.forEach(itemObj => {
-          let id = itemObj.id;
-          if (!id) return;
-          if (!tempGrouped[id]) {
-            tempGrouped[id] = 0;
+        // Добавляем угол‑соединитель профиля: для каждого углового коннектора, используемого в базовом подборе, добавляем одну единицу.
+        let lShapeCount = 0;
+        usedConnectors.forEach(conn => {
+          if (conn.id === effectiveProduct.connectors["L-shape"][0]) {
+            lShapeCount++;
           }
-          tempGrouped[id]++;
         });
-        let angularKey = effectiveProduct.connectors["L-shape"][0];
-        if (tempGrouped[angularKey]) {
-          let cornerCount = tempGrouped[angularKey];
-          for (let i = 0; i < cornerCount; i++) {
-            selectedItems.push({ id: "ST045.199.00" });
-          }
+        console.log("Количество угловых коннекторов (L-shape):", lShapeCount);
+        for (let i = 0; i < lShapeCount; i++) {
+          selectedItems.push({ id: "ST045.199.00" });
         }
       }
       
-      // Если режим hanging – добавляем подвесы.
+      // Логика для режима hanging: добавляем подвесы
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
@@ -544,7 +517,7 @@
       
       console.log("Финальный результат подбора (ST LUCE):", selectedItems);
 
-      // Группируем элементы (треки, коннекторы, профили, end caps, подвесы, угол-соединители)
+      // Группируем все элементы (треки, коннекторы, профили, end caps, подвесы, угол‑соединители)
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -552,7 +525,7 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
-        let comp = components[id] || suspensionMapping[id] || {};
+        let comp = components[id] || suspensionMapping[id] || additionalMapping[id] || {};
         if (!groupedItems[id]) {
           groupedItems[id] = { count: 0, component: comp };
         }
@@ -560,7 +533,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов
+      // Формируем HTML для таблицы результатов. В первой колонке выводим: наименование + артикул.
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
@@ -584,6 +557,13 @@
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
       document.getElementById("resultContainer").style.display = "block";
       console.log("Подбор завершён успешно (ST LUCE).");
+    };
+
+    // Дополнительное сопоставление для дополнительных компонентов (end caps, угол‑соединитель профиля)
+    var additionalMapping = {
+      "ST045.189.00": { "name": "Торцевая заглушка черная", "price": 260, "image": "images/ST045.189.00.png" },
+      "ST001.189.00": { "name": "Торцевая заглушка белая", "price": 260, "image": "images/ST001.189.00.png" },
+      "ST045.199.00": { "name": "Угол-соединитель профиля", "price": 760, "image": "images/ST045.199.00.png" }
     };
 
     document.addEventListener("DOMContentLoaded", function() {
