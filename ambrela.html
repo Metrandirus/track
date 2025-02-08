@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Maytoni UNITY – Подбор трековой системы</title>
+  <title>AMBRELA – Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Общие стили для maytoni.html */
+    /* Общие стили для ambrela.html */
     html, body {
       margin: 0;
       padding: 0;
@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Результаты подбора будут выведены здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -89,82 +89,87 @@
   </div>
   
   <script>
-    /***** Встроенные данные о продуктах (Maytoni UNITY) *****/
+    /***** Встроенные данные для AMBRELA *****/
     var products = {
-      "one-phase": {
+      "ambrela": {
         "black": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+              { "min": 0, "max": 100, "items": ["GL7102 BK"] },
+              { "min": 101, "max": 200, "items": ["GL7104 BK"] },
+              { "min": 201, "max": 300, "items": ["GL7106 BK"] }
             ],
             "connectors": {
-              "straight": ["TRA001C-11B"],
-              "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "straight": ["GL7066 BK"],
+              "L-shape": ["GL7071 BK"],
+              "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             }
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX004-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX004-112B"] }
+              { "min": 0, "max": 100, "items": ["GL7122 BK"] },
+              { "min": 101, "max": 200, "items": ["GL7124 BK"] }
             ],
             "connectors": {
-              "straight": ["TRA002C-11B"],
-              "L-shape": ["TRA002CL-11B"],
-              "T-shape": ["TRA002CT-11B"]
+              "straight": ["GL7160 BK"],
+              "L-shape": ["GL7164 BK"],
+              "T-shape": ["GL7168 BK"]
             },
             "components": {
-              "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м TRX004-111B", "price": 1600, "image": "images/TRX004-111B.png" },
-              "TRX004-112B": { "name": "Шинопровод встраиваемый черный 2м TRX004-112B", "price": 2600, "image": "images/TRX004-112B.png" },
-              "TRA002C-11B": { "name": "Коннектор прямой черный для встраивания TRA002C-11B", "price": 110, "image": "images/TRA002C-11B.png" },
-              "TRA002CL-11B": { "name": "Коннектор угловой черный для встраивания TRA002CL-11B", "price": 160, "image": "images/TRA002CL-11B.png" },
-              "TRA002CT-11B": { "name": "Коннектор Т-образный черный для встраивания TRA002CT-11B", "price": 210, "image": "images/TRA002CT-11B.png" }
+              "GL7122 BK": { "name": "Шинопровод встраиваемый черный 1м", "price": 1190, "image": "images/GL7122.jpg" },
+              "GL7124 BK": { "name": "Шинопровод встраиваемый черный 2м", "price": 2380, "image": "images/GL7124.jpg" },
+              "GL7160 BK": { "name": "Коннектор прямой черный (встраиваемый)", "price": 205, "image": "images/GL7160.jpg" },
+              "GL7164 BK": { "name": "Коннектор угловой черный (встраиваемый)", "price": 225, "image": "images/GL7164.jpg" },
+              "GL7168 BK": { "name": "Коннектор T-образный черный (встраиваемый)", "price": 410, "image": "images/GL7168.jpg" }
             }
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX003-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX003-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX003-113B"] }
+              { "min": 0, "max": 100, "items": ["GL7102 BK"] },
+              { "min": 101, "max": 200, "items": ["GL7104 BK"] },
+              { "min": 201, "max": 300, "items": ["GL7106 BK"] }
             ],
             "connectors": {
-              "straight": ["TRA003C-11B"],
-              "L-shape": ["TRA003CL-11B"],
-              "T-shape": ["TRA003CT-11B"]
+              "straight": ["GL7066 BK"],
+              "L-shape": ["GL7071 BK"],
+              "T-shape": ["GL7078 BK"]
             },
-            "additionalComponents": ["TRA001MP-112S"],
             "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
-            }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
+            },
+            "additionalComponents": [] 
           },
           "hanging": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+              { "min": 0, "max": 100, "items": ["GL7102 BK"] },
+              { "min": 101, "max": 200, "items": ["GL7104 BK"] },
+              { "min": 201, "max": 300, "items": ["GL7106 BK"] }
             ],
             "connectors": {
-              "straight": ["TRA001C-11B"],
-              "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "straight": ["GL7066 BK"],
+              "L-shape": ["GL7071 BK"],
+              "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             }
           }
         },
@@ -333,8 +338,7 @@
     }
 
     // Функция для определения номинальной длины трека по его id для ST LUCE/AMBRELA.
-    // Для AMBRELA используем следующие правила:
-    // Для белых: если id содержит "7101" или "7121" → 100 см; "7103" или "7123" → 200 см; "7105" → 300 см.
+    // Для AMBRELA: для белых, если id содержит "7101" или "7121" → 100 см; "7103" или "7123" → 200 см; "7105" → 300 см.
     // Для чёрных: если id содержит "7102" или "7122" → 100 см; "7104" или "7124" → 200 см; "7106" → 300 см.
     function getNominalLength(id) {
       if (id.indexOf("7101") !== -1 || id.indexOf("7121") !== -1) return 100;
@@ -351,17 +355,14 @@
       console.log("Начало работы showSelection (AMBRELA)");
 
       const params = new URLSearchParams(window.location.search);
-      const type = "ambrela";
-      const color = params.get("color") || "black";
-      let mountingParam = params.get("mounting") || "surface";
-      if (!checkMountingForStLuce(mountingParam)) {
-        return;
-      }
+      // Принудительно приводим к нижнему регистру параметры цвета и способа монтажа
+      const color = (params.get("color") || "black").toLowerCase();
+      let mountingParam = (params.get("mounting") || "surface").toLowerCase();
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
 
-      console.log("Параметры подбора (AMBRELA):", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
+      console.log("Параметры подбора (AMBRELA):", { color, mounting: mountingParam, shape, lengthA, lengthB });
 
       // Для режимов stretch-ceiling и hanging берём базовые треки из surface
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
@@ -475,7 +476,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
       }
       
-      // Если фигура "straight", добавляем недостающие прямые коннекторы
+      // Для фигуры "straight" добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
