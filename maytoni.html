@@ -115,7 +115,6 @@
           },
           "recessed": {
             "lengthOptions": [
-              // Для встраиваемого монтажа доступны только варианты 1м и 2м
               { "min": 0, "max": 100, "items": ["TRX004-111B"] },
               { "min": 101, "max": 200, "items": ["TRX004-112B"] }
             ],
@@ -271,12 +270,12 @@
         }
         let remainder = legLength - fullPieces * 300;
         if (remainder > 0) {
-          // Если остаток меньше 100, то используем частичный сегмент с фактической длиной
-          if (remainder < 100) {
-            pieces.push({ id: lengthOptions[0].items[0], pieceLength: remainder });
+          if (remainder <= 100) {
+            // Если остаток меньше или равен 100, заказываем полный 1м (100 см)
+            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
           } else if (remainder <= 200) {
             pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else {
+          } else { // remainder > 200 && <= 300
             pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
           }
         }
@@ -298,8 +297,8 @@
         }
         let remainder = legLength - fullPieces * 200;
         if (remainder > 0) {
-          if (remainder < 100) {
-            pieces.push({ id: lengthOptions[0].items[0], pieceLength: remainder });
+          if (remainder <= 100) {
+            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
           } else {
             pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
           }
@@ -432,8 +431,10 @@
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
+        // Для боковых сторон добавляем прямые коннекторы между сегментами каждого массива
         if (sideTracks.length > 1) {
           for (let i = 0; i < sideTracks.length - 1; i++) {
+            // Поскольку боковые стороны повторяются дважды, суммарно добавляем 2*(sideTracks.length - 1)
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
@@ -459,7 +460,7 @@
         for (let i = 0; i < 4; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Для каждой стороны добавляем прямые коннекторы: для стороны A – 2*(tracksA.length - 1), для стороны B – 2*(tracksB.length - 1)
+        // Для каждой стороны добавляем прямые коннекторы: 
         let straightForA = (tracksA.length > 1) ? 2 * (tracksA.length - 1) : 0;
         let straightForB = (tracksB.length > 1) ? 2 * (tracksB.length - 1) : 0;
         for (let i = 0; i < straightForA + straightForB; i++) {
@@ -470,7 +471,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Для режима straight (и только для него) – если прямых коннекторов не добавлено, добавляем их между всеми сегментами.
+      // Для систем типа straight добавляем автоматические прямые коннекторы, если они ещё не добавлены.
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -510,7 +511,8 @@
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
 
-      // Группируем элементы. Для трековых сегментов суммируем требуемую длину.
+      // Группировка элементов.
+      // Для трековых сегментов суммируем требуемую длину, для остальных просто считаем количество.
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -518,19 +520,18 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
-        // Если это трековый элемент (есть pieceLength), будем суммировать требуемую длину.
-        let isTrack = (itemObj.hasOwnProperty("pieceLength"));
+        let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          groupedItems[id] = { totalLength: 0, count: 0, component: components[id], isTrack: isTrack };
+          groupedItems[id] = { totalLength: 0, count: 0, component: components[id] || suspensionMappingMaytoni[id] || {}, isTrack: isTrack };
         }
         if (isTrack) {
           groupedItems[id].totalLength += itemObj.pieceLength;
         }
-        groupedItems[id].count++; // для не-трековых будем использовать count как количество единиц
+        groupedItems[id].count++;
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
 
-      // Теперь для трековых групп пересчитываем количество заказываемых единиц по номинальной длине.
+      // Пересчитываем количество заказываемых единиц для трековых сегментов.
       let totalPrice = 0;
       let tbodyHTML = "";
       for (const [id, group] of Object.entries(groupedItems)) {
@@ -539,7 +540,6 @@
           let qty;
           if (group.isTrack) {
             let nominal = getNominalLength(id);
-            // Если сумма требуемых длин меньше номинальной единицы, то заказываем 1
             qty = Math.ceil(group.totalLength / nominal);
           } else {
             qty = group.count;
