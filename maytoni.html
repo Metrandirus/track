@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Maytoni UNITY – Подбор трековой системы</title>
+  <title>NOVOTECH – Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Общие стили для maytoni.html */
+    /* Общие стили для novotech.html */
     html, body {
       margin: 0;
       padding: 0;
@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Результаты подбора будут выведены здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -89,159 +89,84 @@
   </div>
   
   <script>
-    /***** Встроенные данные о продуктах (Maytoni UNITY) *****/
+    /***** Встроенные данные для NOVOTECH *****/
     var products = {
-      "one-phase": {
+      "novotech": {
         "black": {
           "surface": {
+            // Доступны только варианты 1м и 2м
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+              { "min": 0, "max": 100, "items": ["135136"] },  // 1м черный
+              { "min": 101, "max": 200, "items": ["135138"] }   // 2м черный
             ],
             "connectors": {
-              "straight": ["TRA001C-11B"],
-              "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "straight": ["135140"],  // прямой черный
+              "L-shape": ["135142"],   // угловой черный
+              "T-shape": ["135144"]    // Т-образный черный
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
-            }
-          },
-          "recessed": {
-            "lengthOptions": [
-              // Для встраиваемого монтажа доступны только варианты 1м и 2м
-              { "min": 0, "max": 100, "items": ["TRX004-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX004-112B"] }
-            ],
-            "connectors": {
-              "straight": ["TRA002C-11B"],
-              "L-shape": ["TRA002CL-11B"],
-              "T-shape": ["TRA002CT-11B"]
-            },
-            "components": {
-              "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м TRX004-111B", "price": 1600, "image": "images/TRX004-111B.png" },
-              "TRX004-112B": { "name": "Шинопровод встраиваемый черный 2м TRX004-112B", "price": 2600, "image": "images/TRX004-112B.png" },
-              "TRA002C-11B": { "name": "Коннектор прямой черный для встраивания TRA002C-11B", "price": 110, "image": "images/TRA002C-11B.png" },
-              "TRA002CL-11B": { "name": "Коннектор угловой черный для встраивания TRA002CL-11B", "price": 160, "image": "images/TRA002CL-11B.png" },
-              "TRA002CT-11B": { "name": "Коннектор Т-образный черный для встраивания TRA002CT-11B", "price": 210, "image": "images/TRA002CT-11B.png" }
-            }
-          },
-          "stretch-ceiling": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX003-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX003-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX003-113B"] }
-            ],
-            "connectors": {
-              "straight": ["TRA003C-11B"],
-              "L-shape": ["TRA003CL-11B"],
-              "T-shape": ["TRA003CT-11B"]
-            },
-            "additionalComponents": ["TRA001MP-112S"],
-            "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+              "135136": { "name": "Шинопровод накладной черный 1м", "price": 960, "image": "images/135136.png" },
+              "135138": { "name": "Шинопровод накладной черный 2м", "price": 1920, "image": "images/135138.png" },
+              "135140": { "name": "Коннектор прямой черный", "price": 250, "image": "images/135140.png" },
+              "135142": { "name": "Коннектор угловой черный", "price": 250, "image": "images/135142.png" },
+              "135144": { "name": "Коннектор Т-образный черный", "price": 350, "image": "images/135144.png" }
             }
           },
           "hanging": {
+            // Для подвесного монтажа используются те же данные, что и для surface
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+              { "min": 0, "max": 100, "items": ["135136"] },
+              { "min": 101, "max": 200, "items": ["135138"] }
             ],
             "connectors": {
-              "straight": ["TRA001C-11B"],
-              "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "straight": ["135140"],
+              "L-shape": ["135142"],
+              "T-shape": ["135144"]
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "135136": { "name": "Шинопровод накладной черный 1м", "price": 960, "image": "images/135136.png" },
+              "135138": { "name": "Шинопровод накладной черный 2м", "price": 1920, "image": "images/135138.png" },
+              "135140": { "name": "Коннектор прямой черный", "price": 250, "image": "images/135140.png" },
+              "135142": { "name": "Коннектор угловой черный", "price": 250, "image": "images/135142.png" },
+              "135144": { "name": "Коннектор Т-образный черный", "price": 350, "image": "images/135144.png" }
             }
           }
         },
         "white": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
+              { "min": 0, "max": 100, "items": ["135135"] },  // 1м белый
+              { "min": 101, "max": 200, "items": ["135137"] }   // 2м белый
             ],
             "connectors": {
-              "straight": ["TRA001C-11W"],
-              "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
+              "straight": ["135139"],  // прямой белый
+              "L-shape": ["135141"],   // угловой белый
+              "T-shape": ["135143"]    // Т-образный белый
             },
             "components": {
-              "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
-              "TRX001-112W": { "name": "Шинопровод накладной белый 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
-              "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
-              "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
-              "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" }
-            }
-          },
-          "recessed": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX004-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX004-112W"] }
-            ],
-            "connectors": {
-              "straight": ["TRA002C-11W"],
-              "L-shape": ["TRA002CL-11W"],
-              "T-shape": ["TRA002CT-11W"]
-            },
-            "components": {
-              "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м TRX004-111W", "price": 1650, "image": "images/TRX004-111W.png" },
-              "TRX004-112W": { "name": "Шинопровод встраиваемый белый 2м TRX004-112W", "price": 2650, "image": "images/TRX004-112W.png" },
-              "TRA002C-11W": { "name": "Коннектор прямой белый для встраивания TRA002C-11W", "price": 115, "image": "images/TRA002C-11W.png" },
-              "TRA002CL-11W": { "name": "Коннектор угловой белый для встраивания TRA002CL-11W", "price": 165, "image": "images/TRA002CL-11W.png" },
-              "TRA002CT-11W": { "name": "Коннектор Т-образный белый для встраивания TRA002CT-11W", "price": 215, "image": "images/TRA002CT-11W.png" }
-            }
-          },
-          "stretch-ceiling": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
-            ],
-            "connectors": {
-              "straight": ["TRA001C-11W"],
-              "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
-            },
-            "additionalComponents": ["TRA001MP-112S"],
-            "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+              "135135": { "name": "Шинопровод накладной белый 1м", "price": 960, "image": "images/135135.png" },
+              "135137": { "name": "Шинопровод накладной белый 2м", "price": 1920, "image": "images/135137.png" },
+              "135139": { "name": "Коннектор прямой белый", "price": 250, "image": "images/135139.png" },
+              "135141": { "name": "Коннектор угловой белый", "price": 250, "image": "images/135141.png" },
+              "135143": { "name": "Коннектор Т-образный белый", "price": 350, "image": "images/135143.png" }
             }
           },
           "hanging": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
+              { "min": 0, "max": 100, "items": ["135135"] },
+              { "min": 101, "max": 200, "items": ["135137"] }
             ],
             "connectors": {
-              "straight": ["TRA001C-11W"],
-              "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
+              "straight": ["135139"],
+              "L-shape": ["135141"],
+              "T-shape": ["135143"]
             },
             "components": {
-              "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
-              "TRX001-112W": { "name": "Шинопровод накладной белый 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
-              "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
-              "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
-              "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" }
+              "135135": { "name": "Шинопровод накладной белый 1м", "price": 960, "image": "images/135135.png" },
+              "135137": { "name": "Шинопровод накладной белый 2м", "price": 1920, "image": "images/135137.png" },
+              "135139": { "name": "Коннектор прямой белый", "price": 250, "image": "images/135139.png" },
+              "135141": { "name": "Коннектор угловой белый", "price": 250, "image": "images/135141.png" },
+              "135143": { "name": "Коннектор Т-образный белый", "price": 350, "image": "images/135143.png" }
             }
           }
         }
@@ -249,53 +174,16 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Сопоставление для подвесов для режима hanging (Maytoni)
-    var suspensionMappingMaytoni = {
-      "TRA001CW-11B": { "name": "Подвес для Maytoni черный", "price": 490, "image": "images/TRA001CW-11B.png" },
-      "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/TRA001CW-11W.png" }
+    // Глобальная переменная для подвесов NOVOTECH
+    var suspensionMapping = {
+      "135152": { "name": "Подвес черный NOVOTECH", "price": 430, "image": "images/135152.png" },
+      "135151": { "name": "Подвес белый NOVOTECH", "price": 430, "image": "images/135151.png" }
     };
 
-    // Функция для подбора трековых элементов для Maytoni в режиме surface (варианты 1м, 2м, 3м)
-    function getTracksForMaytoniSurface(legLength, lengthOptions) {
+    // Функция для подбора трековых сегментов для NOVOTECH (доступны только варианты 1м и 2м).
+    // Если требуемая длина кратна 400 см, используются только 2м сегменты.
+    function getTracksForNovotech(legLength, lengthOptions) {
       let pieces = [];
-      // Если требуемая длина кратна 400 см (например, 400, 800, …), используем только 2м сегменты
-      if (legLength % 400 === 0) {
-        let count = legLength / 200;
-        for (let i = 0; i < count; i++) {
-          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-        }
-        return pieces;
-      }
-      // Иначе стандартная логика:
-      if (legLength <= 100) {
-        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-      } else if (legLength <= 200) {
-        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-      } else if (legLength <= 300) {
-        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-      } else {
-        let fullPieces = Math.floor(legLength / 300);
-        for (let i = 0; i < fullPieces; i++) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        }
-        let remainder = legLength - fullPieces * 300;
-        if (remainder > 0) {
-          if (remainder <= 100) {
-            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-          } else if (remainder <= 200) {
-            pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else {
-            pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-          }
-        }
-      }
-      return pieces;
-    }
-    
-    // Функция для recessed (встраиваемый монтаж) – доступны только варианты 1м и 2м
-    function getTracksForMaytoniRecessed(legLength, lengthOptions) {
-      let pieces = [];
-      // Если требуемая длина кратна 400 см, используем только 2м сегменты
       if (legLength % 400 === 0) {
         let count = legLength / 200;
         for (let i = 0; i < count; i++) {
@@ -323,20 +211,37 @@
       }
       return pieces;
     }
+    // Для NOVOTECH используются одни и те же данные для surface и hanging
+    function getTracksForNovotechSurface(legLength, lengthOptions) {
+      return getTracksForNovotech(legLength, lengthOptions);
+    }
+    function getTracksForNovotechHanging(legLength, lengthOptions) {
+      return getTracksForNovotech(legLength, lengthOptions);
+    }
     
-    // Функция для определения номинальной длины трека по его id
+    // Функция для определения номинальной длины трека по его id для NOVOTECH.
+    // Для "135136" и "135135" – 100 см, для "135138" и "135137" – 200 см.
     function getNominalLength(id) {
-      if (id.indexOf("-111") !== -1) return 100;
-      if (id.indexOf("-112") !== -1) return 200;
-      if (id.indexOf("-113") !== -1) return 300;
-      return null;
+      if (id === "135136" || id === "135135") return 100;
+      if (id === "135138" || id === "135137") return 200;
+      return 0;
     }
     
     // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
-
+    
+    // Функция проверки режима монтажа для NOVOTECH – доступны только surface и hanging.
+    function checkMountingForNovotech(mountingParam) {
+      if (mountingParam !== "surface" && mountingParam !== "hanging") {
+        document.getElementById("resultContainer").style.display = "none";
+        document.getElementById("debug").textContent = "Для NOVOTECH доступны только режимы surface и hanging.";
+        return false;
+      }
+      return true;
+    }
+    
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -345,60 +250,53 @@
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     };
-
-    // Основная функция подбора для Maytoni с логикой для разных фигур
+    
+    // Основная функция подбора для NOVOTECH с логикой для разных фигур
     window.showSelection = function() {
-      console.log("Начало работы showSelection (Maytoni)");
-
+      console.log("Начало работы showSelection (NOVOTECH)");
+    
       const params = new URLSearchParams(window.location.search);
-      const type = params.get("type") || "one-phase";
+      // Для NOVOTECH используем тип "novotech"
+      const type = "novotech";
       const color = params.get("color") || "black";
       let mountingParam = params.get("mounting") || "surface";
+      
+      if (!checkMountingForNovotech(mountingParam)) return;
+      
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
-
-      console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
-
-      // Для режимов stretch-ceiling и hanging используем базу из surface
-      let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
-          (products[type] && products[type][color] && products[type][color]["surface"]) :
-          (products[type] && products[type][color] && products[type][color][mountingParam]);
+    
+      console.log("Параметры подбора (NOVOTECH):", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
+    
+      // Для NOVOTECH треки доступны только в режимах surface и hanging – используем данные из "surface"
+      let effectiveProduct = (mountingParam === "hanging") ?
+          (products.novotech && products.novotech[color] && products.novotech[color]["surface"]) :
+          (products.novotech && products.novotech[color] && products.novotech[color][mountingParam]) ||
+          (products.novotech && products.novotech[color] && products.novotech[color]["surface"]);
       if (!effectiveProduct) {
-        throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
+        throw new Error("Не найден комплект для NOVOTECH с выбранными параметрами.");
       }
-
+    
+      // Для режима hanging оставляем данные surface
       let components = effectiveProduct.components;
-      if (mountingParam === "stretch-ceiling") {
-        const ceilingProduct = products[type][color]["stretch-ceiling"];
-        if (ceilingProduct && ceilingProduct.components) {
-          components = Object.assign({}, components, ceilingProduct.components);
-        }
-      }
-
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
-
+    
       // Логика подбора по фигурам:
       if (shape === "straight") {
-        selectedItems = (mountingParam === "recessed") ?
-                        getTracksForMaytoniRecessed(lengthA, lengthOptions) :
-                        getTracksForMaytoniSurface(lengthA, lengthOptions);
+        selectedItems = (mountingParam === "hanging") ?
+                        getTracksForNovotechHanging(lengthA, lengthOptions) :
+                        getTracksForNovotechSurface(lengthA, lengthOptions);
       }
       else if (shape === "L-shape") {
-        let legATracks = (mountingParam === "recessed") ?
-                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
-                         getTracksForMaytoniSurface(lengthA, lengthOptions);
-        let legBTracks = (mountingParam === "recessed") ?
-                         getTracksForMaytoniRecessed(lengthB, lengthOptions) :
-                         getTracksForMaytoniSurface(lengthB, lengthOptions);
+        let legATracks = getTracksForNovotech(lengthA, lengthOptions);
+        let legBTracks = getTracksForNovotech(lengthB, lengthOptions);
         selectedItems = legATracks.concat(legBTracks);
-        // Добавляем один угловой коннектор для L-shape
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Добавляем прямые коннекторы внутри каждой "ноги", если более одного сегмента
         if (legATracks.length > 1) {
           for (let i = 0; i < legATracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -411,14 +309,8 @@
         }
       }
       else if (shape === "T-shape") {
-        // T-образная система:
-        // Верхний трек – длина A целиком, вертикальный – длина B.
-        let topTracks = (mountingParam === "recessed") ?
-                        getTracksForMaytoniRecessed(lengthA, lengthOptions) :
-                        getTracksForMaytoniSurface(lengthA, lengthOptions);
-        let verticalTracks = (mountingParam === "recessed") ?
-                             getTracksForMaytoniRecessed(lengthB, lengthOptions) :
-                             getTracksForMaytoniSurface(lengthB, lengthOptions);
+        let topTracks = getTracksForNovotech(lengthA, lengthOptions);
+        let verticalTracks = getTracksForNovotech(lengthB, lengthOptions);
         selectedItems = topTracks.concat(verticalTracks);
         if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
@@ -435,20 +327,13 @@
         }
       }
       else if (shape === "P-shape") {
-        // P-образная система:
-        // Боковые треки – длина A (используются дважды), соединяющий – длина B.
-        let sideTracks = (mountingParam === "recessed") ?
-                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
-                         getTracksForMaytoniSurface(lengthA, lengthOptions);
-        let connectingTracks = (mountingParam === "recessed") ?
-                               getTracksForMaytoniRecessed(lengthB, lengthOptions) :
-                               getTracksForMaytoniSurface(lengthB, lengthOptions);
+        let sideTracks = getTracksForNovotech(lengthA, lengthOptions);
+        let connectingTracks = getTracksForNovotech(lengthB, lengthOptions);
         selectedItems = sideTracks.concat(sideTracks, connectingTracks);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Для боковых сторон добавляем прямые коннекторы между сегментами каждого массива
         if (sideTracks.length > 1) {
           for (let i = 0; i < sideTracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -462,21 +347,14 @@
         }
       }
       else if (shape === "rectangle") {
-        // Прямоугольная система:
-        // Для каждой из длин A и B выбираем сегменты, затем повторяем их дважды.
-        let tracksA = (mountingParam === "recessed") ?
-                      getTracksForMaytoniRecessed(lengthA, lengthOptions) :
-                      getTracksForMaytoniSurface(lengthA, lengthOptions);
-        let tracksB = (mountingParam === "recessed") ?
-                      getTracksForMaytoniRecessed(lengthB, lengthOptions) :
-                      getTracksForMaytoniSurface(lengthB, lengthOptions);
-        // Собираем треки для двух сторон по длине A и двух сторон по длине B.
+        let tracksA = getTracksForNovotech(lengthA, lengthOptions);
+        let tracksB = getTracksForNovotech(lengthB, lengthOptions);
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        // Добавляем 4 угловых коннектора (по одному на угол)
-        for (let i = 0; i < 4; i++) {
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          for (let i = 0; i < 4; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+          }
         }
-        // Для каждой стороны добавляем прямые коннекторы:
         let straightForA = (tracksA.length > 1) ? 2 * (tracksA.length - 1) : 0;
         let straightForB = (tracksB.length > 1) ? 2 * (tracksB.length - 1) : 0;
         for (let i = 0; i < straightForA + straightForB; i++) {
@@ -484,10 +362,10 @@
         }
       }
       else {
-        throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
+        throw new Error("Логика для фигуры '" + shape + "' не реализована для NOVOTECH.");
       }
       
-      // Для систем типа straight добавляем автоматические прямые коннекторы, если они ещё не добавлены.
+      // Для систем straight добавляем недостающие прямые коннекторы (если не были добавлены ранее)
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -500,35 +378,23 @@
         }
       }
       
-      console.log("Подобранные треки (до доп. компонентов):", selectedItems);
-
-      // Режим stretch-ceiling – добавляем профили.
-      if (mountingParam === "stretch-ceiling") {
-        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        let profileCount = Math.ceil(trackLength / 200);
-        if (profileCount % 2 !== 0) { profileCount++; }
-        console.log("Профилей для добавления:", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
-        }
-      }
-      
+      console.log("Подобранные треки (до подвесов):", selectedItems);
+    
       // Режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        let suspensionId = (color === "black") ? "TRA001CW-11B" : "TRA001CW-11W";
+        let suspensionId = (color === "black") ? "135152" : "135151";
         for (let i = 0; i < suspCount; i++) {
           selectedItems.push({ id: suspensionId });
         }
       }
       
-      console.log("Финальный результат подбора (Maytoni):", selectedItems);
-
+      console.log("Финальный результат подбора (NOVOTECH):", selectedItems);
+    
       // Группировка элементов.
-      // Для трековых сегментов суммируем требуемую длину, для остальных просто считаем количество.
+      // Для трековых сегментов суммируем требуемую длину, для остальных – считаем количество.
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -538,7 +404,9 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          groupedItems[id] = { totalLength: 0, count: 0, component: components[id] || suspensionMappingMaytoni[id] || {}, isTrack: isTrack };
+          // Ищем описание компонента сначала в products.novotech[color]["surface"].components, затем в suspensionMapping
+          let comp = (products.novotech[color]["surface"].components[id]) || suspensionMapping[id] || {};
+          groupedItems[id] = { totalLength: 0, count: 0, component: comp, isTrack: isTrack };
         }
         if (isTrack) {
           groupedItems[id].totalLength += itemObj.pieceLength;
@@ -546,7 +414,7 @@
         groupedItems[id].count++;
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
-
+    
       // Пересчитываем количество заказываемых единиц для трековых сегментов.
       let totalPrice = 0;
       let tbodyHTML = "";
@@ -574,13 +442,13 @@
           console.warn("Компонент с ID " + id + " не найден или не имеет имени.");
         }
       }
-
+    
       document.getElementById("results").innerHTML = tbodyHTML;
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
       document.getElementById("resultContainer").style.display = "block";
-      console.log("Подбор завершён успешно (Maytoni).");
+      console.log("Подбор завершён успешно (NOVOTECH).");
     };
-
+    
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
