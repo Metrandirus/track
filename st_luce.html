@@ -152,7 +152,7 @@
               "ST002.429.00": { "name": "Коннектор угловой черный (накладной)", "price": 240, "image": "images/ST002.429.00.png" },
               "ST002.439.00": { "name": "Коннектор T-образный черный (накладной)", "price": 370, "image": "images/ST002.439.00.png" }
             }
-            // Дополнительные компоненты для stretch-ceiling (профили, торцевые заглушки, угол‑соединитель) будут добавляться далее.
+            // Дополнительные компоненты для stretch-ceiling (профили, торцевые заглушки, угол-соединители) добавляются далее.
           },
           "hanging": {
             "lengthOptions": [
@@ -309,7 +309,7 @@
     }
 
     // Функция для подбора трековых элементов для ST LUCE.
-    // Используем сегменты: для surface и recessed доступны варианты 1м, 2м, 3м.
+    // Используем сегменты: для surface и recessed доступны варианты 1м, 2м и 3м.
     function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -343,7 +343,18 @@
     function getTracksForStLuceSurface(legLength, lengthOptions) {
       return getTracksForStLuce(legLength, lengthOptions);
     }
-
+    
+    // Добавляем функцию getNominalLength для ST LUCE.
+    // Для трековых сегментов: если id содержит ".419.00" или ".519.00" – возвращается 100,
+    // если содержит ".429.00" или ".529.00" – возвращается 200,
+    // если содержит ".439.00" или ".539.00" – возвращается 300.
+    function getNominalLength(id) {
+      if (id.indexOf(".419.00") !== -1 || id.indexOf(".519.00") !== -1) return 100;
+      if (id.indexOf(".429.00") !== -1 || id.indexOf(".529.00") !== -1) return 200;
+      if (id.indexOf(".439.00") !== -1 || id.indexOf(".539.00") !== -1) return 300;
+      return null;
+    }
+    
     // Основная функция подбора для ST LUCE
     window.showSelection = function() {
       console.log("Начало работы showSelection (ST LUCE)");
@@ -455,12 +466,23 @@
             getTracksForStLuceRecessed(lengthB, lengthOptions) :
             getTracksForStLuceSurface(lengthB, lengthOptions);
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
+        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
+          for (let i = 0; i < 4; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+          }
+        }
+        // Для каждой стороны – добавляем по одному прямому коннектору между сегментами
+        let straightForA = (tracksA.length > 1) ? (tracksA.length - 1) : 0;
+        let straightForB = (tracksB.length > 1) ? (tracksB.length - 1) : 0;
+        for (let i = 0; i < straightForA + straightForB; i++) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+        }
       } else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE.");
       }
       
-      // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы.
-      {
+      // Для систем типа straight – добавляем недостающие прямые коннекторы, если они не были добавлены.
+      if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
         let currentStraight = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors.straight[0]).length;
@@ -476,10 +498,11 @@
 
       // Режим stretch-ceiling – добавляем профили, торцевые заглушки и угол-соединители.
       if (mountingParam === "stretch-ceiling") {
-        // Суммируем только длины трековых сегментов.
+        // Суммируем только длины трековых сегментов
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        // Для ST LUCE используем 2м профили, если суммарная длина меньше или равна 900 см, иначе – 3м.
+        // Выбираем профиль: для ST LUCE доступны профили 2м и 3м.
+        // Здесь, если общая длина ≤ 900 см – используем 2м профиль, иначе 3м.
         let profileData;
         if (trackLength <= 900) {
           profileData = { id: "ST045.429.00", pieceLength: 200, price: additionalMapping["ST045.429.00"].price };
@@ -526,6 +549,7 @@
       console.log("Финальный результат подбора (ST LUCE):", selectedItems);
 
       // Группировка элементов.
+      // Для трековых сегментов суммируем требуемую длину, для остальных – считаем количество.
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -533,11 +557,11 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
-        let comp = components[id] || suspensionMapping[id] || additionalMapping[id] || {};
+        let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          groupedItems[id] = { totalLength: 0, count: 0, component: comp };
+          groupedItems[id] = { totalLength: 0, count: 0, component: components[id] || suspensionMapping[id] || additionalMapping[id] || {} };
         }
-        if (itemObj.hasOwnProperty("pieceLength")) {
+        if (isTrack) {
           groupedItems[id].totalLength += itemObj.pieceLength;
         }
         groupedItems[id].count++;
