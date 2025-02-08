@@ -87,7 +87,7 @@
     </div>
     <div id="debug" class="debug"></div>
   </div>
-
+  
   <script>
     /***** Встроенные данные для AMBRELA *****/
     var products = {
@@ -95,135 +95,133 @@
         "black": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7102"] },  // 1м
-              { "min": 101, "max": 200, "items": ["GL7104"] },  // 2м
-              { "min": 201, "max": 300, "items": ["GL7106"] }   // 3м
+              { "min": 0, "max": 100, "items": ["GL7102 BK"] },  // 1м черный
+              { "min": 101, "max": 200, "items": ["GL7104 BK"] },  // 2м черный
+              { "min": 201, "max": 300, "items": ["GL7106 BK"] }   // 3м черный
             ],
             "connectors": {
-              "straight": ["GL7066"],  // прямой
-              "L-shape": ["GL7071"],   // угловой
-              "T-shape": ["GL7078"]    // Т-образный
+              "straight": ["GL7066 BK"],  // прямой черный
+              "L-shape": ["GL7071 BK"],   // угловой черный
+              "T-shape": ["GL7078 BK"]    // Т-образный черный
             },
             "components": {
-              "GL7102": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
-              "GL7104": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
-              "GL7106": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
-              "GL7066": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
-              "GL7071": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
-              "GL7078": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             }
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7122"] },  // 1м
-              { "min": 101, "max": 200, "items": ["GL7124"] }   // 2м
+              { "min": 0, "max": 100, "items": ["GL7122 BK"] },  // 1м черный
+              { "min": 101, "max": 200, "items": ["GL7124 BK"] }   // 2м черный
             ],
             "connectors": {
-              "straight": ["GL7160"],  // прямой (встраиваемый)
-              "L-shape": ["GL7164"],   // угловой (встраиваемый)
-              "T-shape": ["GL7168"]    // Т-образный (встраиваемый)
+              "straight": ["GL7160 BK"],  // прямой (встраиваемый) черный
+              "L-shape": ["GL7164 BK"],   // угловой (встраиваемый) черный
+              "T-shape": ["GL7168 BK"]    // T-образный (встраиваемый) черный
             },
             "components": {
-              "GL7122": { "name": "Шинопровод встраиваемый черный 1м", "price": 1190, "image": "images/GL7122.jpg" },
-              "GL7124": { "name": "Шинопровод встраиваемый черный 2м", "price": 2380, "image": "images/GL7124.jpg" },
-              "GL7160": { "name": "Коннектор прямой черный (встраиваемый)", "price": 205, "image": "images/GL7160.jpg" },
-              "GL7164": { "name": "Коннектор угловой черный (встраиваемый)", "price": 225, "image": "images/GL7164.jpg" },
-              "GL7168": { "name": "Коннектор T-образный черный (встраиваемый)", "price": 410, "image": "images/GL7168.jpg" }
+              "GL7122 BK": { "name": "Шинопровод встраиваемый черный 1м", "price": 1190, "image": "images/GL7122.jpg" },
+              "GL7124 BK": { "name": "Шинопровод встраиваемый черный 2м", "price": 2380, "image": "images/GL7124.jpg" },
+              "GL7160 BK": { "name": "Коннектор прямой черный (встраиваемый)", "price": 205, "image": "images/GL7160.jpg" },
+              "GL7164 BK": { "name": "Коннектор угловой черный (встраиваемый)", "price": 225, "image": "images/GL7164.jpg" },
+              "GL7168 BK": { "name": "Коннектор T-образный черный (встраиваемый)", "price": 410, "image": "images/GL7168.jpg" }
             }
           },
           "stretch-ceiling": {
-            // Для stretch-ceiling базовые треки берём из surface
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7102"] },
-              { "min": 101, "max": 200, "items": ["GL7104"] },
-              { "min": 201, "max": 300, "items": ["GL7106"] }
+              { "min": 0, "max": 100, "items": ["GL7102 BK"] },
+              { "min": 101, "max": 200, "items": ["GL7104 BK"] },
+              { "min": 201, "max": 300, "items": ["GL7106 BK"] }
             ],
             "connectors": {
-              "straight": ["GL7066"],
-              "L-shape": ["GL7071"],
-              "T-shape": ["GL7078"]
+              "straight": ["GL7066 BK"],
+              "L-shape": ["GL7071 BK"],
+              "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "GL7102": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
-              "GL7104": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
-              "GL7106": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
-              "GL7066": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
-              "GL7071": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
-              "GL7078": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             },
-            "additionalComponents": []  // Дополнительные компоненты для stretch-ceiling добавляются через логику ниже.
+            "additionalComponents": [] // Дополнительные компоненты (профили, заглушки, угол-соединители) добавляются ниже
           },
           "hanging": {
-            // Для hanging берём базу surface
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7102"] },
-              { "min": 101, "max": 200, "items": ["GL7104"] },
-              { "min": 201, "max": 300, "items": ["GL7106"] }
+              { "min": 0, "max": 100, "items": ["GL7102 BK"] },
+              { "min": 101, "max": 200, "items": ["GL7104 BK"] },
+              { "min": 201, "max": 300, "items": ["GL7106 BK"] }
             ],
             "connectors": {
-              "straight": ["GL7066"],
-              "L-shape": ["GL7071"],
-              "T-shape": ["GL7078"]
+              "straight": ["GL7066 BK"],
+              "L-shape": ["GL7071 BK"],
+              "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "GL7102": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
-              "GL7104": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
-              "GL7106": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
-              "GL7066": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
-              "GL7071": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
-              "GL7078": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/GL7104.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/GL7106.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/GL7066.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             }
           }
         },
         "white": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7101"] },
-              { "min": 101, "max": 200, "items": ["GL7103"] },
-              { "min": 201, "max": 300, "items": ["GL7105"] }
+              { "min": 0, "max": 100, "items": ["GL7101 WH"] },
+              { "min": 101, "max": 200, "items": ["GL7103 WH"] },
+              { "min": 201, "max": 300, "items": ["GL7105 WH"] }
             ],
             "connectors": {
-              "straight": ["GL7065"],
-              "L-shape": ["GL7070"],
-              "T-shape": ["GL7077"]
+              "straight": ["GL7065 WH"],
+              "L-shape": ["GL7070 WH"],
+              "T-shape": ["GL7077 WH"]
             },
             "components": {
-              "GL7101": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/GL7101.jpg" },
-              "GL7103": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/GL7103.jpg" },
-              "GL7105": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/GL7105.jpg" },
-              "GL7065": { "name": "Коннектор прямой белый", "price": 235, "image": "images/GL7065.jpg" },
-              "GL7070": { "name": "Коннектор угловой белый", "price": 295, "image": "images/GL7070.jpg" },
-              "GL7077": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/GL7077.jpg" }
+              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/GL7101.jpg" },
+              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/GL7103.jpg" },
+              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/GL7105.jpg" },
+              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/GL7065.jpg" },
+              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/GL7070.jpg" },
+              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/GL7077.jpg" }
             }
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7121"] },
-              { "min": 101, "max": 200, "items": ["GL7123"] }
+              { "min": 0, "max": 100, "items": ["GL7121 WH"] },
+              { "min": 101, "max": 200, "items": ["GL7123 WH"] }
             ],
             "connectors": {
-              "straight": ["GL7159"],
-              "L-shape": ["GL7163"],
-              "T-shape": ["GL7167"]
+              "straight": ["GL7159 WH"],
+              "L-shape": ["GL7163 WH"],
+              "T-shape": ["GL7167 WH"]
             },
             "components": {
-              "GL7121": { "name": "Шинопровод встраиваемый белый 1м", "price": 1190, "image": "images/GL7121.jpg" },
-              "GL7123": { "name": "Шинопровод встраиваемый белый 2м", "price": 2380, "image": "images/GL7123.jpg" },
-              "GL7159": { "name": "Коннектор прямой белый (встраиваемый)", "price": 205, "image": "images/GL7159.jpg" },
-              "GL7163": { "name": "Коннектор угловой белый (встраиваемый)", "price": 225, "image": "images/GL7163.jpg" },
-              "GL7167": { "name": "Коннектор T-образный белый (встраиваемый)", "price": 410, "image": "images/GL7167.jpg" }
+              "GL7121 WH": { "name": "Шинопровод встраиваемый белый 1м", "price": 1190, "image": "images/GL7121.jpg" },
+              "GL7123 WH": { "name": "Шинопровод встраиваемый белый 2м", "price": 2380, "image": "images/GL7123.jpg" },
+              "GL7159 WH": { "name": "Коннектор прямой белый (встраиваемый)", "price": 205, "image": "images/GL7159.jpg" },
+              "GL7163 WH": { "name": "Коннектор угловой белый (встраиваемый)", "price": 225, "image": "images/GL7163.jpg" },
+              "GL7167 WH": { "name": "Коннектор T-образный белый (встраиваемый)", "price": 410, "image": "images/GL7167.jpg" }
             }
           },
           "stretch-ceiling": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7101"] },
-              { "min": 101, "max": 200, "items": ["GL7103"] },
-              { "min": 201, "max": 300, "items": ["GL7105"] }
+              { "min": 0, "max": 100, "items": ["GL7101 WH"] },
+              { "min": 101, "max": 200, "items": ["GL7103 WH"] },
+              { "min": 201, "max": 300, "items": ["GL7105 WH"] }
             ],
             "connectors": {
-              "straight": ["GL7065"],
-              "L-shape": ["GL7070"],
-              "T-shape": ["GL7077"]
+              "straight": ["GL7065 WH"],
+              "L-shape": ["GL7070 WH"],
+              "T-shape": ["GL7077 WH"]
             },
             "additionalComponents": ["ST001MP-112S"],
             "components": {
@@ -232,22 +230,22 @@
           },
           "hanging": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7101"] },
-              { "min": 101, "max": 200, "items": ["GL7103"] },
-              { "min": 201, "max": 300, "items": ["GL7105"] }
+              { "min": 0, "max": 100, "items": ["GL7101 WH"] },
+              { "min": 101, "max": 200, "items": ["GL7103 WH"] },
+              { "min": 201, "max": 300, "items": ["GL7105 WH"] }
             ],
             "connectors": {
-              "straight": ["GL7065"],
-              "L-shape": ["GL7070"],
-              "T-shape": ["GL7077"]
+              "straight": ["GL7065 WH"],
+              "L-shape": ["GL7070 WH"],
+              "T-shape": ["GL7077 WH"]
             },
             "components": {
-              "GL7101": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/GL7101.jpg" },
-              "GL7103": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/GL7103.jpg" },
-              "GL7105": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/GL7105.jpg" },
-              "GL7065": { "name": "Коннектор прямой белый", "price": 235, "image": "images/GL7065.jpg" },
-              "GL7070": { "name": "Коннектор угловой белый", "price": 295, "image": "images/GL7070.jpg" },
-              "GL7077": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/GL7077.jpg" }
+              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/GL7101.jpg" },
+              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/GL7103.jpg" },
+              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/GL7105.jpg" },
+              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/GL7065.jpg" },
+              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/GL7070.jpg" },
+              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/GL7077.jpg" }
             }
           }
         }
@@ -257,14 +255,14 @@
 
     /***** Дополнительные сопоставления для AMBRELA *****/
     var suspensionMappingAmbrela = {
-      "GL7192": { "name": "Подвес черный AMBRELA", "price": 310, "image": "images/GL7192.jpg" },
-      "GL7191": { "name": "Подвес белый AMBRELA", "price": 320, "image": "images/GL7191.jpg" }
+      "GL7192 BK": { "name": "Подвес черный AMBRELA", "price": 310, "image": "images/GL7192.jpg" },
+      "GL7191 WH": { "name": "Подвес белый AMBRELA", "price": 320, "image": "images/GL7191.jpg" }
     };
     var additionalMappingAmbrela = {
-      "GL7132": { "name": "Профиль 3м AMBRELA", "price": 4860, "image": "images/GL7132.jpg" },
-      "GL7131": { "name": "Профиль 2м AMBRELA", "price": 3230, "image": "images/GL7131.jpg" },
-      "GL7203": { "name": "Заглушка для корпуса (2 шт.) белая", "price": 170, "image": "images/GL7203.jpg" },
-      "GL7204": { "name": "Заглушка для корпуса (2 шт.) черная", "price": 170, "image": "images/GL7204.jpg" },
+      "GL7132 BK": { "name": "Профиль 3м AMBRELA", "price": 4860, "image": "images/GL7132.jpg" },
+      "GL7131 BK": { "name": "Профиль 2м AMBRELA", "price": 3230, "image": "images/GL7131.jpg" },
+      "GL7203 WH": { "name": "Заглушка для корпуса (2 шт.) белая", "price": 170, "image": "images/GL7203.jpg" },
+      "GL7204 BK": { "name": "Заглушка для корпуса (2 шт.) черная", "price": 170, "image": "images/GL7204.jpg" },
       "GL7208": { "name": "Соединитель угловой для профиля", "price": 170, "image": "images/GL7208.jpg" }
     };
 
@@ -401,6 +399,16 @@
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
+        if (legATracks.length > 1) {
+          for (let i = 0; i < legATracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        if (legBTracks.length > 1) {
+          for (let i = 0; i < legBTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
       } else if (shape === "T-shape") {
         let topTracks = (mountingParam === "recessed") ?
                         getTracksForStLuceRecessed(lengthA, lengthOptions) :
@@ -467,7 +475,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
       }
       
-      // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы
+      // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы.
       {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -488,12 +496,12 @@
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         // Для AMBRELA используем профили:
-        // Если общая длина ≤ 900 см – используем 2м профиль (GL7131), иначе 3м (GL7132)
+        // Если общая длина ≤ 900 см – используем профиль 2м (GL7131 WH/BK, для белых — WH, для чёрных — BK), иначе 3м (GL7132)
         let profileData;
         if (trackLength <= 900) {
-          profileData = { id: "GL7131", pieceLength: 200, price: additionalMappingAmbrela["GL7131"].price };
+          profileData = { id: "GL7131 " + (color === "black" ? "BK" : "WH"), pieceLength: 200, price: additionalMappingAmbrela["GL7131 BK"].price };
         } else {
-          profileData = { id: "GL7132", pieceLength: 300, price: additionalMappingAmbrela["GL7132"].price };
+          profileData = { id: "GL7132 " + (color === "black" ? "BK" : "WH"), pieceLength: 300, price: additionalMappingAmbrela["GL7132 BK"].price };
         }
         let profileCount = Math.ceil(trackLength / profileData.pieceLength);
         console.log("Профилей для добавления:", profileCount);
@@ -503,7 +511,7 @@
         // Если форма не "rectangle", добавляем торцевые заглушки
         if (shape !== "rectangle") {
           let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          let endCapsId = (color === "black") ? "GL7204" : "GL7203";
+          let endCapsId = (color === "black") ? "GL7204 BK" : "GL7203 WH";
           for (let i = 0; i < endCapsCount; i++) {
             selectedItems.push({ id: endCapsId });
           }
@@ -526,7 +534,7 @@
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        let suspensionId = (color === "black") ? "GL7192" : "GL7191";
+        let suspensionId = (color === "black") ? "GL7192 BK" : "GL7191 WH";
         for (let i = 0; i < suspCount; i++) {
           selectedItems.push({ id: suspensionId });
         }
