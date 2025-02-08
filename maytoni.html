@@ -115,6 +115,7 @@
           },
           "recessed": {
             "lengthOptions": [
+              // Для встраиваемого монтажа доступны только 1м и 2м варианты
               { "min": 0, "max": 100, "items": ["TRX004-111B"] },
               { "min": 101, "max": 200, "items": ["TRX004-112B"] }
             ],
@@ -248,14 +249,9 @@
     };
     /***** Конец встроенных данных *****/
 
-    // Новое сопоставление для подвесов для Maytoni (используется в режиме hanging)
-    var suspensionMappingMaytoni = {
-      "TRA001CW-11B": { "name": "Подвес для Maytoni черный", "price": 490, "image": "images/TRA001CW-11B.png" },
-      "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/TRA001CW-11W.png" }
-    };
-
-    // Функция для подбора трековых элементов для Maytoni (варианты 1м, 2м, 3м)
-    function getTracksForMaytoni(legLength, lengthOptions) {
+    // Функция для подбора трековых элементов для Maytoni в режиме surface (доступны 1м, 2м, 3м варианты)
+    function getTracksForMaytoniSurface(legLength, lengthOptions) {
+      // Эта функция работает для surface, где lengthOptions имеет 3 элемента.
       let pieces = [];
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
@@ -274,7 +270,7 @@
             pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
           } else if (remainder <= 200) {
             pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else { // remainder от 201 до 300
+          } else {
             pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
           }
         }
@@ -282,15 +278,32 @@
       return pieces;
     }
     
-    // Для recessed и surface используем одну и ту же логику
+    // Функция для подбора трековых элементов для Maytoni в режиме recessed (встраиваемый монтаж, доступны только 1м и 2м)
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
-      return getTracksForMaytoni(legLength, lengthOptions);
+      // Здесь lengthOptions имеет только 2 элемента: 1м и 2м.
+      let pieces = [];
+      if (legLength <= 100) {
+        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+      } else if (legLength <= 200) {
+        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+      } else {
+        let fullPieces = Math.floor(legLength / 200);
+        for (let i = 0; i < fullPieces; i++) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        }
+        let remainder = legLength - fullPieces * 200;
+        if (remainder > 0) {
+          if (remainder <= 100) {
+            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+          } else {
+            pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+          }
+        }
+      }
+      return pieces;
     }
-    function getTracksForMaytoniSurface(legLength, lengthOptions) {
-      return getTracksForMaytoni(legLength, lengthOptions);
-    }
-
-    // Функция-обёртка для коннекторов
+    
+    // Функция-обёртка для коннекторов (оставляем без изменений)
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
@@ -334,11 +347,11 @@
         }
       }
 
+      // В зависимости от режима монтажа выбираем функцию подбора трековых сегментов
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Логика подбора по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
@@ -358,7 +371,7 @@
       }
       else if (shape === "T-shape") {
         // T-образная система:
-        // Для верхнего трека используем всю длину A (покупается целиком), а затем он разрезается при монтаже.
+        // Для верхнего шинопровода используем длину A целиком (он потом разрезается), а для вертикального – длину B.
         let topTracks = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                         getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -382,7 +395,7 @@
       }
       else if (shape === "P-shape") {
         // P-образная система:
-        // Боковые треки – длина A (используются дважды), соединяющий – длина B.
+        // Длина A – боковые треки (используются дважды), а длина B – соединяющий трек.
         let sideTracks = (mountingParam === "recessed") ?
                          getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                          getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -408,7 +421,7 @@
       }
       else if (shape === "rectangle") {
         // Прямоугольная система:
-        // Для каждой из длин A и B выбираем сегменты, затем повторяем их дважды
+        // Для каждой из длин A и B выбираем сегменты, затем повторяем их дважды.
         let tracksA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                       getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -416,7 +429,7 @@
                       getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                       getTracksForMaytoniSurface(lengthB, lengthOptions);
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        // Добавляем 4 угловых коннектора для прямоугольной системы
+        // Добавляем 4 угловых коннектора
         for (let i = 0; i < 4; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
@@ -425,7 +438,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Добавляем прямые коннекторы между сегментами, если их недостаточно
+      // Добавляем прямые коннекторы, если число сегментов (с pieceLength) больше 1
       {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -442,12 +455,9 @@
 
       // Если режим stretch-ceiling – добавляем профили.
       if (mountingParam === "stretch-ceiling") {
-        // Рассчитываем общую длину трековых сегментов (только у объектов с pieceLength)
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        // Вычисляем количество профилей (профиль имеет длину 200 см)
         let profileCount = Math.ceil(trackLength / 200);
-        // Если количество профилей нечётное, прибавляем 1, чтобы получить чётное число
         if (profileCount % 2 !== 0) {
           profileCount++;
         }
@@ -459,14 +469,11 @@
       
       // Если режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
-        // Для подвесного монтажа рассчитываем общую длину трековых сегментов (с pieceLength)
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        // Рассчитываем количество подвесов: минимум 2, иначе 1 + ceil(trackLength/200)
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        // Для подвесов используем данные из suspensionMappingMaytoni (отдельное сопоставление для Maytoni)
+        // Для подвесов используем сопоставление suspensionMappingMaytoni
         let suspensionId = (color === "black") ? "TRA001CW-11B" : "TRA001CW-11W";
-        // Добавляем требуемое число подвесов
         for (let i = 0; i < suspCount; i++) {
           selectedItems.push({ id: suspensionId });
         }
@@ -489,7 +496,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формируем HTML для таблицы результатов: выводим наименование и артикул.
+      // Формируем HTML для таблицы результатов
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
