@@ -150,7 +150,7 @@
               "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
               "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             },
-            "additionalComponents": [] 
+            "additionalComponents": []
           },
           "hanging": {
             "lengthOptions": [
@@ -303,28 +303,53 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функция для подбора трековых сегментов для AMBRELA (аналог getTracksForStLuce)
+    // Функция для подбора трековых сегментов для AMBRELA.
+    // Если lengthOptions содержит только два элемента (например, для recessed), используем логику с вариантами 1м и 2м.
+    // Если длина больше, используем логику для трёх вариантов.
     function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
-      if (legLength <= 100) {
-        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-      } else if (legLength <= 200) {
-        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-      } else if (legLength <= 300) {
-        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-      } else {
-        let fullPieces = Math.floor(legLength / 300);
-        for (let i = 0; i < fullPieces; i++) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-        }
-        let remainder = legLength - fullPieces * 300;
-        if (remainder > 0) {
-          if (remainder <= 100) {
-            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-          } else if (remainder <= 200) {
+      if (lengthOptions.length === 2) {
+        // Для встраиваемого монтажа (recessed): доступны только 1м и 2м варианты.
+        if (legLength <= 100) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+        } else if (legLength <= 200) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        } else {
+          let fullPieces = Math.floor(legLength / 200);
+          for (let i = 0; i < fullPieces; i++) {
             pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else {
+          }
+          let remainder = legLength - fullPieces * 200;
+          if (remainder > 0) {
+            if (remainder <= 100) {
+              pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+            } else {
+              pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+            }
+          }
+        }
+      } else {
+        // Логика для систем с тремя вариантами (surface, stretch-ceiling, hanging)
+        if (legLength <= 100) {
+          pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+        } else if (legLength <= 200) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        } else if (legLength <= 300) {
+          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+        } else {
+          let fullPieces = Math.floor(legLength / 300);
+          for (let i = 0; i < fullPieces; i++) {
             pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+          }
+          let remainder = legLength - fullPieces * 300;
+          if (remainder > 0) {
+            if (remainder <= 100) {
+              pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
+            } else if (remainder <= 200) {
+              pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+            } else {
+              pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+            }
           }
         }
       }
@@ -504,9 +529,9 @@
         // Для AMBRELA: если общая длина ≤ 900 см – используем профиль 2м, иначе профиль 3м.
         let profileData;
         if (trackLength <= 900) {
-          profileData = { id: "GL7131 " + (color === "black" ? "BK" : "WH"), pieceLength: 200, price: additionalMappingAmbrela["GL7131 BK"].price };
+          profileData = { id: "GL7131 " + (color === "black" ? "BK" : "wh"), pieceLength: 200, price: additionalMappingAmbrela["GL7131 BK"].price };
         } else {
-          profileData = { id: "GL7132 " + (color === "black" ? "BK" : "WH"), pieceLength: 300, price: additionalMappingAmbrela["GL7132 BK"].price };
+          profileData = { id: "GL7132 " + (color === "black" ? "BK" : "wh"), pieceLength: 300, price: additionalMappingAmbrela["GL7132 BK"].price };
         }
         let profileCount = Math.ceil(trackLength / profileData.pieceLength);
         console.log("Профилей для добавления:", profileCount);
