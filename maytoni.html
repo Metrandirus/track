@@ -255,7 +255,7 @@
       "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/TRA001CW-11W.png" }
     };
 
-    // Функция для подбора трековых элементов для Maytoni в режиме surface (доступны варианты 1м, 2м, 3м)
+    // Функция для подбора трековых элементов для Maytoni в режиме surface (1м, 2м, 3м)
     function getTracksForMaytoniSurface(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -283,7 +283,7 @@
       return pieces;
     }
     
-    // Функция для recessed (встраиваемый монтаж) – доступны только варианты 1м и 2м
+    // Функция для recessed (встраиваемый монтаж) – доступны только 1м и 2м варианты
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -369,11 +369,11 @@
                          getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                          getTracksForMaytoniSurface(lengthB, lengthOptions);
         selectedItems = legATracks.concat(legBTracks);
-        // Добавляем угловой коннектор для L-shape
+        // Для L-shape добавляем только угловой коннектор один раз
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Если в каждом блоке более одного сегмента, добавляем прямые коннекторы между сегментами внутри каждой "ноги"
+        // Добавляем прямые коннекторы внутри каждой "ноги", если более одного сегмента
         if (legATracks.length > 1) {
           for (let i = 0; i < legATracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -387,7 +387,7 @@
       }
       else if (shape === "T-shape") {
         // T-образная система:
-        // Для верхнего трека используем длину A целиком (он потом разрезается), а для вертикального – длину B.
+        // Для верхнего трека используем длину A целиком (он затем разрезается), а для вертикального – длину B.
         let topTracks = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                         getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -411,7 +411,7 @@
       }
       else if (shape === "P-shape") {
         // P-образная система:
-        // Длина A – боковые треки (используются дважды), а длина B – соединяющий трек.
+        // Боковые треки – длина A (используются дважды), а соединяющий – длина B.
         let sideTracks = (mountingParam === "recessed") ?
                          getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                          getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -437,25 +437,35 @@
       }
       else if (shape === "rectangle") {
         // Прямоугольная система:
-        // Для каждой из длин A и B выбираем сегменты, затем повторяем их дважды
+        // Для каждой из длин A и B выбираем сегменты, затем повторяем их дважды.
+        // Здесь необходимо добавить прямые коннекторы _по каждой стороне отдельно_.
         let tracksA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                       getTracksForMaytoniSurface(lengthA, lengthOptions);
         let tracksB = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                       getTracksForMaytoniSurface(lengthB, lengthOptions);
+        // Собираем треки для двух сторон по длине A и двух сторон по длине B.
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        // Добавляем 4 угловых коннектора для прямоугольной системы
+        // Добавляем 4 угловых коннектора (по одному на угол).
         for (let i = 0; i < 4; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
+        }
+        // Для каждой стороны добавляем прямые коннекторы: 
+        // если для стороны A количество сегментов больше 1, то для каждой из двух сторон добавляем (tracksA.length - 1);
+        // аналогично для стороны B.
+        let straightForA = (tracksA.length > 1) ? 2 * (tracksA.length - 1) : 0;
+        let straightForB = (tracksB.length > 1) ? 2 * (tracksB.length - 1) : 0;
+        for (let i = 0; i < straightForA + straightForB; i++) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
       }
       else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Для систем straight и rectangle добавляем автоматические прямые коннекторы, если их не хватает.
-      if (shape === "straight" || shape === "rectangle") {
+      // Для режима straight (и только для него) – если не было добавлено никаких коннекторов, добавляем недостающие между всеми сегментами.
+      if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
         let currentStraight = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors.straight[0]).length;
@@ -474,9 +484,7 @@
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         let profileCount = Math.ceil(trackLength / 200);
-        if (profileCount % 2 !== 0) {
-          profileCount++;
-        }
+        if (profileCount % 2 !== 0) { profileCount++; }
         console.log("Профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
@@ -496,7 +504,7 @@
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
 
-      // Группировка элементов: сначала ищем описание в components, если не найдено – в suspensionMappingMaytoni
+      // Группируем элементы: сначала ищем описание в components, если не найдено – в suspensionMappingMaytoni
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -504,7 +512,6 @@
           console.warn("Обнаружен элемент без id:", itemObj);
           return;
         }
-        // Ищем сначала в компонентах, затем в подвесах (если это подвес)
         let comp = components[id] || suspensionMappingMaytoni[id] || {};
         if (!groupedItems[id]) {
           groupedItems[id] = { count: 0, component: comp };
@@ -513,7 +520,7 @@
       });
       console.log("Сгруппированные элементы:", groupedItems);
 
-      // Формирование HTML для таблицы результатов: выводим наименование и артикул.
+      // Формирование HTML для таблицы результатов (выводим наименование и артикул)
       let tbodyHTML = "";
       let totalPrice = 0;
       for (const [id, itemData] of Object.entries(groupedItems)) {
