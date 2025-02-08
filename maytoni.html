@@ -115,6 +115,7 @@
           },
           "recessed": {
             "lengthOptions": [
+              // Для встраиваемого монтажа доступны только варианты 1м и 2м
               { "min": 0, "max": 100, "items": ["TRX004-111B"] },
               { "min": 101, "max": 200, "items": ["TRX004-112B"] }
             ],
@@ -254,9 +255,18 @@
       "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/TRA001CW-11W.png" }
     };
 
-    // Функция для подбора трековых элементов для Maytoni в режиме surface (доступны варианты 1м, 2м, 3м)
+    // Функция для подбора трековых элементов для Maytoni в режиме surface (варианты 1м, 2м, 3м)
     function getTracksForMaytoniSurface(legLength, lengthOptions) {
       let pieces = [];
+      // Если требуемая длина кратна 400 см (например, 400, 800, …), используем только 2м сегменты
+      if (legLength % 400 === 0) {
+        let count = legLength / 200;
+        for (let i = 0; i < count; i++) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        }
+        return pieces;
+      }
+      // Иначе стандартная логика:
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
       } else if (legLength <= 200) {
@@ -271,11 +281,10 @@
         let remainder = legLength - fullPieces * 300;
         if (remainder > 0) {
           if (remainder <= 100) {
-            // Если остаток меньше или равен 100, заказываем полный 1м (100 см)
             pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
           } else if (remainder <= 200) {
             pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else { // remainder > 200 && <= 300
+          } else {
             pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
           }
         }
@@ -286,6 +295,14 @@
     // Функция для recessed (встраиваемый монтаж) – доступны только варианты 1м и 2м
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
       let pieces = [];
+      // Если требуемая длина кратна 400 см, используем только 2м сегменты
+      if (legLength % 400 === 0) {
+        let count = legLength / 200;
+        for (let i = 0; i < count; i++) {
+          pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
+        }
+        return pieces;
+      }
       if (legLength <= 100) {
         pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
       } else if (legLength <= 200) {
@@ -434,7 +451,6 @@
         // Для боковых сторон добавляем прямые коннекторы между сегментами каждого массива
         if (sideTracks.length > 1) {
           for (let i = 0; i < sideTracks.length - 1; i++) {
-            // Поскольку боковые стороны повторяются дважды, суммарно добавляем 2*(sideTracks.length - 1)
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
@@ -460,7 +476,7 @@
         for (let i = 0; i < 4; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Для каждой стороны добавляем прямые коннекторы: 
+        // Для каждой стороны добавляем прямые коннекторы:
         let straightForA = (tracksA.length > 1) ? 2 * (tracksA.length - 1) : 0;
         let straightForB = (tracksB.length > 1) ? 2 * (tracksB.length - 1) : 0;
         for (let i = 0; i < straightForA + straightForB; i++) {
