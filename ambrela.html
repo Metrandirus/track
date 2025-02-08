@@ -100,9 +100,9 @@
               { "min": 201, "max": 300, "items": ["GL7106 BK"] }   // 3м черный
             ],
             "connectors": {
-              "straight": ["GL7066 BK"],  // прямой черный
-              "L-shape": ["GL7071 BK"],   // угловой черный
-              "T-shape": ["GL7078 BK"]    // Т-образный черный
+              "straight": ["GL7066 BK"],  // прямой
+              "L-shape": ["GL7071 BK"],   // угловой
+              "T-shape": ["GL7078 BK"]    // Т-образный
             },
             "components": {
               "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/GL7102.jpg" },
@@ -115,13 +115,13 @@
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7122 BK"] },  // 1м черный
-              { "min": 101, "max": 200, "items": ["GL7124 BK"] }   // 2м черный
+              { "min": 0, "max": 100, "items": ["GL7122 BK"] },  // 1м черный (встраиваемый)
+              { "min": 101, "max": 200, "items": ["GL7124 BK"] }   // 2м черный (встраиваемый)
             ],
             "connectors": {
-              "straight": ["GL7160 BK"],  // прямой (встраиваемый) черный
-              "L-shape": ["GL7164 BK"],   // угловой (встраиваемый) черный
-              "T-shape": ["GL7168 BK"]    // T-образный (встраиваемый) черный
+              "straight": ["GL7160 BK"],
+              "L-shape": ["GL7164 BK"],
+              "T-shape": ["GL7168 BK"]
             },
             "components": {
               "GL7122 BK": { "name": "Шинопровод встраиваемый черный 1м", "price": 1190, "image": "images/GL7122.jpg" },
@@ -150,7 +150,7 @@
               "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/GL7071.jpg" },
               "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/GL7078.jpg" }
             },
-            "additionalComponents": [] // Дополнительные компоненты (профили, заглушки, угол-соединители) добавляются ниже
+            "additionalComponents": [] 
           },
           "hanging": {
             "lengthOptions": [
@@ -338,11 +338,16 @@
     }
 
     // Функция для определения номинальной длины трека по его id для ST LUCE/AMBRELA.
-    // Если id содержит ".419.00" или ".519.00" → 100 см; ".429.00" или ".529.00" → 200 см; ".439.00" или ".539.00" → 300 см.
+    // Для AMBRELA используем следующие правила:
+    // Для белых: если id содержит "7101" или "7121" → 100 см; "7103" или "7123" → 200 см; "7105" → 300 см.
+    // Для чёрных: если id содержит "7102" or "7122" → 100 см; "7104" or "7124" → 200 см; "7106" → 300 см.
     function getNominalLength(id) {
-      if (id.indexOf(".419.00") !== -1 || id.indexOf(".519.00") !== -1) return 100;
-      if (id.indexOf(".429.00") !== -1 || id.indexOf(".529.00") !== -1) return 200;
-      if (id.indexOf(".439.00") !== -1 || id.indexOf(".539.00") !== -1) return 300;
+      if (id.indexOf("7101") !== -1 || id.indexOf("7121") !== -1) return 100;
+      if (id.indexOf("7102") !== -1 || id.indexOf("7122") !== -1) return 100;
+      if (id.indexOf("7103") !== -1 || id.indexOf("7123") !== -1) return 200;
+      if (id.indexOf("7104") !== -1 || id.indexOf("7124") !== -1) return 200;
+      if (id.indexOf("7105") !== -1) return 300;
+      if (id.indexOf("7106") !== -1) return 300;
       return null;
     }
 
@@ -475,7 +480,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
       }
       
-      // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы.
+      // Если итоговая комбинация состоит из более чем одного сегмента, добавляем недостающие прямые коннекторы
       {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -496,7 +501,7 @@
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         // Для AMBRELA используем профили:
-        // Если общая длина ≤ 900 см – используем профиль 2м (GL7131 WH/BK, для белых — WH, для чёрных — BK), иначе 3м (GL7132)
+        // Если общая длина ≤ 900 см – используем 2м профиль, иначе 3м.
         let profileData;
         if (trackLength <= 900) {
           profileData = { id: "GL7131 " + (color === "black" ? "BK" : "WH"), pieceLength: 200, price: additionalMappingAmbrela["GL7131 BK"].price };
@@ -577,6 +582,8 @@
           let qty;
           if (group.isTrack && group.totalLength > 0) {
             let nominal = getNominalLength(id);
+            // Если getNominalLength возвращает null (что не должно случаться), установим значение по умолчанию 100
+            if (!nominal) { nominal = 100; }
             qty = Math.ceil(group.totalLength / nominal);
           } else {
             qty = group.count;
