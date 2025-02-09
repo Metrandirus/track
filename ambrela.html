@@ -259,8 +259,10 @@
       "GL7191 WH": { "name": "Подвес белый AMBRELA", "price": 320, "image": "images/GL7191.jpg" }
     };
     var additionalMappingAmbrela = {
-      "GL7132 BK": { "name": "Профиль 3м AMBRELA", "price": 4860, "image": "images/GL7132.jpg" },
-      "GL7131 BK": { "name": "Профиль 2м AMBRELA", "price": 3230, "image": "images/GL7131.jpg" },
+      "GL7132 BK": { "name": "Профиль 3м AMBRELA (черный)", "price": 4860, "image": "images/GL7132.jpg" },
+      "GL7131 BK": { "name": "Профиль 2м AMBRELA (черный)", "price": 3230, "image": "images/GL7131.jpg" },
+      "GL7132 WH": { "name": "Профиль 3м AMBRELA (белый)", "price": 4860, "image": "images/GL7132.jpg" },
+      "GL7131 WH": { "name": "Профиль 2м AMBRELA (белый)", "price": 3230, "image": "images/GL7131.jpg" },
       "GL7203 WH": { "name": "Заглушка для корпуса (2 шт.) белая", "price": 170, "image": "images/GL7203.jpg" },
       "GL7204 BK": { "name": "Заглушка для корпуса (2 шт.) черная", "price": 170, "image": "images/GL7204.jpg" },
       "GL7208": { "name": "Соединитель угловой для профиля", "price": 170, "image": "images/GL7208.jpg" }
@@ -304,12 +306,12 @@
     }
 
     // Функция для подбора трековых сегментов для AMBRELA.
-    // Если lengthOptions содержит только два элемента (например, для recessed), используем логику с вариантами 1м и 2м.
-    // Если длина больше, используем логику для трёх вариантов.
+    // Если lengthOptions содержит только два элемента (для recessed), используем логику с вариантами 1м и 2м.
+    // Если вариантов три – стандартная логика.
     function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
       if (lengthOptions.length === 2) {
-        // Для встраиваемого монтажа (recessed): доступны только 1м и 2м варианты.
+        // Для recessed: доступны только 1м и 2м варианты.
         if (legLength <= 100) {
           pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else if (legLength <= 200) {
@@ -329,7 +331,7 @@
           }
         }
       } else {
-        // Логика для систем с тремя вариантами (surface, stretch-ceiling, hanging)
+        // Для вариантов с тремя длинами (surface, stretch-ceiling, hanging)
         if (legLength <= 100) {
           pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else if (legLength <= 200) {
@@ -363,8 +365,6 @@
     }
 
     // Функция для определения номинальной длины трека по его id для ST LUCE/AMBRELA.
-    // Для AMBRELA: для белых, если id содержит "7101" или "7121" → 100 см; "7103" или "7123" → 200 см; "7105" → 300 см.
-    // Для чёрных: если id содержит "7102" или "7122" → 100 см; "7104" или "7124" → 200 см; "7106" → 300 см.
     function getNominalLength(id) {
       if (id.indexOf("7101") !== -1 || id.indexOf("7121") !== -1) return 100;
       if (id.indexOf("7102") !== -1 || id.indexOf("7122") !== -1) return 100;
@@ -372,7 +372,7 @@
       if (id.indexOf("7104") !== -1 || id.indexOf("7124") !== -1) return 200;
       if (id.indexOf("7105") !== -1) return 300;
       if (id.indexOf("7106") !== -1) return 300;
-      return 100; // значение по умолчанию
+      return 100;
     }
 
     // Основная функция подбора для ST LUCE/AMBRELA
@@ -425,11 +425,9 @@
                          getTracksForStLuceRecessed(lengthB, lengthOptions) :
                          getTracksForStLuceSurface(lengthB, lengthOptions);
         selectedItems = legATracks.concat(legBTracks);
-        // Добавляем один угловой коннектор для L-shape
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        // Добавляем прямые коннекторы внутри каждой "ноги", если более одного сегмента
         if (legATracks.length > 1) {
           for (let i = 0; i < legATracks.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -523,16 +521,21 @@
       
       // Режим stretch-ceiling – добавляем профили, торцевые заглушки и угол-соединители.
       if (mountingParam === "stretch-ceiling") {
-        // Суммируем только длины трековых сегментов
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         // Для AMBRELA: если общая длина ≤ 900 см – используем профиль 2м, иначе профиль 3м.
-        let profileData;
-        if (trackLength <= 900) {
-          profileData = { id: "GL7131 " + (color === "black" ? "BK" : "wh"), pieceLength: 200, price: additionalMappingAmbrela["GL7131 BK"].price };
+        let profileKey;
+        if (color === "black") {
+          profileKey = (trackLength <= 900) ? "GL7131 BK" : "GL7132 BK";
         } else {
-          profileData = { id: "GL7132 " + (color === "black" ? "BK" : "wh"), pieceLength: 300, price: additionalMappingAmbrela["GL7132 BK"].price };
+          profileKey = (trackLength <= 900) ? "GL7131 WH" : "GL7132 WH";
         }
+        // Определяем данные профиля из сопоставления
+        var profileMapping = additionalMappingAmbrela[profileKey];
+        if (!profileMapping) {
+          throw new Error("Не найден профиль для ключа " + profileKey);
+        }
+        let profileData = { id: profileKey, pieceLength: (profileKey.indexOf("GL7131") !== -1 ? 200 : 300), price: profileMapping.price };
         let profileCount = Math.ceil(trackLength / profileData.pieceLength);
         console.log("Профилей для добавления:", profileCount);
         for (let i = 0; i < profileCount; i++) {
@@ -582,8 +585,6 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Ищем описание компонента сначала в products.ambrela[color]["surface"].components,
-          // затем в products.ambrela[color]["recessed"].components, затем в suspensionMappingAmbrela, затем в additionalMappingAmbrela.
           let comp = (products.ambrela[color]["surface"].components[id]) ||
                      (products.ambrela[color]["recessed"] && products.ambrela[color]["recessed"].components[id]) ||
                      suspensionMappingAmbrela[id] ||
@@ -629,7 +630,7 @@
       document.getElementById("results").innerHTML = tbodyHTML;
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
       document.getElementById("resultContainer").style.display = "block";
-      console.log("Подбор завершён успешно (ST LUCE/AMBRELA).");
+      console.log("Подбор завершён успешно (AMBRELA).");
     };
 
     document.addEventListener("DOMContentLoaded", function() {
