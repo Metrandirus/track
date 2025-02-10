@@ -144,11 +144,8 @@
 
     /***** Дополнительные сопоставления для Denkirs *****/
     var additionalMappingDenkirs = {
-      // Для recessed (встраиваемой системы) – профиль для гипсокартонного потолка TR3020-AL (2м)
       "TR3020-AL": { "name": "Профиль для гипсокартонного потолка TR3020-AL", "price": 3265, "image": "images/TR3020-AL.jpg" },
-      // Для stretch‑ceiling (натяжного потолка) – профиль TR3050-AL (2м)
       "TR3050-AL": { "name": "Профиль для натяжного потолка TR3050-AL", "price": 2640, "image": "images/TR3050-AL.jpg" },
-      // Заглушки для recessed систем (встраиваемый профиль)
       "TR3052-AL": { "name": "Заглушка для встраиваемого профиля (черная)", "price": 135, "image": "images/TR3052-AL.jpg" },
       "TR3021-AL": { "name": "Заглушка для встраиваемого профиля (белая)", "price": 690, "image": "images/TR3021-AL.jpg" }
     };
@@ -161,7 +158,6 @@
       "TR1105-WH": { "name": "Подвес белый", "price": 661, "image": "images/TR1105-WH.jpg" }
     };
 
-    // Для Denkirs доступны режимы: surface, recessed, stretch‑ceiling и hanging.
     function checkMountingForDenkirs(mountingParam) {
       if (["surface", "recessed", "stretch-ceiling", "hanging"].indexOf(mountingParam) === -1) {
         document.getElementById("resultContainer").style.display = "none";
@@ -171,7 +167,6 @@
       return true;
     }
 
-    // Функция для определения номинальной длины трека по его id (для Denkirs)
     function getNominalLength(id) {
       if (id.indexOf("TR1001") !== -1) return 100;
       if (id.indexOf("TR1002") !== -1) return 200;
@@ -179,12 +174,10 @@
       return 100;
     }
 
-    // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функции для подбора трековых сегментов для Denkirs (варианты 1м, 2м, 3м)
     function getTracksForDenkirs(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -227,23 +220,19 @@
       }
     };
 
-    // Основная функция подбора для Denkirs
     window.showSelection = function() {
       console.log("Начало работы showSelection (Denkirs)");
 
       const params = new URLSearchParams(window.location.search);
       const color = (params.get("color") || "black").toLowerCase();
       let mountingParam = (params.get("mounting") || "surface").toLowerCase();
-      if (!checkMountingForDenkirs(mountingParam)) {
-        return;
-      }
+      if (!checkMountingForDenkirs(mountingParam)) return;
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
 
       console.log("Параметры подбора (Denkirs):", { color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режимов stretch‑ceiling, hanging и recessed базовые данные берём из "surface"
       let effectiveProduct = (["stretch-ceiling", "hanging", "recessed"].indexOf(mountingParam) !== -1) ?
           (products.denkirs && products.denkirs[color] && products.denkirs[color]["surface"]) :
           (products.denkirs && products.denkirs[color] && products.denkirs[color][mountingParam]);
@@ -256,7 +245,6 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор трековых сегментов по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "hanging") ?
                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
@@ -348,7 +336,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Denkirs.");
       }
       
-      // Для систем "straight" добавляем недостающие прямые коннекторы, если они не добавлены
+      // Если для систем "straight" добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -363,14 +351,13 @@
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
-      // Всегда добавляем подвод питания
+      // Добавляем подвод питания
       let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
       selectedItems.push({ id: powerInput });
       
       // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
         // Для stretch‑ceiling (натяжной потолок) добавляем профиль для натяжного потолка TR3050‑AL
-        // (В Denkirs для stretch‑ceiling профиль добавлять НЕ нужно – согласно требованиям, оставляем только базовые треки)
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -383,15 +370,14 @@
         } else {
           effectiveTrackLength = lengthA + lengthB;
         }
-        console.log("Эффективная длина трековой системы (stretch‑ceiling):", effectiveTrackLength, "см");
+        console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
-        console.log("Профилей для добавления (stretch‑ceiling):", profileCount);
+        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3050-AL", pieceLength: 200 });
         }
       } else if (mountingParam === "recessed") {
-        // Для recessed (встраиваемой системы) – используем базовые треки из surface,
-        // затем добавляем профиль для гипсокартонного потолка TR3020‑AL и заглушки (если система не "rectangle")
+        // Для recessed (встраиваемой системы) добавляем профиль для гипсокартонного потолка и заглушки (если система не "rectangle")
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -453,8 +439,6 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Ищем описание компонента сначала в products.denkirs[color]["surface"].components,
-          // затем в powerInputMapping, suspensionMappingDenkirs, additionalMappingDenkirs.
           let comp = (products.denkirs[color]["surface"].components[id]) ||
                      powerInputMapping[id] ||
                      suspensionMappingDenkirs[id] ||
@@ -485,7 +469,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td><img src="${comp.image}" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
