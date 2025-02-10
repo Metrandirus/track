@@ -92,7 +92,7 @@
     var products = {
       "denkirs": {
         "black": {
-          // Для Denkirs базой являются данные из раздела surface (используются для всех режимов)
+          // Базовые данные берём из раздела "surface"
           "surface": {
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["TR1001-BK"] },
@@ -115,7 +115,6 @@
               "TR1104-BK": { "name": "X-коннектор черный", "price": 661, "image": "images/TR1104-BK.jpg" }
             }
           },
-          // Для режимов stretch-ceiling и hanging данные берутся из surface, а для recessed – также surface
           "stretch-ceiling": {},
           "hanging": {}
         },
@@ -152,8 +151,9 @@
     var additionalMappingDenkirs = {
       // Для recessed (встраиваемой системы) – профиль для гипсокартонного потолка TR3020-AL (2м)
       "TR3020-AL": { "name": "Профиль для гипсокартонного потолка TR3020-AL", "price": 3265, "image": "images/TR3020-AL.jpg" },
-      // Для режима stretch-ceiling – профиль НЕ добавляем (по требованию)
-      // Для end caps: для черного используем TR3052-AL, для белого – TR3021-AL
+      // Для stretch‑ceiling (натяжного потолка) – профиль TR3050-AL (2м)
+      "TR3050-AL": { "name": "Профиль для натяжного потолка TR3050-AL", "price": 2640, "image": "images/TR3050-AL.jpg" },
+      // Заглушки для recessed систем (встраиваемый профиль)
       "TR3052-AL": { "name": "Заглушка для встраиваемого профиля (черная)", "price": 135, "image": "images/TR3052-AL.jpg" },
       "TR3021-AL": { "name": "Заглушка для встраиваемого профиля (белая)", "price": 690, "image": "images/TR3021-AL.jpg" }
     };
@@ -166,9 +166,8 @@
       "TR1105-WH": { "name": "Подвес белый", "price": 661, "image": "images/TR1105-WH.jpg" }
     };
 
-    // Для Denkirs доступны режимы: surface, recessed, stretch-ceiling и hanging.
+    // Для Denkirs доступны режимы: surface, recessed, stretch‑ceiling и hanging.
     function checkMountingForDenkirs(mountingParam) {
-      // Допускаем: surface, recessed, stretch-ceiling, hanging
       if (["surface", "recessed", "stretch-ceiling", "hanging"].indexOf(mountingParam) === -1) {
         document.getElementById("resultContainer").style.display = "none";
         document.getElementById("debug").textContent = "Для Denkirs доступны только режимы surface, recessed, stretch-ceiling и hanging.";
@@ -179,7 +178,6 @@
 
     // Функция для определения номинальной длины трека по его id (для Denkirs)
     function getNominalLength(id) {
-      // Для Denkirs предполагаем: треки TR1001 – 1м, TR1002 – 2м, TR1003 – 3м
       if (id.indexOf("TR1001") !== -1) return 100;
       if (id.indexOf("TR1002") !== -1) return 200;
       if (id.indexOf("TR1003") !== -1) return 300;
@@ -191,7 +189,7 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функции для подбора трековых сегментов для Denkirs (используем варианты 1м, 2м, 3м)
+    // Функции для подбора трековых сегментов для Denkirs (варианты 1м, 2м, 3м)
     function getTracksForDenkirs(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -250,7 +248,7 @@
 
       console.log("Параметры подбора (Denkirs):", { color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режимов stretch‑ceiling, hanging и recessed берём базу из "surface"
+      // Для режимов stretch‑ceiling, hanging и recessed базовые треки берём из "surface"
       let effectiveProduct = (["stretch-ceiling", "hanging", "recessed"].indexOf(mountingParam) !== -1) ?
           (products.denkirs && products.denkirs[color] && products.denkirs[color]["surface"]) :
           (products.denkirs && products.denkirs[color] && products.denkirs[color][mountingParam]);
@@ -259,13 +257,11 @@
       }
 
       let components = effectiveProduct.components;
-      // Для режима stretch‑ceiling оставляем компоненты как есть (без добавления профиля)
-      // Для режима recessed – добавляем профиль для гипсокартонного потолка и заглушки
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор трековых сегментов по фигурам
+      // Подбор трековых сегментов по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "hanging") ?
                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
@@ -372,18 +368,26 @@
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
-      // Всегда добавляем подвод питания
+      // Добавляем подвод питания (всегда добавляется один)
       let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
       selectedItems.push({ id: powerInput });
       
       // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
-        // Для stretch-ceiling (натяжной потолок) профиль НЕ добавляется для Denkirs
-      } else if (mountingParam === "recessed") {
-        // Для встраиваемой системы – используем базовые треки из surface,
-        // затем добавляем профиль для гипсокартонного потолка (TR3020-AL) и заглушки (если система не "rectangle")
+        // Для режима stretch‑ceiling добавляем профиль для натяжного потолка TR3050‑AL
         let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength"))
-                                       .reduce((sum, item) => sum + item.pieceLength, 0);
+                                        .reduce((sum, item) => sum + item.pieceLength, 0);
+        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
+        let profileCount = Math.ceil(trackLength / 200);
+        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: "TR3050-AL", pieceLength: 200 });
+        }
+      } else if (mountingParam === "recessed") {
+        // Для режима recessed (встраиваемой системы) – используем базовые треки из surface,
+        // затем добавляем профиль для гипсокартонного потолка TR3020‑AL и заглушки (если система не "rectangle")
+        let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength"))
+                                        .reduce((sum, item) => sum + item.pieceLength, 0);
         console.log("Общая длина треков (recessed):", trackLength, "см");
         let profileCount = Math.ceil(trackLength / 200);
         console.log("Профилей для добавления (recessed):", profileCount);
@@ -401,7 +405,7 @@
       
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength"))
-                                       .reduce((sum, item) => sum + item.pieceLength, 0);
+                                        .reduce((sum, item) => sum + item.pieceLength, 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
         let suspensionId = (color === "black") ? "TR1105-BK" : "TR1105-WH";
@@ -452,7 +456,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td><img src="images/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
