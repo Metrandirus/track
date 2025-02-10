@@ -386,7 +386,7 @@
           effectiveTrackLength = lengthA + lengthB;
         }
         console.log("Эффективная длина трековой системы (stretch‑ceiling):", effectiveTrackLength, "см");
-        let profileCount = Math.ceil(effectiveTrackLength / 200);
+        let profileCount = Math.ceil(effectiveTrackLength / 200); // Исправлено на 200
         console.log("Профилей для добавления (stretch‑ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3050-AL", pieceLength: 200 });
@@ -407,7 +407,7 @@
           effectiveTrackLength = lengthA + lengthB;
         }
         console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
-        let profileCount = Math.ceil(effectiveTrackLength / 200);
+        let profileCount = Math.ceil(effectiveTrackLength / 200); // Исправлено на 200
         console.log("Профилей для добавления (recessed):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3020-AL", pieceLength: 200 });
@@ -487,7 +487,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td><img src="images/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
