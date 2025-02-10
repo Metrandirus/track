@@ -79,20 +79,42 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Результаты подбора будут выведены здесь -->
+          <!-- Здесь будут выводиться результаты подбора -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
     </div>
     <div id="debug" class="debug"></div>
   </div>
-  
+
   <script>
     /***** Встроенные данные для Denkirs *****/
     var products = {
       "denkirs": {
         "black": {
           "surface": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["TR1001-BK"] },
+              { "min": 101, "max": 200, "items": ["TR1002-BK"] },
+              { "min": 201, "max": 300, "items": ["TR1003-BK"] }
+            ],
+            "connectors": {
+              "straight": ["TR1101-BK"],
+              "L-shape": ["TR1102-BK"],
+              "T-shape": ["TR1103-BK"],
+              "X-shape": ["TR1104-BK"]
+            },
+            "components": {
+              "TR1001-BK": { "name": "Шинопровод накладной черный 1м TR1001-BK", "price": 950, "image": "images/TR1001-BK.jpg" },
+              "TR1002-BK": { "name": "Шинопровод накладной черный 2м TR1002-BK", "price": 1990, "image": "images/TR1002-BK.jpg" },
+              "TR1003-BK": { "name": "Шинопровод накладной черный 3м TR1003-BK", "price": 3150, "image": "images/TR1003-BK.jpg" },
+              "TR1101-BK": { "name": "Коннектор прямой черный TR1101-BK", "price": 375, "image": "images/TR1101-BK.jpg" },
+              "TR1102-BK": { "name": "L-коннектор черный TR1102-BK", "price": 375, "image": "images/TR1102-BK.jpg" },
+              "TR1103-BK": { "name": "T-коннектор черный TR1103-BK", "price": 562, "image": "images/TR1103-BK.jpg" },
+              "TR1104-BK": { "name": "X-коннектор черный TR1104-BK", "price": 661, "image": "images/TR1104-BK.jpg" }
+            }
+          },
+          "hanging": {
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["TR1001-BK"] },
               { "min": 101, "max": 200, "items": ["TR1002-BK"] },
@@ -135,29 +157,7 @@
               "TR1103-BK": { "name": "T-коннектор черный TR1103-BK", "price": 562, "image": "images/TR1103-BK.jpg" },
               "TR1104-BK": { "name": "X-коннектор черный TR1104-BK", "price": 661, "image": "images/TR1104-BK.jpg" }
             },
-            "additionalComponents": []  // для stretch-ceiling добавим профиль отдельно
-          },
-          "hanging": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TR1001-BK"] },
-              { "min": 101, "max": 200, "items": ["TR1002-BK"] },
-              { "min": 201, "max": 300, "items": ["TR1003-BK"] }
-            ],
-            "connectors": {
-              "straight": ["TR1101-BK"],
-              "L-shape": ["TR1102-BK"],
-              "T-shape": ["TR1103-BK"],
-              "X-shape": ["TR1104-BK"]
-            },
-            "components": {
-              "TR1001-BK": { "name": "Шинопровод накладной черный 1м TR1001-BK", "price": 950, "image": "images/TR1001-BK.jpg" },
-              "TR1002-BK": { "name": "Шинопровод накладной черный 2м TR1002-BK", "price": 1990, "image": "images/TR1002-BK.jpg" },
-              "TR1003-BK": { "name": "Шинопровод накладной черный 3м TR1003-BK", "price": 3150, "image": "images/TR1003-BK.jpg" },
-              "TR1101-BK": { "name": "Коннектор прямой черный TR1101-BK", "price": 375, "image": "images/TR1101-BK.jpg" },
-              "TR1102-BK": { "name": "L-коннектор черный TR1102-BK", "price": 375, "image": "images/TR1102-BK.jpg" },
-              "TR1103-BK": { "name": "T-коннектор черный TR1103-BK", "price": 562, "image": "images/TR1103-BK.jpg" },
-              "TR1104-BK": { "name": "X-коннектор черный TR1104-BK", "price": 661, "image": "images/TR1104-BK.jpg" }
-            }
+            "additionalComponents": []  // для stretch-ceiling профиль будет добавлен отдельно
           }
         },
         "white": {
@@ -235,15 +235,13 @@
 
     /***** Дополнительные сопоставления для Denkirs *****/
     var additionalMappingDenkirs = {
-      // Профиль для гипсокартонного потолка (2 м)
+      // Для встраиваемой системы (хотя Denkirs не поддерживает recessed, но для stretch‑ceiling используем профиль для гипсокартонного потолка)
       "TR3020-AL": { "name": "Профиль для гипсокартонного потолка TR3020-AL 2м", "price": 3265, "image": "images/TR3020-AL.jpg" }
     };
-    // Подвод питания – добавляется в каждый комплект
     var powerInputMapping = {
       "TR1100-BK": { "name": "Подвод питания черный TR1100-BK", "price": 375, "image": "images/TR1100-BK.jpg" },
       "TR1100-WH": { "name": "Подвод питания белый TR1100-WH", "price": 375, "image": "images/TR1100-WH.jpg" }
     };
-    // Подвесы для режима hanging
     var suspensionMappingDenkirs = {
       "TR1105-BK": { "name": "Подвес черный TR1105-BK", "price": 661, "image": "images/TR1105-BK.jpg" },
       "TR1105-WH": { "name": "Подвес белый TR1105-WH", "price": 661, "image": "images/TR1105-WH.jpg" }
@@ -259,12 +257,20 @@
       return true;
     }
 
+    // Функция для определения номинальной длины трека по его id (для Denkirs)
+    function getNominalLength(id) {
+      if (id.indexOf("TR1001") !== -1) return 100;
+      if (id.indexOf("TR1002") !== -1) return 200;
+      if (id.indexOf("TR1003") !== -1) return 300;
+      return 100;
+    }
+
     // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функции для подбора трековых сегментов для Denkirs (используем логику с 3 вариантами – 1м, 2м, 3м)
+    // Функции для подбора трековых сегментов для Denkirs (используем 1м, 2м, 3м варианты)
     function getTracksForDenkirs(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -298,22 +304,6 @@
       return getTracksForDenkirs(legLength, lengthOptions);
     }
 
-    // Функция для определения номинальной длины трека по его id (аналог getNominalLength)
-    function getNominalLength(id) {
-      if (id.indexOf("-BK") !== -1) {
-        if (id.indexOf("TR1001") !== -1) return 100;
-        if (id.indexOf("TR1002") !== -1) return 200;
-        if (id.indexOf("TR1003") !== -1) return 300;
-      }
-      if (id.indexOf("-WH") !== -1) {
-        if (id.indexOf("TR1001") !== -1) return 100;
-        if (id.indexOf("TR1002") !== -1) return 200;
-        if (id.indexOf("TR1003") !== -1) return 300;
-      }
-      return 100; // значение по умолчанию
-    }
-
-    // Глобальная функция safeShowSelection
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -323,12 +313,11 @@
       }
     };
 
-    // Основная функция подбора для Denkirs
+    // Основная функция подбора для Denkirs с учётом новых требований по профилям и заглушкам
     window.showSelection = function() {
       console.log("Начало работы showSelection (Denkirs)");
 
       const params = new URLSearchParams(window.location.search);
-      // Приводим параметры к нижнему регистру
       const color = (params.get("color") || "black").toLowerCase();
       let mountingParam = (params.get("mounting") || "surface").toLowerCase();
       if (!checkMountingForDenkirs(mountingParam)) {
@@ -340,7 +329,7 @@
 
       console.log("Параметры подбора (Denkirs):", { color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режима stretch-ceiling и hanging используем базу из surface
+      // Для режимов stretch-ceiling и hanging базовые треки берём из surface
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products.denkirs && products.denkirs[color] && products.denkirs[color]["surface"]) :
           (products.denkirs && products.denkirs[color] && products.denkirs[color][mountingParam]);
@@ -349,14 +338,13 @@
       }
 
       let components = effectiveProduct.components;
-      // В Denkirs для режима stretch-ceiling (натяжной потолок) используем дополнительные компоненты
-      // для профиля для гипсокартонного потолка (TR3020-AL)
-      // Для режима hanging добавляем подвесы (TR1105)
+      // Для режима stretch-ceiling используем профиль TR3050-AL
+      // Для surface и hanging – профиль не добавляем
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Логика подбора по фигурам (аналогичная предыдущим файлам)
+      // Подбор трековых сегментов в зависимости от фигуры
       if (shape === "straight") {
         selectedItems = (mountingParam === "hanging") ?
                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
@@ -445,10 +433,10 @@
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
       } else {
-        throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
+        throw new Error("Логика для фигуры '" + shape + "' не реализована для Denkirs.");
       }
       
-      // Для системы "straight" добавляем недостающие прямые коннекторы (только для прямых систем)
+      // Для систем "straight" добавляем недостающие прямые коннекторы, если они не добавлены
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -463,26 +451,24 @@
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
-      // Добавляем ввод питания (обязательно)
+      // Добавляем подвод питания (ввод питания) обязательно
       let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
       selectedItems.push({ id: powerInput });
       
-      // Режим stretch-ceiling – добавляем профиль для гипсокартонного потолка.
+      // Если режим stretch-ceiling – добавляем профиль для натяжного потолка
       if (mountingParam === "stretch-ceiling") {
+        // Используем профиль TR3050-AL (2 м, 2640₽)
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        let profileCount = Math.ceil(trackLength / 200);
-        console.log("Профилей для добавления:", profileCount);
+        let profileData = { id: "TR3050-AL", pieceLength: 200, price: 2640 };
+        let profileCount = Math.ceil(trackLength / profileData.pieceLength);
+        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TR3020-AL", pieceLength: 200 });
+          selectedItems.push({ id: profileData.id, pieceLength: profileData.pieceLength });
         }
-        // Добавляем заглушки для встраиваемого профиля (так как в Denkirs для recessed нет, а здесь для stretch-ceiling используем end caps)
-        let endCapsId = (color === "black") ? "TR3052-AL" : "TR3021-AL";
-        // Добавляем одну пару (считается как 1 шт. заказа)
-        selectedItems.push({ id: endCapsId });
       }
       
-      // Режим hanging – добавляем подвесы.
+      // Если режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
@@ -492,6 +478,9 @@
           selectedItems.push({ id: suspensionId });
         }
       }
+      
+      // Для mounting "surface" и "hanging" никаких профилей и заглушек не добавляем,
+      // а для recessed (встраиваемый) Denkirs не поддерживается.
       
       console.log("Финальный результат подбора (Denkirs):", selectedItems);
       
@@ -505,7 +494,6 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Сначала ищем в компонентах базового набора (surface), затем в powerInput, suspension и additionalMapping
           let comp = (products.denkirs[color]["surface"].components[id]) ||
                      powerInputMapping[id] ||
                      suspensionMappingDenkirs[id] ||
@@ -520,7 +508,7 @@
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
       
-      // Пересчитываем количество заказываемых единиц для трековых сегментов.
+      // Пересчитываем количество единиц для трековых сегментов.
       let totalPrice = 0;
       let tbodyHTML = "";
       for (const [id, group] of Object.entries(groupedItems)) {
