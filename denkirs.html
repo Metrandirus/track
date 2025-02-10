@@ -146,8 +146,9 @@
     var additionalMappingDenkirs = {
       "TR3020-AL": { "name": "Профиль для гипсокартонного потолка TR3020-AL", "price": 3265, "image": "images/TR3020-AL.jpg" },
       "TR3050-AL": { "name": "Профиль для натяжного потолка TR3050-AL", "price": 2640, "image": "images/TR3050-AL.jpg" },
-      "TR3052-AL": { "name": "Заглушка для встраиваемого профиля (черная)", "price": 135, "image": "images/TR3052-AL.jpg" },
-      "TR3021-AL": { "name": "Заглушка для встраиваемого профиля (белая)", "price": 690, "image": "images/TR3021-AL.jpg" }
+      "TR3052-AL": { "name": "Заглушка для встраиваемого профиля", "price": 135, "image": "images/TR3052-AL.jpg" },
+      "TR3021-AL": { "name": "Заглушка для встраиваемого профиля (белая)", "price": 690, "image": "images/TR3021-AL.jpg" },
+      "TR3031-AL": { "name": "Угол-соединитель профиля", "price": 1975, "image": "images/TR3031-AL.jpg" }
     };
     var powerInputMapping = {
       "TR1100-BK": { "name": "Подвод питания черный", "price": 375, "image": "images/TR1100-BK.jpg" },
@@ -158,7 +159,7 @@
       "TR1105-WH": { "name": "Подвес белый", "price": 661, "image": "images/TR1105-WH.jpg" }
     };
 
-    // Функция проверки режима монтажа для Denkirs
+    // Проверка режима монтажа для Denkirs
     function checkMountingForDenkirs(mountingParam) {
       if (["surface", "recessed", "stretch-ceiling", "hanging"].indexOf(mountingParam) === -1) {
         document.getElementById("resultContainer").style.display = "none";
@@ -248,7 +249,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор трековых сегментов в зависимости от фигуры:
+      // Подбор трековых сегментов по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "hanging") ?
                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
@@ -362,17 +363,29 @@
       // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
         // Для натяжного потолка – используем профиль TR3050-AL
-        // Расчет эффективной длины системы (для Denkirs в этом режиме: effectiveLength = lengthA + lengthB)
+        // Эффективная длина системы рассчитывается как:
+        // • straight: lengthA
+        // • L-shape, T-shape: lengthA + lengthB
+        // • P-shape: 2 * lengthA + lengthB
+        // • rectangle: lengthA + lengthB
         let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
-        // Добавляем профили как обычные компоненты (без pieceLength)
+        // Добавляем профиль как обычный компонент (без pieceLength)
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3050-AL" });
         }
+        // Если в системе присутствуют угловые коннекторы (L-shape),
+        // добавляем столько же угол‑соединителей профиля TR3031-AL
+        let angleCount = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors["L-shape"][0]).length;
+        console.log("Угловых коннекторов в системе (stretch-ceiling):", angleCount);
+        for (let i = 0; i < angleCount; i++) {
+          selectedItems.push({ id: "TR3031-AL" });
+        }
       } else if (mountingParam === "recessed") {
-        // Для встраиваемой системы – используем профиль для гипсокартонного потолка TR3020-AL и заглушки (если система не "rectangle")
+        // Для встраиваемой системы – используем профиль для гипсокартонного потолка TR3020-AL
+        // и заглушки. Здесь effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB)
         let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
@@ -380,9 +393,10 @@
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3020-AL" });
         }
+        // Для всех, кроме прямоугольной системы, добавляем заглушку (одинаковая для черного и белого)
         if (shape !== "rectangle") {
           let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          let endCapsId = (color === "black") ? "TR3052-AL" : "TR3021-AL";
+          let endCapsId = "TR3052-AL"; // независимо от цвета
           for (let i = 0; i < endCapsCount; i++) {
             selectedItems.push({ id: endCapsId });
           }
@@ -390,7 +404,7 @@
       }
       
       if (mountingParam === "hanging") {
-        // Для подвесного монтажа – рассчитываем эффективную длину системы по входным параметрам
+        // Для подвесного монтажа – рассчитываем эффективную длину системы
         let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
         let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
