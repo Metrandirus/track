@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Maytoni UNITY – Подбор трековой системы</title>
+  <title>Denkirs – Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Общие стили для maytoni.html */
+    /* Общие стили для denkirs.html */
     html, body {
       margin: 0;
       padding: 0;
@@ -19,7 +19,6 @@
       padding: 20px;
       border: 1px solid #ddd;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      height: auto;
       overflow: visible;
     }
     .results-table {
@@ -89,183 +88,87 @@
   </div>
   
   <script>
-    /***** Встроенные данные о продуктах (Maytoni UNITY) *****/
+    /***** Встроенные данные для Denkirs *****/
     var products = {
-      "one-phase": {
+      "denkirs": {
         "black": {
+          // Для Denkirs базой являются данные из раздела surface (используются для всех режимов)
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
+              { "min": 0, "max": 100, "items": ["TR1001-BK"] },
+              { "min": 101, "max": 200, "items": ["TR1002-BK"] },
+              { "min": 201, "max": 300, "items": ["TR1003-BK"] }
             ],
             "connectors": {
-              "straight": ["TRA001C-11B"],
-              "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "straight": ["TR1101-BK"],
+              "L-shape": ["TR1102-BK"],
+              "T-shape": ["TR1103-BK"],
+              "X-shape": ["TR1104-BK"]
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "TR1001-BK": { "name": "Шинопровод накладной черный 1м", "price": 950, "image": "images/TR1001-BK.jpg" },
+              "TR1002-BK": { "name": "Шинопровод накладной черный 2м", "price": 1990, "image": "images/TR1002-BK.jpg" },
+              "TR1003-BK": { "name": "Шинопровод накладной черный 3м", "price": 3150, "image": "images/TR1003-BK.jpg" },
+              "TR1101-BK": { "name": "Коннектор прямой черный", "price": 375, "image": "images/TR1101-BK.jpg" },
+              "TR1102-BK": { "name": "L-коннектор черный", "price": 375, "image": "images/TR1102-BK.jpg" },
+              "TR1103-BK": { "name": "T-коннектор черный", "price": 562, "image": "images/TR1103-BK.jpg" },
+              "TR1104-BK": { "name": "X-коннектор черный", "price": 661, "image": "images/TR1104-BK.jpg" }
             }
           },
-          "recessed": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX004-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX004-112B"] }
-            ],
-            "connectors": {
-              "straight": ["TRA002C-11B"],
-              "L-shape": ["TRA002CL-11B"],
-              "T-shape": ["TRA002CT-11B"]
-            },
-            "components": {
-              "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м", "price": 1600, "image": "images/TRX004-111B.png" },
-              "TRX004-112B": { "name": "Шинопровод встраиваемый черный 2м", "price": 2600, "image": "images/TRX004-112B.png" },
-              "TRA002C-11B": { "name": "Коннектор прямой черный для встраивания", "price": 110, "image": "images/TRA002C-11B.png" },
-              "TRA002CL-11B": { "name": "Коннектор угловой черный для встраивания", "price": 160, "image": "images/TRA002CL-11B.png" },
-              "TRA002CT-11B": { "name": "Коннектор Т-образный черный для встраивания", "price": 210, "image": "images/TRA002CT-11B.png" }
-            }
-          },
-          "stretch-ceiling": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX003-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX003-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX003-113B"] }
-            ],
-            "connectors": {
-              "straight": ["TRA003C-11B"],
-              "L-shape": ["TRA003CL-11B"],
-              "T-shape": ["TRA003CT-11B"]
-            },
-            "additionalComponents": ["TRA001MP-112S"],
-            "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка", "price": 5490, "image": "images/TRA001MP-112S.png" }
-            }
-          },
-          "hanging": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111B"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112B"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113B"] }
-            ],
-            "connectors": {
-              "straight": ["TRA001C-11B"],
-              "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
-            },
-            "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный", "price": 200, "image": "images/TRA001CT-11B.png" }
-            }
-          }
+          // Для режимов stretch-ceiling и hanging данные берутся из surface, а для recessed – также surface
+          "stretch-ceiling": {},
+          "hanging": {}
         },
         "white": {
           "surface": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
+              { "min": 0, "max": 100, "items": ["TR1001-WH"] },
+              { "min": 101, "max": 200, "items": ["TR1002-WH"] },
+              { "min": 201, "max": 300, "items": ["TR1003-WH"] }
             ],
             "connectors": {
-              "straight": ["TRA001C-11W"],
-              "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
+              "straight": ["TR1101-WH"],
+              "L-shape": ["TR1102-WH"],
+              "T-shape": ["TR1103-WH"],
+              "X-shape": ["TR1104-WH"]
             },
             "components": {
-              "TRX001-111W": { "name": "Шинопровод накладной белый 1м", "price": 1550, "image": "images/TRX001-111W.png" },
-              "TRX001-112W": { "name": "Шинопровод накладной белый 2м", "price": 2550, "image": "images/TRX001-112W.png" },
-              "TRX001-113W": { "name": "Шинопровод накладной белый 3м", "price": 3550, "image": "images/TRX001-113W.png" },
-              "TRA001C-11W": { "name": "Коннектор прямой белый", "price": 105, "image": "images/TRA001C-11W.png" },
-              "TRA001CL-11W": { "name": "Коннектор угловой белый", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/TRA001CT-11W.png" }
+              "TR1001-WH": { "name": "Шинопровод накладной белый 1м", "price": 950, "image": "images/TR1001-WH.jpg" },
+              "TR1002-WH": { "name": "Шинопровод накладной белый 2м", "price": 1990, "image": "images/TR1002-WH.jpg" },
+              "TR1003-WH": { "name": "Шинопровод накладной белый 3м", "price": 3150, "image": "images/TR1003-WH.jpg" },
+              "TR1101-WH": { "name": "Коннектор прямой белый", "price": 375, "image": "images/TR1101-WH.jpg" },
+              "TR1102-WH": { "name": "L-коннектор белый", "price": 375, "image": "images/TR1102-WH.jpg" },
+              "TR1103-WH": { "name": "T-коннектор белый", "price": 562, "image": "images/TR1103-WH.jpg" },
+              "TR1104-WH": { "name": "X-коннектор белый", "price": 661, "image": "images/TR1104-WH.jpg" }
             }
           },
-          "recessed": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX004-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX004-112W"] }
-            ],
-            "connectors": {
-              "straight": ["TRA002C-11W"],
-              "L-shape": ["TRA002CL-11W"],
-              "T-shape": ["TRA002CT-11W"]
-            },
-            "components": {
-              "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м", "price": 1650, "image": "images/TRX004-111W.png" },
-              "TRX004-112W": { "name": "Шинопровод встраиваемый белый 2м", "price": 2650, "image": "images/TRX004-112W.png" },
-              "TRA002C-11W": { "name": "Коннектор прямой белый для встраивания", "price": 115, "image": "images/TRA002C-11W.png" },
-              "TRA002CL-11W": { "name": "Коннектор угловой белый для встраивания", "price": 165, "image": "images/TRA002CL-11W.png" },
-              "TRA002CT-11W": { "name": "Коннектор Т-образный белый для встраивания", "price": 215, "image": "images/TRA002CT-11W.png" }
-            }
-          },
-          "stretch-ceiling": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
-            ],
-            "connectors": {
-              "straight": ["TRA001C-11W"],
-              "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
-            },
-            "additionalComponents": ["TRA001MP-112S"],
-            "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка", "price": 5490, "image": "images/TRA001MP-112S.png" }
-            }
-          },
-          "hanging": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TRX001-111W"] },
-              { "min": 101, "max": 200, "items": ["TRX001-112W"] },
-              { "min": 201, "max": 300, "items": ["TRX001-113W"] }
-            ],
-            "connectors": {
-              "straight": ["TRA001C-11W"],
-              "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
-            },
-            "components": {
-              "TRX001-111W": { "name": "Шинопровод накладной белый 1м", "price": 1550, "image": "images/TRX001-111W.png" },
-              "TRX001-112W": { "name": "Шинопровод накладной белый 2м", "price": 2550, "image": "images/TRX001-112W.png" },
-              "TRX001-113W": { "name": "Шинопровод накладной белый 3м", "price": 3550, "image": "images/TRX001-113W.png" },
-              "TRA001C-11W": { "name": "Коннектор прямой белый", "price": 105, "image": "images/TRA001C-11W.png" },
-              "TRA001CL-11W": { "name": "Коннектор угловой белый", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/TRA001CT-11W.png" }
-            }
-          }
+          "stretch-ceiling": {},
+          "hanging": {}
         }
       }
     };
-    /***** Конец встроенных данных *****/
 
     /***** Дополнительные сопоставления для Denkirs *****/
     var additionalMappingDenkirs = {
-      // Для встраиваемой системы – профиль для гипсокартонного потолка TR3020-AL (2 м)
+      // Для recessed (встраиваемой системы) – профиль для гипсокартонного потолка TR3020-AL (2м)
       "TR3020-AL": { "name": "Профиль для гипсокартонного потолка TR3020-AL", "price": 3265, "image": "images/TR3020-AL.jpg" },
-      // Для натяжного потолка – профиль для натяжного потолка TR3050-AL (2 м)
-      "TR3050-AL": { "name": "Профиль для натяжного потолка TR3050-AL", "price": 2640, "image": "images/TR3050-AL.jpg" }
+      // Для режима stretch-ceiling – профиль НЕ добавляем (по требованию)
+      // Для end caps: для черного используем TR3052-AL, для белого – TR3021-AL
+      "TR3052-AL": { "name": "Заглушка для встраиваемого профиля (черная)", "price": 135, "image": "images/TR3052-AL.jpg" },
+      "TR3021-AL": { "name": "Заглушка для встраиваемого профиля (белая)", "price": 690, "image": "images/TR3021-AL.jpg" }
     };
     var powerInputMapping = {
-      "TR1100-BK": { "name": "Подвод питания черный TR1100-BK", "price": 375, "image": "images/TR1100-BK.jpg" },
-      "TR1100-WH": { "name": "Подвод питания белый TR1100-WH", "price": 375, "image": "images/TR1100-WH.jpg" }
+      "TR1100-BK": { "name": "Подвод питания черный", "price": 375, "image": "images/TR1100-BK.jpg" },
+      "TR1100-WH": { "name": "Подвод питания белый", "price": 375, "image": "images/TR1100-WH.jpg" }
     };
     var suspensionMappingDenkirs = {
-      "TR1105-BK": { "name": "Подвес черный TR1105-BK", "price": 661, "image": "images/TR1105-BK.jpg" },
-      "TR1105-WH": { "name": "Подвес белый TR1105-WH", "price": 661, "image": "images/TR1105-WH.jpg" }
+      "TR1105-BK": { "name": "Подвес черный", "price": 661, "image": "images/TR1105-BK.jpg" },
+      "TR1105-WH": { "name": "Подвес белый", "price": 661, "image": "images/TR1105-WH.jpg" }
     };
 
-    // Для Denkirs теперь поддерживаются режимы: surface, recessed, stretch-ceiling и hanging.
+    // Для Denkirs доступны режимы: surface, recessed, stretch-ceiling и hanging.
     function checkMountingForDenkirs(mountingParam) {
+      // Допускаем: surface, recessed, stretch-ceiling, hanging
       if (["surface", "recessed", "stretch-ceiling", "hanging"].indexOf(mountingParam) === -1) {
         document.getElementById("resultContainer").style.display = "none";
         document.getElementById("debug").textContent = "Для Denkirs доступны только режимы surface, recessed, stretch-ceiling и hanging.";
@@ -276,6 +179,7 @@
 
     // Функция для определения номинальной длины трека по его id (для Denkirs)
     function getNominalLength(id) {
+      // Для Denkirs предполагаем: треки TR1001 – 1м, TR1002 – 2м, TR1003 – 3м
       if (id.indexOf("TR1001") !== -1) return 100;
       if (id.indexOf("TR1002") !== -1) return 200;
       if (id.indexOf("TR1003") !== -1) return 300;
@@ -287,7 +191,7 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
 
-    // Функции для подбора трековых сегментов для Denkirs (1м, 2м, 3м)
+    // Функции для подбора трековых сегментов для Denkirs (используем варианты 1м, 2м, 3м)
     function getTracksForDenkirs(legLength, lengthOptions) {
       let pieces = [];
       if (legLength <= 100) {
@@ -330,7 +234,7 @@
       }
     };
 
-    // Основная функция подбора для Denkirs с учётом новых требований по профилям и заглушкам
+    // Основная функция подбора для Denkirs
     window.showSelection = function() {
       console.log("Начало работы showSelection (Denkirs)");
 
@@ -355,12 +259,13 @@
       }
 
       let components = effectiveProduct.components;
-      // Для режима stretch‑ceiling и recessed добавляем дополнительные компоненты (профили и заглушки)
+      // Для режима stretch‑ceiling оставляем компоненты как есть (без добавления профиля)
+      // Для режима recessed – добавляем профиль для гипсокартонного потолка и заглушки
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Логика подбора трековых сегментов по фигурам:
+      // Подбор трековых сегментов по фигурам
       if (shape === "straight") {
         selectedItems = (mountingParam === "hanging") ?
                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
@@ -467,26 +372,18 @@
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
-      // Добавляем подвод питания (всегда добавляется один)
+      // Всегда добавляем подвод питания
       let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
       selectedItems.push({ id: powerInput });
       
       // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка добавляем профиль для натяжного потолка TR3050-AL
-        let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength"))
-                                        .reduce((sum, item) => sum + item.pieceLength, 0);
-        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        let profileCount = Math.ceil(trackLength / 200);
-        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
-        }
+        // Для stretch-ceiling (натяжной потолок) профиль НЕ добавляется для Denkirs
       } else if (mountingParam === "recessed") {
-        // Для встраиваемой системы (recessed) – используем обычные треки (из surface) и добавляем профиль для гипсокартонного потолка TR3020-AL,
-        // а также заглушки: для T‑образной – 2 комплекта, для остальных (если не rectangle) – 1 комплект.
+        // Для встраиваемой системы – используем базовые треки из surface,
+        // затем добавляем профиль для гипсокартонного потолка (TR3020-AL) и заглушки (если система не "rectangle")
         let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength"))
-                                        .reduce((sum, item) => sum + item.pieceLength, 0);
+                                       .reduce((sum, item) => sum + item.pieceLength, 0);
         console.log("Общая длина треков (recessed):", trackLength, "см");
         let profileCount = Math.ceil(trackLength / 200);
         console.log("Профилей для добавления (recessed):", profileCount);
@@ -502,10 +399,9 @@
         }
       }
       
-      // Для режима hanging – добавляем подвесы
       if (mountingParam === "hanging") {
         let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength"))
-                                        .reduce((sum, item) => sum + item.pieceLength, 0);
+                                       .reduce((sum, item) => sum + item.pieceLength, 0);
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
         let suspensionId = (color === "black") ? "TR1105-BK" : "TR1105-WH";
@@ -516,7 +412,7 @@
       
       console.log("Финальный результат подбора (Denkirs):", selectedItems);
       
-      // Группировка элементов.
+      // Группировка элементов: для трековых сегментов суммируем длину, для остальных – считаем количество
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -526,8 +422,6 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Ищем описание компонента сначала в products.denkirs[color]["surface"].components,
-          // затем в powerInputMapping, suspensionMappingDenkirs, additionalMappingDenkirs.
           let comp = (products.denkirs[color]["surface"].components[id]) ||
                      powerInputMapping[id] ||
                      suspensionMappingDenkirs[id] ||
@@ -542,7 +436,6 @@
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
       
-      // Пересчитываем итоговое количество для трековых сегментов и рассчитываем стоимость
       let totalPrice = 0;
       let tbodyHTML = "";
       for (const [id, group] of Object.entries(groupedItems)) {
