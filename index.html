@@ -83,11 +83,11 @@
       font-size: 14px;
       box-sizing: border-box;
     }
-    /* Кнопка "Добавить светильник" уменьшена и выровнена по левому краю */
+    /* Кнопка "Добавить светильник": фиксированная маленькая ширина и выравнивание по левому краю */
     .add-lighting-button {
-      width: 50%;
-      padding: 5px;
-      font-size: 14px;
+      width: 120px;
+      padding: 5px 10px;
+      font-size: 12px;
       cursor: pointer;
       text-align: left;
       margin-top: 10px;
@@ -121,7 +121,8 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 40px);
+      /* Убираем фиксированную высоту: теперь авто */
+      height: auto;
     }
     .manufacturer-title {
       background-color: #f4f4f4;
@@ -207,7 +208,7 @@
         <label for="lengthB">Длина б (см):</label>
         <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
       </div>
-      <!-- Кнопка "Добавить светильник" уменьшена и выровнена по левому краю -->
+      <!-- Кнопка "Добавить светильник" -->
       <div class="button-container">
         <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
       </div>
