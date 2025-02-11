@@ -2,477 +2,402 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Denkirs – Подбор трековой системы</title>
+  <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Общие стили для denkirs.html */
-    html, body {
-      margin: 0;
-      padding: 0;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+   /* Стили для всей страницы */
+    body {
+      font-family: Arial, sans-serif;
       background-color: #e7f5fd;
-      overflow: visible;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
     }
     .container {
-      max-width: 800px;
-      margin: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    /* Левая область: форма выбора */
+    .form-container {
+      flex: 1 1 300px;
       background-color: white;
       padding: 20px;
       border: 1px solid #ddd;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      overflow: visible;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      max-width: 350px;
     }
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background-color: white;
-      table-layout: auto;
+    .form-container h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
     }
-    .results-table th, .results-table td {
-      border: 1px solid #ddd;
-      padding: 6px 8px;
-      text-align: left;
-      word-wrap: break-word;
-      font-size: 13px;
-    }
-    .results-table th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    .results-table th:nth-child(3),
-    .results-table td:nth-child(3) {
-      width: 90px;
-    }
-    .results-table th:nth-child(2),
-    .results-table td:nth-child(2) {
-      width: 40px;
-      text-align: center;
-    }
-    .total-price {
-      font-weight: bold;
-      text-align: right;
+    .form-container label {
+      display: block;
       margin-top: 10px;
       font-size: 14px;
     }
-    .result-container {
+    .form-container select,
+    .form-container input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .shape-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .shape-options div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ddd;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      width: calc(50% - 5px);
+      box-sizing: border-box;
+    }
+    .shape-options img {
+      width: 50px;
+      height: auto;
+    }
+    .shape-options label {
+      font-size: 12px;
+      margin-top: 5px;
+      text-align: center;
+    }
+    /* Группа для ввода длин и кнопки добавления светильников */
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .input-group input[type="text"] {
+      width: 80px; /* короче поля ввода */
+      padding: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    /* Кнопка "Добавить светильники" – меньше и выровнена по центру вертикально */
+    .add-lighting-button {
+      width: 120px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+    }
+    /* Кнопка "Подобрать" располагается ниже остальных элементов */
+    .button-container {
+      margin-top: 20px;
+    }
+    .button-container button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    /* Правая область: блок с 5 столбцами производителей */
+    .manufacturers-container {
+      flex: 2 1 500px;
       display: none;
-      overflow: visible;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .manufacturer-column {
+      flex: 1 1 calc(20% - 10px);
+      background-color: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      /* Высота столбцов – auto, чтобы занимать всю доступную высоту */
+      height: auto;
+    }
+    .manufacturer-title {
+      background-color: #f4f4f4;
+      padding: 5px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+    .manufacturer-iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+    /* Кнопка для скачивания PDF под каждым столбцом */
+    .download-pdf-button {
+      width: 100%;
+      padding: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      margin-top: 5px;
     }
     .debug {
+      margin-top: 10px;
       font-size: 12px;
       color: red;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Контейнер для вывода результатов подбора -->
-    <div id="resultContainer" class="result-container">
-      <table class="results-table" id="resultsTable">
-        <thead id="tableHeader">
-          <tr>
-            <th>Наименование</th>
-            <th>кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-          </tr>
-        </thead>
-        <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
-        </tbody>
-      </table>
-      <div id="totalPrice" class="total-price"></div>
+    <!-- Левая область: форма выбора -->
+    <div class="form-container">
+      <h2>Подбор трековой системы</h2>
+      <label for="type">Тип:</label>
+      <select id="type" name="type">
+        <option value="one-phase">Однофазный</option>
+        <option value="magnetic">Магнитный</option>
+      </select>
+      <label for="color">Цвет:</label>
+      <select id="color" name="color">
+        <option value="black">Черный</option>
+        <option value="white">Белый</option>
+      </select>
+      <label for="mounting">Способ монтажа:</label>
+      <select id="mounting" name="mounting">
+        <option value="surface">Накладной</option>
+        <option value="recessed">Встраиваемый</option>
+        <option value="stretch-ceiling">В натяжной потолок</option>
+        <option value="hanging">Подвесной</option>
+      </select>
+      <label>Фигура:</label>
+      <div class="shape-options">
+        <div>
+          <img src="images/straight.png" alt="Прямая">
+          <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
+          <label for="straight">Прямая</label>
+        </div>
+        <div>
+          <img src="images/L-shape.png" alt="L-образная">
+          <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
+          <label for="L-shape">L-образная</label>
+        </div>
+        <div>
+          <img src="images/T-shape.png" alt="T-образная">
+          <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
+          <label for="T-shape">T-образная</label>
+        </div>
+        <div>
+          <img src="images/P-shape.png" alt="П-образная">
+          <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
+          <label for="P-shape">П-образная</label>
+        </div>
+        <div>
+          <img src="images/rectangle.png" alt="Прямоугольник">
+          <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
+          <label for="rectangle">Прямоугольник</label>
+        </div>
+        <div>
+          <img src="images/x.png" alt="Х-образная">
+          <input type="radio" id="x" name="shape" value="x" onclick="selectShape('x')">
+          <label for="x">Х-образная</label>
+        </div>
+      </div>
+      <input type="hidden" id="selectedShape" name="selectedShape" value="">
+      <!-- Группа для ввода длин и кнопки "Добавить светильники" -->
+      <div class="input-group">
+        <div>
+          <label for="lengthA">Длина а (см):</label>
+          <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
+        </div>
+        <div>
+          <label for="lengthB">Длина б (см):</label>
+          <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+        </div>
+        <div>
+          <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
+        </div>
+      </div>
+      <!-- Контейнер для строк добавления светильников -->
+      <div id="lightingButtonsContainer"></div>
+      <!-- Кнопка "Подобрать" располагается ниже остальных элементов -->
+      <div class="button-container">
+        <button type="button" onclick="safeShowSelection()">Подобрать</button>
+      </div>
+      <div id="debug" class="debug"></div>
     </div>
-    <div id="debug" class="debug"></div>
+
+    <!-- Правая область: блок с 5 столбцами производителей -->
+    <div class="manufacturers-container" id="manufacturersContainer">
+      <!-- Здесь будут динамически создаваться столбцы -->
+    </div>
   </div>
-  
+
   <script>
-    /***** Встроенные данные для Denkirs *****/
-    var products = {
-      "denkirs": {
-        "black": {
-          "surface": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TR1001-BK"] },
-              { "min": 101, "max": 200, "items": ["TR1002-BK"] },
-              { "min": 201, "max": 300, "items": ["TR1003-BK"] }
-            ],
-            "connectors": {
-              "straight": ["TR1101-BK"],
-              "L-shape": ["TR1102-BK"],
-              "T-shape": ["TR1103-BK"]
-            },
-            "components": {
-              "TR1001-BK": { "name": "Шинопровод накладной черный 1м", "price": 950, "image": "images/TR1001-BK.jpg" },
-              "TR1002-BK": { "name": "Шинопровод накладной черный 2м", "price": 1990, "image": "images/TR1002-BK.jpg" },
-              "TR1003-BK": { "name": "Шинопровод накладной черный 3м", "price": 3150, "image": "images/TR1003-BK.jpg" },
-              "TR1101-BK": { "name": "Коннектор прямой черный", "price": 375, "image": "images/TR1101-BK.jpg" },
-              "TR1102-BK": { "name": "L‑коннектор черный", "price": 375, "image": "images/TR1102-BK.jpg" },
-              "TR1103-BK": { "name": "T‑коннектор черный", "price": 562, "image": "images/TR1103-BK.jpg" }
-            }
-          },
-          "stretch-ceiling": {},
-          "hanging": {}
-        },
-        "white": {
-          "surface": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["TR1001-WH"] },
-              { "min": 101, "max": 200, "items": ["TR1002-WH"] },
-              { "min": 201, "max": 300, "items": ["TR1003-WH"] }
-            ],
-            "connectors": {
-              "straight": ["TR1101-WH"],
-              "L-shape": ["TR1102-WH"],
-              "T-shape": ["TR1103-WH"]
-            },
-            "components": {
-              "TR1001-WH": { "name": "Шинопровод накладной белый 1м", "price": 950, "image": "images/TR1001-WH.jpg" },
-              "TR1002-WH": { "name": "Шинопровод накладной белый 2м", "price": 1990, "image": "images/TR1002-WH.jpg" },
-              "TR1003-WH": { "name": "Шинопровод накладной белый 3м", "price": 3150, "image": "images/TR1003-WH.jpg" },
-              "TR1101-WH": { "name": "Коннектор прямой белый", "price": 375, "image": "images/TR1101-WH.jpg" },
-              "TR1102-WH": { "name": "L‑коннектор белый", "price": 375, "image": "images/TR1102-WH.jpg" },
-              "TR1103-WH": { "name": "T‑коннектор белый", "price": 562, "image": "images/TR1103-WH.jpg" }
-            }
-          },
-          "stretch-ceiling": {},
-          "hanging": {}
-        }
+    // Функция для установки выбранной фигуры
+    function selectShape(shape) {
+      document.getElementById("selectedShape").value = shape;
+      console.log("Выбрана фигура:", shape);
+    }
+
+    // Функция для добавления строки для выбора светильника
+    let lightingRowsCount = 0;
+    const maxLightingRows = 3;
+    function addLightingRow() {
+      if (lightingRowsCount >= maxLightingRows) {
+        alert("Можно добавить не более " + maxLightingRows + " вариантов светильников.");
+        return;
       }
-    };
-
-    /***** Дополнительные сопоставления для Denkirs *****/
-    var additionalMappingDenkirs = {
-      "TR3020-AL": { "name": "Профиль для гипсокартонного потолка TR3020-AL", "price": 3265, "image": "images/TR3020-AL.jpg" },
-      "TR3050-AL": { "name": "Профиль для натяжного потолка TR3050-AL", "price": 2640, "image": "images/TR3050-AL.jpg" },
-      "TR3052-AL": { "name": "Заглушка для встраиваемого профиля", "price": 135, "image": "images/TR3052-AL.jpg" },
-      "TR3021-AL": { "name": "Заглушка для встраиваемого профиля", "price": 690, "image": "images/TR3021-AL.jpg" },
-      "TR3031-AL": { "name": "Угол для натяжного потолка TR3031-AL", "price": 1975, "image": "images/TR3031-AL.jpg" }
-    };
-
-    var powerInputMapping = {
-      "TR1100-BK": { "name": "Подвод питания черный", "price": 375, "image": "images/TR1100-BK.jpg" },
-      "TR1100-WH": { "name": "Подвод питания белый", "price": 375, "image": "images/TR1100-WH.jpg" }
-    };
-
-    var suspensionMappingDenkirs = {
-      "TR1105-BK": { "name": "Подвес черный", "price": 661, "image": "images/TR1105-BK.jpg" },
-      "TR1105-WH": { "name": "Подвес белый", "price": 661, "image": "images/TR1105-WH.jpg" }
-    };
-
-    function checkMountingForDenkirs(mountingParam) {
-      if (["surface", "recessed", "stretch-ceiling", "hanging"].indexOf(mountingParam) === -1) {
-        document.getElementById("resultContainer").style.display = "none";
-        document.getElementById("debug").textContent = "Для Denkirs доступны только режимы surface, recessed, stretch-ceiling и hanging.";
-        return false;
-      }
-      return true;
-    }
-
-    // Функция для определения номинальной длины трека по его id (возвращает значение в см)
-    function getNominalLength(id) {
-      if (id.indexOf("TR1001") !== -1) return 100;
-      if (id.indexOf("TR1002") !== -1) return 200;
-      if (id.indexOf("TR1003") !== -1) return 300;
-      return 100;
-    }
-
-    function wrapConnector(conn) {
-      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
-    }
-
-    // Функции для подбора трековых элементов для Denkirs – варианты одинаковы для surface и hanging
-    function getTracksForDenkirs(legLength, lengthOptions) {
-      let pieces = [];
-      if (legLength <= 100) {
-        pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-      } else if (legLength <= 200) {
-        pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-      } else if (legLength <= 300) {
-        pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-      } else {
-        let fullPieces = Math.floor(legLength / 300);
-        for (let i = 0; i < fullPieces; i++) {
-          pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
+      lightingRowsCount++;
+      const selectedValues = [];
+      const existingSelects = document.querySelectorAll("[id^='light']");
+      existingSelects.forEach(select => {
+        if (select.value) {
+          selectedValues.push(select.value);
         }
-        let remainder = legLength - fullPieces * 300;
-        if (remainder > 0) {
-          if (remainder <= 100) {
-            pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
-          } else if (remainder <= 200) {
-            pieces.push({ id: lengthOptions[1].items[0], pieceLength: 200 });
-          } else {
-            pieces.push({ id: lengthOptions[2].items[0], pieceLength: 300 });
-          }
-        }
+      });
+      const allOptions = [
+        { value: "spot", text: "Как споты" },
+        { value: "linear", text: "Линейный" },
+        { value: "pendant", text: "Подвесной" }
+      ];
+      const availableOptions = allOptions.filter(opt => !selectedValues.includes(opt.value));
+      if (availableOptions.length === 0) {
+        alert("Все варианты светильников уже выбраны.");
+        return;
       }
-      return pieces;
-    }
-    function getTracksForDenkirsSurface(legLength, lengthOptions) {
-      return getTracksForDenkirs(legLength, lengthOptions);
-    }
-    function getTracksForDenkirsHanging(legLength, lengthOptions) {
-      return getTracksForDenkirs(legLength, lengthOptions);
+      let selectHTML = `<select id="light${lightingRowsCount}" name="light${lightingRowsCount}">`;
+      availableOptions.forEach(opt => {
+        selectHTML += `<option value="${opt.value}">${opt.text}</option>`;
+      });
+      selectHTML += `</select>`;
+      const container = document.createElement("div");
+      container.className = "lighting-row";
+      container.id = "lightingRow" + lightingRowsCount;
+      container.innerHTML = `
+        ${selectHTML}
+        <div class="quantity-controls">
+          <button type="button" onclick="decreaseQuantity('light${lightingRowsCount}')">-</button>
+          <input type="number" id="quantity${lightingRowsCount}" name="quantity${lightingRowsCount}" value="1" min="1" style="width: 60px;">
+          <button type="button" onclick="increaseQuantity('light${lightingRowsCount}')">+</button>
+        </div>
+        <button type="button" class="remove-button" onclick="removeLightingRow('lightingRow${lightingRowsCount}')">Удалить</button>
+      `;
+      document.getElementById("lightingButtonsContainer").appendChild(container);
+      console.log("Добавлена строка для выбора светильника.");
     }
 
-    window.safeShowSelection = function() {
+    function increaseQuantity(lightId) {
+      const quantityInput = document.getElementById("quantity" + lightId.slice(-1));
+      quantityInput.value = parseInt(quantityInput.value) + 1;
+    }
+
+    function decreaseQuantity(lightId) {
+      const quantityInput = document.getElementById("quantity" + lightId.slice(-1));
+      if (parseInt(quantityInput.value) > 1) {
+        quantityInput.value = parseInt(quantityInput.value) - 1;
+      }
+    }
+
+    function removeLightingRow(rowId) {
+      const row = document.getElementById(rowId);
+      row.parentNode.removeChild(row);
+      lightingRowsCount--;
+      console.log("Удалена строка для выбора светильника.");
+    }
+
+    // Функция обновления iframe для каждого производителя
+    function updateManufacturerIframes(queryString, manufacturerList) {
+      const container = document.getElementById("manufacturersContainer");
+      container.innerHTML = ""; // Очистка предыдущих столбцов
+      manufacturerList.forEach(man => {
+        const col = document.createElement("div");
+        col.className = "manufacturer-column";
+        // Добавляем кнопку "Скачать PDF" под iframe.
+        // Предполагается, что PDF-файл имеет то же имя, что и файл производителя, но с расширением .pdf.
+        const pdfFile = man.file.replace(/\.html$/i, ".pdf");
+        col.innerHTML = `
+    <div class="manufacturer-title">${man.title}</div>
+    <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
+    <button class="download-pdf-button" onclick="downloadPDF('${man.title}', '#iframe-${man.title}')">Скачать PDF</button>
+`;
+        container.appendChild(col);
+      });
+    }
+
+    // Функция для скачивания PDF (открывает ссылку в новом окне)
+    function downloadPDF(manufacturerTitle, iframeSelector) {
+    const iframe = document.querySelector(iframeSelector);
+    if (!iframe) {
+        alert("Ошибка: не найден iframe для " + manufacturerTitle);
+        return;
+    }
+    
+    const iframeDoc = iframe.contentWindow.document;
+    const resultsTable = iframeDoc.getElementById("resultsTable");
+    
+    if (!resultsTable) {
+        alert("Ошибка: не найдена таблица с товарами для " + manufacturerTitle);
+        return;
+    }
+
+    html2canvas(resultsTable).then(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 190; // Ширина изображения в PDF
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Пропорциональная высота
+        
+        pdf.text(manufacturerTitle, 10, 10);
+        pdf.addImage(imgData, "PNG", 10, 20, imgWidth, imgHeight);
+        pdf.save(manufacturerTitle + "_выбор.pdf");
+    });
+}
+
+
+    // Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать")
+    function safeShowSelection() {
       try {
-        showSelection();
-      } catch (e) {
-        console.error("Ошибка в showSelection:", e);
-        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-      }
-    };
-
-    window.showSelection = function() {
-      console.log("Начало работы showSelection (Denkirs)");
-
-      const params = new URLSearchParams(window.location.search);
-      const color = (params.get("color") || "black").toLowerCase();
-      let mountingParam = (params.get("mounting") || "surface").toLowerCase();
-      if (!checkMountingForDenkirs(mountingParam)) return;
-      const shape = params.get("shape") || "straight";
-      const lengthA = parseFloat(params.get("lengthA")) || 150;
-      const lengthB = parseFloat(params.get("lengthB")) || 0;
-
-      console.log("Параметры подбора (Denkirs):", { color, mounting: mountingParam, shape, lengthA, lengthB });
-
-      let effectiveProduct = (["stretch-ceiling", "hanging", "recessed"].indexOf(mountingParam) !== -1) ?
-          (products.denkirs && products.denkirs[color] && products.denkirs[color]["surface"]) :
-          (products.denkirs && products.denkirs[color] && products.denkirs[color][mountingParam]);
-      if (!effectiveProduct) {
-        throw new Error("Не найден комплект для Denkirs с выбранными параметрами.");
-      }
-
-      let components = effectiveProduct.components;
-      const lengthOptions = effectiveProduct.lengthOptions;
-      let selectedItems = [];
-      let usedConnectors = [];
-
-      // Логика подбора по фигурам:
-      if (shape === "straight") {
-        selectedItems = (mountingParam === "hanging") ?
-                        getTracksForDenkirsHanging(lengthA, lengthOptions) :
-                        getTracksForDenkirsSurface(lengthA, lengthOptions);
-      } else if (shape === "L-shape") {
-        let legATracks = (mountingParam === "hanging") ?
-                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
-                         getTracksForDenkirsSurface(lengthA, lengthOptions);
-        let legBTracks = (mountingParam === "hanging") ?
-                         getTracksForDenkirsHanging(lengthB, lengthOptions) :
-                         getTracksForDenkirsSurface(lengthB, lengthOptions);
-        selectedItems = legATracks.concat(legBTracks);
-        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
-        }
-        if (legATracks.length > 1) {
-          for (let i = 0; i < legATracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-        if (legBTracks.length > 1) {
-          for (let i = 0; i < legBTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-      } else if (shape === "T-shape") {
-        let topTracks = (mountingParam === "hanging") ?
-                        getTracksForDenkirsHanging(lengthA, lengthOptions) :
-                        getTracksForDenkirsSurface(lengthA, lengthOptions);
-        let verticalTracks = (mountingParam === "hanging") ?
-                             getTracksForDenkirsHanging(lengthB, lengthOptions) :
-                             getTracksForDenkirsSurface(lengthB, lengthOptions);
-        selectedItems = topTracks.concat(verticalTracks);
-        if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
-        }
-        if (topTracks.length > 1) {
-          for (let i = 0; i < topTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-        if (verticalTracks.length > 1) {
-          for (let i = 0; i < verticalTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-      } else if (shape === "P-shape") {
-        let sideTracks = (mountingParam === "hanging") ?
-                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
-                         getTracksForDenkirsSurface(lengthA, lengthOptions);
-        let connectingTracks = (mountingParam === "hanging") ?
-                               getTracksForDenkirsHanging(lengthB, lengthOptions) :
-                               getTracksForDenkirsSurface(lengthB, lengthOptions);
-        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
-        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
-        }
-        if (sideTracks.length > 1) {
-          for (let i = 0; i < sideTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-        if (connectingTracks.length > 1) {
-          for (let i = 0; i < connectingTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-      } else if (shape === "rectangle") {
-        let tracksA = (mountingParam === "hanging") ?
-                      getTracksForDenkirsHanging(lengthA, lengthOptions) :
-                      getTracksForDenkirsSurface(lengthA, lengthOptions);
-        let tracksB = (mountingParam === "hanging") ?
-                      getTracksForDenkirsHanging(lengthB, lengthOptions) :
-                      getTracksForDenkirsSurface(lengthB, lengthOptions);
-        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
-        if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
-          for (let i = 0; i < 4; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
-          }
-        }
-        let straightForA = (tracksA.length > 1) ? (tracksA.length - 1) : 0;
-        let straightForB = (tracksB.length > 1) ? (tracksB.length - 1) : 0;
-        for (let i = 0; i < straightForA + straightForB; i++) {
-          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-        }
-      } else {
-        throw new Error("Логика для фигуры '" + shape + "' не реализована для Denkirs.");
-      }
-      
-      // Для систем "straight" добавляем недостающие прямые коннекторы, если они ещё не добавлены.
-      if (shape === "straight") {
-        let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
-        let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
-        let currentStraight = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors.straight[0]).length;
-        let missing = neededStraight - currentStraight;
-        if (missing > 0) {
-          for (let i = 0; i < missing; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-      }
-      
-      console.log("Подобранные треки (до доп. компонентов):", selectedItems);
-      
-      // Добавляем подвод питания (всегда один)
-      let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
-      selectedItems.push({ id: powerInput });
-      
-      // Обработка дополнительных компонентов по режимам монтажа:
-      if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка: добавляем профиль для натяжного потолка TR3050-AL
-        // Логика расчёта: эффективная длина = (для всех фигур кроме straight – сумма lengthA и lengthB, для straight – просто lengthA)
-        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
-        console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
-        let profileCount = Math.ceil(effectiveTrackLength / 200);
-        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TR3050-AL", pieceLength: 200 });
-        }
-        // Если форма содержит углы (L, T, P) – добавляем уголки для профиля (TR3031-AL) по количеству углов (для T - 2, для остальных - 1)
-        if (["L-shape", "T-shape", "P-shape"].includes(shape)) {
-          let angleCount = (shape === "T-shape") ? 2 : 1;
-          for (let i = 0; i < angleCount; i++) {
-            selectedItems.push({ id: "TR3031-AL" });
-          }
-        }
-      } else if (mountingParam === "recessed") {
-        // Для встраиваемой системы: добавляем профиль для гипсокартонного потолка TR3020-AL
-        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
-        console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
-        let profileCount = Math.ceil(effectiveTrackLength / 200);
-        console.log("Профилей для добавления (recessed):", profileCount);
-        for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TR3020-AL", pieceLength: 200 });
-        }
-        // Для recessed, если форма не "rectangle", добавляем заглушки (один комплект для прямой/угловой/P-shape, 2 для T-shape)
-        if (shape !== "rectangle") {
-          let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          let endCapsId = "TR3052-AL"; // для обоих цветов используется одна заглушка
-          for (let i = 0; i < endCapsCount; i++) {
-            selectedItems.push({ id: endCapsId });
-          }
-        }
-      }
-      
-      if (mountingParam === "hanging") {
-        // Для подвесного монтажа: рассчитываем общую длину и добавляем подвесы
-        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
-        console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
-        let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
-        console.log("Подвесов для добавления (hanging):", suspCount);
-        let suspensionId = (color === "black") ? "TR1105-BK" : "TR1105-WH";
-        for (let i = 0; i < suspCount; i++) {
-          selectedItems.push({ id: suspensionId });
-        }
-      }
-      
-      console.log("Финальный результат подбора (Denkirs):", selectedItems);
-      
-      // Группировка элементов: для трековых сегментов суммируем длину, для остальных – считаем количество.
-      let groupedItems = {};
-      selectedItems.concat(usedConnectors).forEach(itemObj => {
-        let id = itemObj.id;
-        if (!id) {
-          console.warn("Обнаружен элемент без id:", itemObj);
+        const type = document.getElementById("type").value;
+        const color = document.getElementById("color").value;
+        const mounting = document.getElementById("mounting").value;
+        const shape = document.getElementById("selectedShape").value;
+        const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
+        const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
+        const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}`;
+        console.log("Query-string:", queryString);
+        const manufacturersData = {
+          "one-phase": [
+            { title: "Maytoni UNITY", file: "maytoni.html" },
+            { title: "NOVOTECH", file: "novotech.html" },
+            { title: "ST LUCE", file: "st_luce.html" },
+            { title: "AMBRELA", file: "ambrela.html" },
+            { title: "DENKIRS", file: "denkirs.html" }
+          ],
+          "magnetic": [
+            { title: "Maytoni S35", file: "maytoni_s35.html" },
+            { title: "Maytoni EXILITY", file: "maytoni_exility.html" },
+            { title: "ST LUCE 220", file: "st_luce_220.html" },
+            { title: "ST LUCE 48", file: "st_luce_48.html" },
+            { title: "DENKIRS 220", file: "denkirs_220.html" }
+          ]
+        };
+        const manufacturerList = manufacturersData[type] || [];
+        if (manufacturerList.length === 0) {
+          document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
           return;
         }
-        let isTrack = itemObj.hasOwnProperty("pieceLength");
-        if (!groupedItems[id]) {
-          // Ищем компонент сначала в компонентах для surface, затем в powerInputMapping, suspensionMappingDenkirs и additionalMappingDenkirs
-          let comp = (products.denkirs[color]["surface"].components[id]) ||
-                     powerInputMapping[id] ||
-                     suspensionMappingDenkirs[id] ||
-                     additionalMappingDenkirs[id] ||
-                     {};
-          groupedItems[id] = { totalLength: 0, count: 0, component: comp, isTrack: isTrack };
-        }
-        if (isTrack) {
-          groupedItems[id].totalLength += itemObj.pieceLength;
-        }
-        groupedItems[id].count++;
-      });
-      console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
-      
-      let totalPrice = 0;
-      let tbodyHTML = "";
-      for (const [id, group] of Object.entries(groupedItems)) {
-        let comp = group.component;
-        if (comp && comp.name) {
-          let qty;
-          if (group.isTrack && group.totalLength > 0) {
-            let nominal = getNominalLength(id);
-            qty = Math.ceil(group.totalLength / nominal);
-          } else {
-            qty = group.count;
-          }
-          let cost = qty * comp.price;
-          totalPrice += cost;
-          tbodyHTML += `
-            <tr>
-              <td><img src="images/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
-              <td style="background-color: white; text-align: center;">${qty} шт.</td>
-              <td>${comp.price}₽</td>
-              <td>${cost}₽</td>
-            </tr>
-          `;
-        } else {
-          console.warn("Компонент с ID " + id + " не найден или не имеет имени.");
-        }
+        updateManufacturerIframes(queryString, manufacturerList);
+        document.getElementById("manufacturersContainer").style.display = "flex";
+        document.getElementById("debug").textContent = "";
+      } catch (e) {
+        console.error("Ошибка в safeShowSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
-      
-      document.getElementById("results").innerHTML = tbodyHTML;
-      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
-      document.getElementById("resultContainer").style.display = "block";
-      console.log("Подбор завершён успешно (Denkirs).");
-    };
-
-    document.addEventListener("DOMContentLoaded", function() {
-      setTimeout(window.safeShowSelection, 1000);
-    });
+    }
   </script>
 </body>
 </html>
