@@ -78,19 +78,19 @@
       align-items: center;
     }
     .length-section input[type="text"] {
-      flex: 1;
+      width: 80px;  /* Короче поля ввода */
       padding: 8px;
       font-size: 14px;
       box-sizing: border-box;
     }
-    /* Кнопка "Добавить светильник": фиксированная маленькая ширина и выравнивание по левому краю */
+    /* Кнопка "Добавить светильник" */
     .add-lighting-button {
-      width: 120px;
+      width: 120px;  /* Меньше ширина кнопки */
       padding: 5px 10px;
       font-size: 12px;
       cursor: pointer;
-      text-align: left;
-      margin-top: 10px;
+      text-align: center;
+      margin-left: 10px;
     }
     /* Контейнер для строк добавления светильников */
     #lightingButtonsContainer {
@@ -121,7 +121,7 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      /* Убираем фиксированную высоту: теперь авто */
+      /* Высота столбцов теперь auto, чтобы занимать всю доступную высоту */
       height: auto;
     }
     .manufacturer-title {
@@ -200,16 +200,14 @@
         </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
+      <!-- Поля для ввода длин размещаем в двух строках, кнопка "Добавить светильник" теперь справа от них -->
       <div class="length-section">
         <label for="lengthA">Длина а (см):</label>
         <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
       </div>
-      <div class="length-section">
+      <div class="length-section" style="align-items: center;">
         <label for="lengthB">Длина б (см):</label>
         <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
-      </div>
-      <!-- Кнопка "Добавить светильник" -->
-      <div class="button-container">
         <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
       </div>
       <!-- Контейнер для строк добавления светильников -->
