@@ -360,36 +360,29 @@
       let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
       selectedItems.push({ id: powerInput });
       
+      // Сохраняем сумму длин трековых сегментов (исключая дополнительные компоненты)
+      let baseTrackLength = selectedItems
+                            .filter(item => item.hasOwnProperty("pieceLength"))
+                            .reduce((sum, item) => sum + item.pieceLength, 0);
+      console.log("Суммарная длина трековых сегментов:", baseTrackLength, "см");
+      
       // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
         // Для натяжного потолка – используем профиль TR3050-AL
-        // Эффективная длина системы рассчитывается в зависимости от фигуры:
-        let effectiveTrackLength;
-        if (shape === "straight") {
-          effectiveTrackLength = lengthA;
-        } else if (shape === "L-shape" || shape === "T-shape") {
-          effectiveTrackLength = lengthA + lengthB;
-        } else if (shape === "P-shape") {
-          effectiveTrackLength = 2 * lengthA + lengthB;
-        } else if (shape === "rectangle") {
-          effectiveTrackLength = lengthA + lengthB;
-        } else {
-          effectiveTrackLength = lengthA + lengthB;
-        }
-        console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
-        let baseProfileCount = Math.ceil(effectiveTrackLength / 200);
+        let baseProfileCount = Math.ceil(baseTrackLength / 200);
+        // Округляем до чётного числа
         let profileCount = (baseProfileCount % 2 === 1) ? baseProfileCount + 1 : baseProfileCount;
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3050-AL" });
         }
-        // Добавляем угол-соединители профиля, если в системе есть угловые коннекторы
+        // Если в системе присутствуют угловые коннекторы – добавляем угол‑соединители профиля TR3031-AL
         let angleCount = usedConnectors.filter(conn => conn.id === effectiveProduct.connectors["L-shape"][0]).length;
         console.log("Угловых коннекторов в системе (stretch-ceiling):", angleCount);
         for (let i = 0; i < angleCount; i++) {
           selectedItems.push({ id: "TR3031-AL" });
         }
-        // Добавляем заглушки – для T-shape: 2 комплекта, для straight, L-shape, P-shape: 1 комплект; для rectangle: ни одной
+        // Добавляем заглушки – для T-shape: 2 комплекта, для остальных (кроме rectangle): 1 комплект
         if (shape !== "rectangle") {
           let endCapsCount = (shape === "T-shape") ? 2 : 1;
           for (let i = 0; i < endCapsCount; i++) {
@@ -397,48 +390,22 @@
           }
         }
       } else if (mountingParam === "recessed") {
-        // Для встраиваемой системы – используем профиль для гипсокартонного потолка TR3020-AL и заглушки
-        let effectiveTrackLength;
-        if (shape === "straight") {
-          effectiveTrackLength = lengthA;
-        } else if (shape === "L-shape" || shape === "T-shape") {
-          effectiveTrackLength = lengthA + lengthB;
-        } else if (shape === "P-shape") {
-          effectiveTrackLength = 2 * lengthA + lengthB;
-        } else if (shape === "rectangle") {
-          effectiveTrackLength = lengthA + lengthB;
-        } else {
-          effectiveTrackLength = lengthA + lengthB;
-        }
-        console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
-        let baseProfileCount = Math.ceil(effectiveTrackLength / 200);
+        // Для встраиваемой системы – используем профиль для гипсокартонного потолка TR3020-AL
+        let baseProfileCount = Math.ceil(baseTrackLength / 200);
         let profileCount = (baseProfileCount % 2 === 1) ? baseProfileCount + 1 : baseProfileCount;
         console.log("Профилей для добавления (recessed):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3020-AL" });
         }
+        // Если система не "rectangle" – добавляем заглушку (один комплект)
         if (shape !== "rectangle") {
-          let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          for (let i = 0; i < endCapsCount; i++) {
-            selectedItems.push({ id: "TR3052-AL" });
-          }
+          selectedItems.push({ id: "TR3052-AL" });
         }
       }
       
       if (mountingParam === "hanging") {
         // Для подвесного монтажа – рассчитываем эффективную длину системы
-        let effectiveTrackLength;
-        if (shape === "straight") {
-          effectiveTrackLength = lengthA;
-        } else if (shape === "L-shape" || shape === "T-shape") {
-          effectiveTrackLength = lengthA + lengthB;
-        } else if (shape === "P-shape") {
-          effectiveTrackLength = 2 * lengthA + lengthB;
-        } else if (shape === "rectangle") {
-          effectiveTrackLength = lengthA + lengthB;
-        } else {
-          effectiveTrackLength = lengthA + lengthB;
-        }
+        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
         let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
         console.log("Подвесов для добавления (hanging):", suspCount);
@@ -490,7 +457,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="${comp.image}" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
+              <td><img src="${comp.image}" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
