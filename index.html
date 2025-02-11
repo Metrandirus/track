@@ -92,7 +92,7 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Правая область: область для отображения результатов – 5 столбцов с производителями */
+    /* Правая область: блок с 5 столбцами производителей */
     .manufacturers-container {
       flex: 2 1 500px;
       display: none;
@@ -178,6 +178,11 @@
           <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
           <label for="rectangle">Прямоугольник</label>
         </div>
+        <div>
+          <img src="images/x.png" alt="Х-образная">
+          <input type="radio" id="x" name="shape" value="x" onclick="selectShape('x')">
+          <label for="x">Х-образная</label>
+        </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
       <div class="length-section">
@@ -187,6 +192,10 @@
       <div class="length-section">
         <label for="lengthB">Длина б (см):</label>
         <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+      </div>
+      <!-- Кнопка "Добавить светильник" -->
+      <div class="button-container">
+        <button type="button" onclick="addLightingRow()">Добавить светильник</button>
       </div>
       <div class="button-container">
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
@@ -207,28 +216,53 @@
       console.log("Выбрана фигура:", shape);
     }
 
-    // Определяем набор производителей для каждого типа системы
-    const manufacturersData = {
-      "one-phase": [
-        { title: "Maytoni UNITY", file: "maytoni.html" },
-        { title: "NOVOTECH", file: "novotech.html" },
-        { title: "ST LUCE", file: "st_luce.html" },
-        { title: "AMBRELA", file: "ambrela.html" },
-        { title: "DENKIRS", file: "denkirs.html" }
-      ],
-      "magnetic": [
-        { title: "Maytoni S35", file: "maytoni_s35.html" },
-        { title: "Maytoni EXILITY", file: "maytoni_exility.html" },
-        { title: "ST LUCE 220", file: "st_luce_220.html" },
-        { title: "ST LUCE 48", file: "st_luce_48.html" },
-        { title: "DENKIRS 220", file: "denkirs_220.html" }
-      ]
-    };
+    // Функция для добавления строки для выбора светильника
+    let lightingRowsCount = 0;
+    function addLightingRow() {
+      lightingRowsCount++;
+      const container = document.createElement("div");
+      container.className = "lighting-row";
+      container.id = "lightingRow" + lightingRowsCount;
+      container.innerHTML = `
+        <select id="light${lightingRowsCount}" name="light${lightingRowsCount}">
+          <option value="spot">Спот</option>
+          <option value="linear">Линейный</option>
+          <option value="pendant">Подвесной</option>
+        </select>
+        <div class="quantity-controls">
+          <button type="button" onclick="decreaseQuantity('light${lightingRowsCount}')">-</button>
+          <input type="number" id="quantity${lightingRowsCount}" name="quantity${lightingRowsCount}" value="1" min="1" style="width: 60px;">
+          <button type="button" onclick="increaseQuantity('light${lightingRowsCount}')">+</button>
+        </div>
+        <button type="button" class="remove-button" onclick="removeLightingRow('lightingRow${lightingRowsCount}')">Удалить</button>
+      `;
+      // Вставляем новую строку перед элементом debug
+      document.getElementById("debug").insertAdjacentElement("beforebegin", container);
+      console.log("Добавлена строка для выбора светильника.");
+    }
+
+    function increaseQuantity(lightId) {
+      const quantityInput = document.getElementById("quantity" + lightId.slice(-1));
+      quantityInput.value = parseInt(quantityInput.value) + 1;
+    }
+
+    function decreaseQuantity(lightId) {
+      const quantityInput = document.getElementById("quantity" + lightId.slice(-1));
+      if (parseInt(quantityInput.value) > 1) {
+        quantityInput.value = parseInt(quantityInput.value) - 1;
+      }
+    }
+
+    function removeLightingRow(rowId) {
+      const row = document.getElementById(rowId);
+      row.parentNode.removeChild(row);
+      console.log("Удалена строка для выбора светильника.");
+    }
 
     // Функция обновления iframe для каждого производителя
     function updateManufacturerIframes(queryString, manufacturerList) {
       const container = document.getElementById("manufacturersContainer");
-      container.innerHTML = ""; // очистка предыдущих столбцов
+      container.innerHTML = ""; // Очистка предыдущих столбцов
       manufacturerList.forEach(man => {
         const col = document.createElement("div");
         col.className = "manufacturer-column";
@@ -256,6 +290,22 @@
         console.log("Query-string:", queryString);
         
         // Выбираем набор производителей в зависимости от типа системы
+        const manufacturersData = {
+          "one-phase": [
+            { title: "Maytoni UNITY", file: "maytoni.html" },
+            { title: "NOVOTECH", file: "novotech.html" },
+            { title: "ST LUCE", file: "st_luce.html" },
+            { title: "AMBRELA", file: "ambrela.html" },
+            { title: "DENKIRS", file: "denkirs.html" }
+          ],
+          "magnetic": [
+            { title: "Maytoni S35", file: "maytoni_s35.html" },
+            { title: "Maytoni EXILITY", file: "maytoni_exility.html" },
+            { title: "ST LUCE 220", file: "st_luce_220.html" },
+            { title: "ST LUCE 48", file: "st_luce_48.html" },
+            { title: "DENKIRS 220", file: "denkirs_220.html" }
+          ]
+        };
         const manufacturerList = manufacturersData[type] || [];
         if (manufacturerList.length === 0) {
           document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
