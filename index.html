@@ -83,18 +83,20 @@
       font-size: 14px;
       box-sizing: border-box;
     }
-    /* Кнопка "Добавить светильник" уменьшена */
+    /* Кнопка "Добавить светильник" уменьшена и выровнена по левому краю */
     .add-lighting-button {
       width: 50%;
       padding: 5px;
       font-size: 14px;
       cursor: pointer;
+      text-align: left;
+      margin-top: 10px;
     }
-    /* Контейнер для строк выбора светильников */
+    /* Контейнер для строк добавления светильников */
     #lightingButtonsContainer {
       margin-top: 10px;
     }
-    /* Кнопка "Подобрать" */
+    /* Кнопка "Подобрать" располагается ниже остальных элементов */
     .button-container {
       margin-top: 20px;
     }
@@ -205,13 +207,13 @@
         <label for="lengthB">Длина б (см):</label>
         <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
       </div>
-      <!-- Кнопка "Добавить светильник" уменьшена -->
+      <!-- Кнопка "Добавить светильник" уменьшена и выровнена по левому краю -->
       <div class="button-container">
         <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
       </div>
-      <!-- Контейнер для строк добавления светильников (будут добавляться сюда) -->
+      <!-- Контейнер для строк добавления светильников -->
       <div id="lightingButtonsContainer"></div>
-      <!-- Кнопка "Подобрать" располагается ниже -->
+      <!-- Кнопка "Подобрать" располагается ниже остальных элементов -->
       <div class="button-container">
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
@@ -233,17 +235,53 @@
 
     // Функция для добавления строки для выбора светильника
     let lightingRowsCount = 0;
+    const maxLightingRows = 3;
     function addLightingRow() {
+      // Если уже добавлено максимальное количество строк, не добавляем новую
+      if (lightingRowsCount >= maxLightingRows) {
+        alert("Можно добавить не более " + maxLightingRows + " вариантов светильников.");
+        return;
+      }
       lightingRowsCount++;
+      
+      // Определяем, какие варианты уже выбраны в существующих строках
+      const selectedValues = [];
+      const existingSelects = document.querySelectorAll("[id^='light']");
+      existingSelects.forEach(select => {
+        if (select.value) {
+          selectedValues.push(select.value);
+        }
+      });
+      
+      // Список всех возможных вариантов
+      const allOptions = [
+        { value: "spot", text: "Как споты" },
+        { value: "linear", text: "Линейный" },
+        { value: "pendant", text: "Подвесной" }
+      ];
+      
+      // Фильтруем варианты, исключая уже выбранные
+      const availableOptions = allOptions.filter(opt => !selectedValues.includes(opt.value));
+      
+      // Если ни один вариант не доступен, не добавляем строку
+      if (availableOptions.length === 0) {
+        alert("Все варианты светильников уже выбраны.");
+        return;
+      }
+      
+      // Формируем HTML для нового селекта с доступными вариантами
+      let selectHTML = `<select id="light${lightingRowsCount}" name="light${lightingRowsCount}">`;
+      availableOptions.forEach(opt => {
+        selectHTML += `<option value="${opt.value}">${opt.text}</option>`;
+      });
+      selectHTML += `</select>`;
+      
+      // Формируем HTML для новой строки выбора светильника
       const container = document.createElement("div");
       container.className = "lighting-row";
       container.id = "lightingRow" + lightingRowsCount;
       container.innerHTML = `
-        <select id="light${lightingRowsCount}" name="light${lightingRowsCount}">
-          <option value="spot">Спот</option>
-          <option value="linear">Линейный</option>
-          <option value="pendant">Подвесной</option>
-        </select>
+        ${selectHTML}
         <div class="quantity-controls">
           <button type="button" onclick="decreaseQuantity('light${lightingRowsCount}')">-</button>
           <input type="number" id="quantity${lightingRowsCount}" name="quantity${lightingRowsCount}" value="1" min="1" style="width: 60px;">
@@ -270,6 +308,7 @@
     function removeLightingRow(rowId) {
       const row = document.getElementById(rowId);
       row.parentNode.removeChild(row);
+      lightingRowsCount--;
       console.log("Удалена строка для выбора светильника.");
     }
 
