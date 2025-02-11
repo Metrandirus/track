@@ -5,7 +5,9 @@
   <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    /* Стили для всей страницы */
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+   /* Стили для всей страницы */
     body {
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
@@ -319,18 +321,42 @@
         // Предполагается, что PDF-файл имеет то же имя, что и файл производителя, но с расширением .pdf.
         const pdfFile = man.file.replace(/\.html$/i, ".pdf");
         col.innerHTML = `
-          <div class="manufacturer-title">${man.title}</div>
-          <iframe class="manufacturer-iframe" src="${man.file + queryString}"></iframe>
-          <button class="download-pdf-button" onclick="downloadPDF('${pdfFile}')">Скачать PDF</button>
-        `;
+    <div class="manufacturer-title">${man.title}</div>
+    <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
+    <button class="download-pdf-button" onclick="downloadPDF('${man.title}', '#iframe-${man.title}')">Скачать PDF</button>
+`;
         container.appendChild(col);
       });
     }
 
     // Функция для скачивания PDF (открывает ссылку в новом окне)
-    function downloadPDF(pdfFile) {
-      window.open(pdfFile, '_blank');
+    function downloadPDF(manufacturerTitle, iframeSelector) {
+    const iframe = document.querySelector(iframeSelector);
+    if (!iframe) {
+        alert("Ошибка: не найден iframe для " + manufacturerTitle);
+        return;
     }
+    
+    const iframeDoc = iframe.contentWindow.document;
+    const resultsTable = iframeDoc.getElementById("resultsTable");
+    
+    if (!resultsTable) {
+        alert("Ошибка: не найдена таблица с товарами для " + manufacturerTitle);
+        return;
+    }
+
+    html2canvas(resultsTable).then(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgWidth = 190; // Ширина изображения в PDF
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Пропорциональная высота
+        
+        pdf.text(manufacturerTitle, 10, 10);
+        pdf.addImage(imgData, "PNG", 10, 20, imgWidth, imgHeight);
+        pdf.save(manufacturerTitle + "_выбор.pdf");
+    });
+}
+
 
     // Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать")
     function safeShowSelection() {
