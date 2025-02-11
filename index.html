@@ -83,6 +83,18 @@
       font-size: 14px;
       box-sizing: border-box;
     }
+    /* Кнопка "Добавить светильник" уменьшена */
+    .add-lighting-button {
+      width: 50%;
+      padding: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    /* Контейнер для строк выбора светильников */
+    #lightingButtonsContainer {
+      margin-top: 10px;
+    }
+    /* Кнопка "Подобрать" */
     .button-container {
       margin-top: 20px;
     }
@@ -107,7 +119,7 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      height: 80vh;
+      height: calc(100vh - 40px);
     }
     .manufacturer-title {
       background-color: #f4f4f4;
@@ -193,10 +205,13 @@
         <label for="lengthB">Длина б (см):</label>
         <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
       </div>
-      <!-- Кнопка "Добавить светильник" -->
+      <!-- Кнопка "Добавить светильник" уменьшена -->
       <div class="button-container">
-        <button type="button" onclick="addLightingRow()">Добавить светильник</button>
+        <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
       </div>
+      <!-- Контейнер для строк добавления светильников (будут добавляться сюда) -->
+      <div id="lightingButtonsContainer"></div>
+      <!-- Кнопка "Подобрать" располагается ниже -->
       <div class="button-container">
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
       </div>
@@ -236,8 +251,7 @@
         </div>
         <button type="button" class="remove-button" onclick="removeLightingRow('lightingRow${lightingRowsCount}')">Удалить</button>
       `;
-      // Вставляем новую строку перед элементом debug
-      document.getElementById("debug").insertAdjacentElement("beforebegin", container);
+      document.getElementById("lightingButtonsContainer").appendChild(container);
       console.log("Добавлена строка для выбора светильника.");
     }
 
