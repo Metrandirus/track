@@ -110,7 +110,11 @@
               "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
               "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
               "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
+              /* При необходимости добавьте X‑образные коннекторы в компоненты:
+              "TRA002CX-11B": { "name": "Коннектор Х-образный черный TRA002CX-11B", "price": 200, "image": "images/TRA002CX-11B.png" },
+              "TRA002CX-11W": { "name": "Коннектор Х-образный белый TRA002CX-11W", "price": 200, "image": "images/TRA002CX-11W.png" }
+              */
             }
           },
           "recessed": {
@@ -452,6 +456,32 @@
           }
         }
       }
+      // Новая ветка для X-образной системы:
+      else if (shape === "x") {
+        // Для X-образной системы выбираем два набора шинопроводов по длинам A и B
+        let busbarA = (mountingParam === "recessed") ?
+                      getTracksForMaytoniRecessed(lengthA, lengthOptions) :
+                      getTracksForMaytoniSurface(lengthA, lengthOptions);
+        let busbarB = (mountingParam === "recessed") ?
+                      getTracksForMaytoniRecessed(lengthB, lengthOptions) :
+                      getTracksForMaytoniSurface(lengthB, lengthOptions);
+        selectedItems = busbarA.concat(busbarB);
+        // Добавляем X-образный коннектор:
+        // Если цвет черный, используем TRA002CX-11B, иначе TRA002CX-11W.
+        let xConnector = (color === "black") ? "TRA002CX-11B" : "TRA002CX-11W";
+        usedConnectors.push(wrapConnector(xConnector));
+        // Если в любом наборе более одного сегмента, добавляем прямые коннекторы между ними
+        if (busbarA.length > 1) {
+          for (let i = 0; i < busbarA.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        if (busbarB.length > 1) {
+          for (let i = 0; i < busbarB.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+      }
       else if (shape === "rectangle") {
         let tracksA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
@@ -488,24 +518,53 @@
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
 
-      // Режим stretch-ceiling – добавляем профили.
+      // Добавляем подвод питания (всегда один)
+      let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
+      selectedItems.push({ id: powerInput });
+      
+      // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
-        // Суммируем только длины трековых сегментов
-        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        // Вычисляем количество профилей: профиль имеет длину 200 см, округляем в большую сторону
-        let profileCount = Math.ceil(trackLength / 200);
-        console.log("Профилей для добавления:", profileCount);
+        // Для натяжного потолка: добавляем профиль для натяжного потолка TR3050-AL
+        // Эффективная длина трековой системы:
+        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
+        console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
+        // Количество профилей = округление в большую сторону от (effectiveTrackLength / 200)
+        let profileCount = Math.ceil(effectiveTrackLength / 200);
+        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
+          selectedItems.push({ id: "TR3050-AL", pieceLength: 200 });
+        }
+        // Если форма содержит углы (L, T, P) – добавляем уголки для профиля (TR3031-AL) по количеству:
+        if (["L-shape", "T-shape", "P-shape"].includes(shape)) {
+          let angleCount = (shape === "T-shape") ? 2 : 1;
+          for (let i = 0; i < angleCount; i++) {
+            selectedItems.push({ id: "TR3031-AL" });
+          }
+        }
+      }
+      else if (mountingParam === "recessed") {
+        // Для встраиваемой системы: добавляем профиль для гипсокартонного потолка TR3020-AL и заглушки (если система не "rectangle")
+        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
+        console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
+        let profileCount = Math.ceil(effectiveTrackLength / 200);
+        console.log("Профилей для добавления (recessed):", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: "TR3020-AL", pieceLength: 200 });
+        }
+        if (shape !== "rectangle") {
+          let endCapsCount = (shape === "T-shape") ? 2 : 1;
+          let endCapsId = "TR3052-AL"; // для обоих цветов используется одна заглушка
+          for (let i = 0; i < endCapsCount; i++) {
+            selectedItems.push({ id: endCapsId });
+          }
         }
       }
       
-      // Режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
-        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
-        console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
+        let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
+        console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
+        let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
+        console.log("Подвесов для добавления (hanging):", suspCount);
         let suspensionId = (color === "black") ? "TRA001CW-11B" : "TRA001CW-11W";
         for (let i = 0; i < suspCount; i++) {
           selectedItems.push({ id: suspensionId });
@@ -514,8 +573,7 @@
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
 
-      // Группировка элементов.
-      // Для трековых сегментов суммируем требуемую длину, для остальных просто считаем количество.
+      // Группировка элементов: для трековых сегментов суммируем требуемую длину, для остальных – считаем количество.
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -534,14 +592,13 @@
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
 
-      // Пересчитываем количество заказываемых единиц для трековых сегментов.
       let totalPrice = 0;
       let tbodyHTML = "";
       for (const [id, group] of Object.entries(groupedItems)) {
         let comp = group.component;
         if (comp && comp.name) {
           let qty;
-          if (group.isTrack) {
+          if (group.isTrack && group.totalLength > 0) {
             let nominal = getNominalLength(id);
             qty = Math.ceil(group.totalLength / nominal);
           } else {
@@ -551,7 +608,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
+              <td><img src="images/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
@@ -561,7 +618,7 @@
           console.warn("Компонент с ID " + id + " не найден или не имеет имени.");
         }
       }
-
+      
       document.getElementById("results").innerHTML = tbodyHTML;
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
       document.getElementById("resultContainer").style.display = "block";
