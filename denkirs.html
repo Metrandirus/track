@@ -249,7 +249,7 @@
       let selectedItems = [];
       let usedConnectors = [];
 
-      // Подбор трековых сегментов в зависимости от фигуры:
+      // Подбор трековых сегментов по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "hanging") ?
                         getTracksForDenkirsHanging(lengthA, lengthOptions) :
@@ -341,7 +341,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Denkirs.");
       }
       
-      // Для систем "straight" – добавляем недостающие прямые коннекторы, если они не добавлены.
+      // Для систем "straight" – добавляем недостающие прямые коннекторы, если не добавлены.
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -360,7 +360,7 @@
       let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
       selectedItems.push({ id: powerInput });
       
-      // Сохраняем сумму длин трековых сегментов (исключая дополнительные компоненты)
+      // Суммируем длины трековых сегментов (только для тех элементов, у которых задано pieceLength)
       let baseTrackLength = selectedItems
                             .filter(item => item.hasOwnProperty("pieceLength"))
                             .reduce((sum, item) => sum + item.pieceLength, 0);
@@ -369,9 +369,8 @@
       // Обработка дополнительных компонентов по режимам монтажа:
       if (mountingParam === "stretch-ceiling") {
         // Для натяжного потолка – используем профиль TR3050-AL
-        let baseProfileCount = Math.ceil(baseTrackLength / 200);
-        // Округляем до чётного числа
-        let profileCount = (baseProfileCount % 2 === 1) ? baseProfileCount + 1 : baseProfileCount;
+        // Количество профилей = округление вверх (baseTrackLength / 200)
+        let profileCount = Math.ceil(baseTrackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3050-AL" });
@@ -391,8 +390,7 @@
         }
       } else if (mountingParam === "recessed") {
         // Для встраиваемой системы – используем профиль для гипсокартонного потолка TR3020-AL
-        let baseProfileCount = Math.ceil(baseTrackLength / 200);
-        let profileCount = (baseProfileCount % 2 === 1) ? baseProfileCount + 1 : baseProfileCount;
+        let profileCount = Math.ceil(baseTrackLength / 200);
         console.log("Профилей для добавления (recessed):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3020-AL" });
@@ -457,7 +455,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="${comp.image}" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td><img src="${comp.image}" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
