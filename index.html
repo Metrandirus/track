@@ -71,30 +71,26 @@
       margin-top: 5px;
       text-align: center;
     }
-    .length-section {
+    /* Группа для ввода длин и кнопки добавления светильников */
+    .input-group {
       display: flex;
+      align-items: center;
       gap: 10px;
       margin-top: 15px;
-      align-items: center;
     }
-    .length-section input[type="text"] {
-      width: 80px;  /* Короче поля ввода */
+    .input-group input[type="text"] {
+      width: 80px; /* короче поля ввода */
       padding: 8px;
       font-size: 14px;
       box-sizing: border-box;
     }
-    /* Кнопка "Добавить светильник" */
+    /* Кнопка "Добавить светильники" – меньше и выровнена по центру вертикально */
     .add-lighting-button {
-      width: 120px;  /* Меньше ширина кнопки */
+      width: 120px;
       padding: 5px 10px;
       font-size: 12px;
       cursor: pointer;
       text-align: center;
-      margin-left: 10px;
-    }
-    /* Контейнер для строк добавления светильников */
-    #lightingButtonsContainer {
-      margin-top: 10px;
     }
     /* Кнопка "Подобрать" располагается ниже остальных элементов */
     .button-container {
@@ -121,7 +117,7 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      /* Высота столбцов теперь auto, чтобы занимать всю доступную высоту */
+      /* Высота столбцов – auto, чтобы занимать всю доступную высоту */
       height: auto;
     }
     .manufacturer-title {
@@ -136,6 +132,16 @@
       flex: 1;
       border: none;
       width: 100%;
+    }
+    /* Кнопка для скачивания PDF под каждым столбцом */
+    .download-pdf-button {
+      width: 100%;
+      padding: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      margin-top: 5px;
     }
     .debug {
       margin-top: 10px;
@@ -200,15 +206,19 @@
         </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
-      <!-- Поля для ввода длин размещаем в двух строках, кнопка "Добавить светильник" теперь справа от них -->
-      <div class="length-section">
-        <label for="lengthA">Длина а (см):</label>
-        <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
-      </div>
-      <div class="length-section" style="align-items: center;">
-        <label for="lengthB">Длина б (см):</label>
-        <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
-        <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
+      <!-- Группа для ввода длин и кнопки "Добавить светильники" -->
+      <div class="input-group">
+        <div>
+          <label for="lengthA">Длина а (см):</label>
+          <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
+        </div>
+        <div>
+          <label for="lengthB">Длина б (см):</label>
+          <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+        </div>
+        <div>
+          <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
+        </div>
       </div>
       <!-- Контейнер для строк добавления светильников -->
       <div id="lightingButtonsContainer"></div>
@@ -236,14 +246,11 @@
     let lightingRowsCount = 0;
     const maxLightingRows = 3;
     function addLightingRow() {
-      // Если уже добавлено максимальное количество строк, не добавляем новую
       if (lightingRowsCount >= maxLightingRows) {
         alert("Можно добавить не более " + maxLightingRows + " вариантов светильников.");
         return;
       }
       lightingRowsCount++;
-      
-      // Определяем, какие варианты уже выбраны в существующих строках
       const selectedValues = [];
       const existingSelects = document.querySelectorAll("[id^='light']");
       existingSelects.forEach(select => {
@@ -251,31 +258,21 @@
           selectedValues.push(select.value);
         }
       });
-      
-      // Список всех возможных вариантов
       const allOptions = [
         { value: "spot", text: "Как споты" },
         { value: "linear", text: "Линейный" },
         { value: "pendant", text: "Подвесной" }
       ];
-      
-      // Фильтруем варианты, исключая уже выбранные
       const availableOptions = allOptions.filter(opt => !selectedValues.includes(opt.value));
-      
-      // Если ни один вариант не доступен, не добавляем строку
       if (availableOptions.length === 0) {
         alert("Все варианты светильников уже выбраны.");
         return;
       }
-      
-      // Формируем HTML для нового селекта с доступными вариантами
       let selectHTML = `<select id="light${lightingRowsCount}" name="light${lightingRowsCount}">`;
       availableOptions.forEach(opt => {
         selectHTML += `<option value="${opt.value}">${opt.text}</option>`;
       });
       selectHTML += `</select>`;
-      
-      // Формируем HTML для новой строки выбора светильника
       const container = document.createElement("div");
       container.className = "lighting-row";
       container.id = "lightingRow" + lightingRowsCount;
@@ -318,30 +315,34 @@
       manufacturerList.forEach(man => {
         const col = document.createElement("div");
         col.className = "manufacturer-column";
+        // Добавляем кнопку "Скачать PDF" под iframe.
+        // Предполагается, что PDF-файл имеет то же имя, что и файл производителя, но с расширением .pdf.
+        const pdfFile = man.file.replace(/\.html$/i, ".pdf");
         col.innerHTML = `
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" src="${man.file + queryString}"></iframe>
+          <button class="download-pdf-button" onclick="downloadPDF('${pdfFile}')">Скачать PDF</button>
         `;
         container.appendChild(col);
       });
     }
 
-    // Функция обновления параметров и отображения результата
+    // Функция для скачивания PDF (открывает ссылку в новом окне)
+    function downloadPDF(pdfFile) {
+      window.open(pdfFile, '_blank');
+    }
+
+    // Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать")
     function safeShowSelection() {
       try {
-        // Считываем параметры формы
         const type = document.getElementById("type").value;
         const color = document.getElementById("color").value;
         const mounting = document.getElementById("mounting").value;
         const shape = document.getElementById("selectedShape").value;
         const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
         const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
-        
-        // Формируем query-строку для передачи параметров
         const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}`;
         console.log("Query-string:", queryString);
-        
-        // Выбираем набор производителей в зависимости от типа системы
         const manufacturersData = {
           "one-phase": [
             { title: "Maytoni UNITY", file: "maytoni.html" },
@@ -363,9 +364,7 @@
           document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
           return;
         }
-        // Обновляем iframes для каждого производителя
         updateManufacturerIframes(queryString, manufacturerList);
-        // Делаем видимой правую область с результатами
         document.getElementById("manufacturersContainer").style.display = "flex";
         document.getElementById("debug").textContent = "";
       } catch (e) {
