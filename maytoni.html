@@ -270,6 +270,7 @@
     /***** Функции для расчёта трековых сегментов *****/
     function getTracksForMaytoniSurface(legLength, lengthOptions) {
       let pieces = [];
+      // Если требуемая длина кратна 400 см, используем только 2м сегменты
       if (legLength % 400 === 0) {
         let count = legLength / 200;
         for (let i = 0; i < count; i++) {
@@ -331,7 +332,7 @@
       return pieces;
     }
     
-    // Функция для определения номинальной длины трека по его id (на основе артикулов)
+    // Функция для определения номинальной длины трека по его id
     function getNominalLength(id) {
       if (id.indexOf("-111") !== -1) return 100;
       if (id.indexOf("-112") !== -1) return 200;
@@ -356,7 +357,6 @@
     /***** Основная функция подбора для Maytoni *****/
     window.showSelection = function() {
       console.log("Начало работы showSelection (Maytoni)");
-
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -364,9 +364,9 @@
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
-
+      
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
-
+      
       // Для режимов stretch-ceiling и hanging используем базу из surface
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products[type] && products[type][color] && products[type][color]["surface"]) :
@@ -374,7 +374,7 @@
       if (!effectiveProduct) {
         throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
       }
-
+      
       let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
@@ -386,8 +386,8 @@
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
-
-      // Расчёт трековых сегментов по фигурам:
+      
+      // Расчёт трековых сегментов по фигурам
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
@@ -479,7 +479,7 @@
         }
       }
       else if (shape === "x") {
-        // X‑образная система: два пересекающихся шинопровода, соединённых X‑образным коннектором
+        // X‑образная система: два пересекающихся шинопровода
         let trackX = (mountingParam === "recessed") ?
                      getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                      getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -509,7 +509,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Для систем "straight" добавляем недостающие прямые коннекторы, если они ещё не добавлены.
+      // Для систем типа straight добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -528,9 +528,9 @@
       let lightingContainer = document.getElementById("lightingButtonsContainer");
       if (lightingContainer) {
         const lightingRows = lightingContainer.querySelectorAll(".lighting-row");
-        lightingRows.forEach(row => {
-          let selectEl = row.querySelector("select");
-          let qtyEl = row.querySelector("input[type='number']");
+        lightingRows.forEach((row, index) => {
+          const selectEl = row.querySelector("select");
+          const qtyEl = row.querySelector("input[type='number']");
           if (selectEl && qtyEl) {
             let lightingType = selectEl.value; // "spot", "linear", "pendant"
             let quantity = parseInt(qtyEl.value) || 1;
@@ -538,6 +538,7 @@
             if (lightItem) {
               for (let i = 0; i < quantity; i++) {
                 selectedItems.push({ id: lightItem.id });
+                // Если компонента для данного светильника ещё нет, добавляем её из mapping
                 if (!components[lightItem.id]) {
                   components[lightItem.id] = {
                     name: lightItem.name,
@@ -554,7 +555,6 @@
       /***** Обработка дополнительных компонентов по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
         // Для натяжного потолка – добавляем профиль
-        // Суммируем только длины трековых сегментов
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         let profileCount = Math.ceil(trackLength / 200);
@@ -562,8 +562,9 @@
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
-      } else if (mountingParam === "recessed") {
-        // Для встраиваемой системы – добавляем профиль для гипсокартонного потолка и заглушки (если система не "rectangle")
+      }
+      else if (mountingParam === "recessed") {
+        // Для встраиваемой системы – добавляем профиль для гипсокартонного потолка и заглушки
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -584,7 +585,7 @@
         }
         if (shape !== "rectangle") {
           let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          let endCapsId = "TR3052-AL"; // Заглушка одинакова для встраиваемых систем
+          let endCapsId = "TR3052-AL"; // Заглушка для встраиваемой системы
           for (let i = 0; i < endCapsCount; i++) {
             selectedItems.push({ id: endCapsId });
           }
