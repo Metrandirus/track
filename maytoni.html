@@ -111,7 +111,7 @@
               "TRA001C-11B": { "name": "Коннектор прямой черный", "price": 100, "image": "images/TRA001C-11B.png" },
               "TRA001CL-11B": { "name": "Коннектор угловой черный", "price": 150, "image": "images/TRA001CL-11B.png" },
               "TRA001CT-11B": { "name": "Коннектор Т-образный черный", "price": 200, "image": "images/TRA001CT-11B.png" },
-              /* X‑образный коннектор для накладного (не встраиваемого) – черный */
+              /* Дополнительный X‑образный коннектор для накладного/подвесного/натяжного монтажа */
               "TRA001CX-11B": { "name": "Коннектор Х-образный черный", "price": 440, "image": "images/TRA001CX-11B.png" }
             }
           },
@@ -131,7 +131,7 @@
               "TRA002C-11B": { "name": "Коннектор прямой для встраивания", "price": 110, "image": "images/TRA002C-11B.png" },
               "TRA002CL-11B": { "name": "Коннектор угловой для встраивания", "price": 160, "image": "images/TRA002CL-11B.png" },
               "TRA002CT-11B": { "name": "Коннектор Т-образный для встраивания", "price": 210, "image": "images/TRA002CT-11B.png" },
-              /* X‑образный коннектор для встраиваемой системы – черный */
+              /* X‑образный коннектор для встраиваемой системы */
               "TRA002CX-11B": { "name": "Коннектор Х-образный встраиваемый черный", "price": 690, "image": "images/TRA002CX-11B.png" }
             }
           },
@@ -191,7 +191,7 @@
               "TRA001C-11W": { "name": "Коннектор прямой белый", "price": 105, "image": "images/TRA001C-11W.png" },
               "TRA001CL-11W": { "name": "Коннектор угловой белый", "price": 155, "image": "images/TRA001CL-11W.png" },
               "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/TRA001CT-11W.png" },
-              /* Для НЕвстраиваемых систем белый вариант X‑образного коннектора: */
+              /* Для НЕвстраиваемых систем белый вариант X‑образного коннектора */
               "TRA001CX-11W": { "name": "Коннектор Х-образный белый", "price": 440, "image": "images/TRA001CX-11W.png" }
             }
           },
@@ -208,10 +208,10 @@
             "components": {
               "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м", "price": 1650, "image": "images/TRX004-111W.png" },
               "TRX004-112W": { "name": "Шинопровод встраиваемый белый 2м", "price": 2650, "image": "images/TRX004-112W.png" },
-              "TRA002C-11W": { "name": "Коннектор прямой для встраивания", "price": 115, "image": "images/TRA002C-11W.png" },
-              "TRA002CL-11W": { "name": "Коннектор угловой для встраивания", "price": 165, "image": "images/TRA002CL-11W.png" },
-              "TRA002CT-11W": { "name": "Коннектор Т-образный для встраивания", "price": 215, "image": "images/TRA002CT-11W.png" },
-              /* Для встраиваемых систем добавляем X‑образный коннектор белый: */
+              "TRA002C-11W": { "name": "Коннектор прямой белый для встраивания", "price": 115, "image": "images/TRA002C-11W.png" },
+              "TRA002CL-11W": { "name": "Коннектор угловой белый для встраивания", "price": 165, "image": "images/TRA002CL-11W.png" },
+              "TRA002CT-11W": { "name": "Коннектор Т-образный белый для встраивания", "price": 215, "image": "images/TRA002CT-11W.png" },
+              /* Для встраиваемых систем добавляем X‑образный коннектор белый */
               "TRA002CX-11W": { "name": "Коннектор Х-образный встраиваемый белый", "price": 690, "image": "images/TRA002CX-11W.png" }
             }
           },
@@ -483,15 +483,13 @@
                      getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                      getTracksForMaytoniSurface(lengthB, lengthOptions);
         selectedItems = trackX.concat(trackY);
-        // Добавляем X‑образный коннектор: для recessed используем другой артикул
-        let xConnector;
+        let xConnector = "";
         if (mountingParam === "recessed") {
           xConnector = (color === "black") ? "TRA002CX-11B" : "TRA002CX-11W";
         } else {
           xConnector = (color === "black") ? "TRA001CX-11B" : "TRA001CX-11W";
         }
         usedConnectors.push(wrapConnector(xConnector));
-        // Если в одном из треков несколько сегментов, добавляем прямые коннекторы между ними
         if (trackX.length > 1) {
           for (let i = 0; i < trackX.length - 1; i++) {
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
@@ -585,7 +583,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td><img src="images/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
