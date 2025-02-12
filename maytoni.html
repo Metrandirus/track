@@ -357,6 +357,7 @@
     /***** Основная функция подбора для Maytoni *****/
     window.showSelection = function() {
       console.log("Начало работы showSelection (Maytoni)");
+      
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -364,6 +365,7 @@
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
+      
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
       
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
@@ -507,6 +509,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
+      // Если для систем "straight" добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -518,6 +521,8 @@
           }
         }
       }
+      
+      console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
       /***** Добавление выбранных светильников *****/
       let lightingContainer = document.getElementById("lightingButtonsContainer");
@@ -533,6 +538,7 @@
             if (lightItem) {
               for (let i = 0; i < quantity; i++) {
                 selectedItems.push({ id: lightItem.id });
+                // Если компонент для светильника ещё не внесён, добавляем его в components
                 if (!components[lightItem.id]) {
                   components[lightItem.id] = {
                     name: lightItem.name,
@@ -548,9 +554,10 @@
       
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка – добавляем профиль (рассчитывается по сумме длин трековых сегментов)
+        // Для натяжного потолка – добавляем профиль
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
+        // Профиль имеет длину 200 см – количество профилей = округляем (trackLength/200) вверх
         let profileCount = Math.ceil(trackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
