@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Подключаем библиотеки для создания PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
   <style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-   /* Стили для всей страницы */
+    /* Стили для всей страницы */
     body {
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
@@ -81,12 +82,12 @@
       margin-top: 15px;
     }
     .input-group input[type="text"] {
-      width: 80px; /* короче поля ввода */
+      width: 80px; /* укороченные поля ввода */
       padding: 8px;
       font-size: 14px;
       box-sizing: border-box;
     }
-    /* Кнопка "Добавить светильники" – меньше и выровнена по центру вертикально */
+    /* Кнопка "Добавить светильник" – меньше и выровнена по центру вертикально */
     .add-lighting-button {
       width: 120px;
       padding: 5px 10px;
@@ -119,8 +120,8 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      /* Высота столбцов – auto, чтобы занимать всю доступную высоту */
-      height: auto;
+      /* Высота столбцов – на всю высоту экрана */
+      height: 100vh;
     }
     .manufacturer-title {
       background-color: #f4f4f4;
@@ -208,7 +209,7 @@
         </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
-      <!-- Группа для ввода длин и кнопки "Добавить светильники" -->
+      <!-- Группа для ввода длин и кнопки "Добавить светильник" (кнопка располагается справа от полей ввода) -->
       <div class="input-group">
         <div>
           <label for="lengthA">Длина а (см):</label>
@@ -222,7 +223,7 @@
           <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
         </div>
       </div>
-      <!-- Контейнер для строк добавления светильников -->
+      <!-- Контейнер для строк выбора светильников -->
       <div id="lightingButtonsContainer"></div>
       <!-- Кнопка "Подобрать" располагается ниже остальных элементов -->
       <div class="button-container">
@@ -244,7 +245,7 @@
       console.log("Выбрана фигура:", shape);
     }
 
-    // Функция для добавления строки для выбора светильника
+    // Функция для добавления строки выбора светильника
     let lightingRowsCount = 0;
     const maxLightingRows = 3;
     function addLightingRow() {
@@ -256,9 +257,7 @@
       const selectedValues = [];
       const existingSelects = document.querySelectorAll("[id^='light']");
       existingSelects.forEach(select => {
-        if (select.value) {
-          selectedValues.push(select.value);
-        }
+        if (select.value) selectedValues.push(select.value);
       });
       const allOptions = [
         { value: "spot", text: "Как споты" },
@@ -317,46 +316,40 @@
       manufacturerList.forEach(man => {
         const col = document.createElement("div");
         col.className = "manufacturer-column";
-        // Добавляем кнопку "Скачать PDF" под iframe.
         // Предполагается, что PDF-файл имеет то же имя, что и файл производителя, но с расширением .pdf.
         const pdfFile = man.file.replace(/\.html$/i, ".pdf");
         col.innerHTML = `
-    <div class="manufacturer-title">${man.title}</div>
-    <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
-    <button class="download-pdf-button" onclick="downloadPDF('${man.title}', '#iframe-${man.title}')">Скачать PDF</button>
-`;
+          <div class="manufacturer-title">${man.title}</div>
+          <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
+          <button class="download-pdf-button" onclick="downloadPDF('${man.title}', '#iframe-${man.title}')">Скачать PDF</button>
+        `;
         container.appendChild(col);
       });
     }
 
-    // Функция для скачивания PDF (открывает ссылку в новом окне)
+    // Функция для скачивания PDF с выбранными товарами
     function downloadPDF(manufacturerTitle, iframeSelector) {
-    const iframe = document.querySelector(iframeSelector);
-    if (!iframe) {
+      const iframe = document.querySelector(iframeSelector);
+      if (!iframe) {
         alert("Ошибка: не найден iframe для " + manufacturerTitle);
         return;
-    }
-    
-    const iframeDoc = iframe.contentWindow.document;
-    const resultsTable = iframeDoc.getElementById("resultsTable");
-    
-    if (!resultsTable) {
+      }
+      const iframeDoc = iframe.contentWindow.document;
+      const resultsTable = iframeDoc.getElementById("resultsTable");
+      if (!resultsTable) {
         alert("Ошибка: не найдена таблица с товарами для " + manufacturerTitle);
         return;
-    }
-
-    html2canvas(resultsTable).then(canvas => {
+      }
+      html2canvas(resultsTable).then(canvas => {
         const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgWidth = 190; // Ширина изображения в PDF
-        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Пропорциональная высота
-        
+        const pdf = new jspdf.jsPDF("p", "mm", "a4");
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
         pdf.text(manufacturerTitle, 10, 10);
         pdf.addImage(imgData, "PNG", 10, 20, imgWidth, imgHeight);
         pdf.save(manufacturerTitle + "_выбор.pdf");
-    });
-}
-
+      });
+    }
 
     // Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать")
     function safeShowSelection() {
