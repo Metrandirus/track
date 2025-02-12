@@ -88,7 +88,7 @@
     <div id="debug" class="debug"></div>
   </div>
   
-  <!-- Контейнер для динамически добавляемых строк выбора светильников -->
+  <!-- Контейнер для динамически добавляемых строк выбора светильников (если он присутствует в этом документе) -->
   <div id="lightingButtonsContainer"></div>
   
   <script>
@@ -247,8 +247,7 @@
               "TRX001-113W": { "name": "Шинопровод накладной белый 3м", "price": 3550, "image": "images/maytoni unity/TRX001-113W.png" },
               "TRA001C-11W": { "name": "Коннектор прямой белый", "price": 105, "image": "images/maytoni unity/TRA001C-11W.png" },
               "TRA001CL-11W": { "name": "Коннектор угловой белый", "price": 155, "image": "images/maytoni unity/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/maytoni unity/TRA001CT-11W.png" },
-              "TRA001CX-11W": { "name": "Коннектор Х-образный белый", "price": 440, "image": "images/maytoni unity/TRA001CX-11W.png" }
+              "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/maytoni unity/TRA001CT-11W.png" }
             }
           }
         }
@@ -335,6 +334,7 @@
       return pieces;
     }
     
+    // Функция для определения номинальной длины трека по его id
     function getNominalLength(id) {
       if (id.indexOf("-111") !== -1) return 100;
       if (id.indexOf("-112") !== -1) return 200;
@@ -342,6 +342,7 @@
       return null;
     }
     
+    // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
@@ -510,7 +511,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Для систем "straight" добавляем недостающие прямые коннекторы
+      // Для систем "straight" добавляем недостающие прямые коннекторы, если они ещё не добавлены.
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -526,8 +527,12 @@
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
       /***** Добавление выбранных светильников *****/
-      // Обработка строк выбора светильников из контейнера "lightingButtonsContainer"
+      // Попытаемся найти контейнер строк светильников сначала в текущем документе,
+      // а если его нет, то попробуем получить его из родительского окна (index)
       let lightingContainer = document.getElementById("lightingButtonsContainer");
+      if (!lightingContainer && window.parent && window.parent.document) {
+        lightingContainer = window.parent.document.getElementById("lightingButtonsContainer");
+      }
       if (lightingContainer) {
         const lightingRows = lightingContainer.querySelectorAll(".lighting-row");
         lightingRows.forEach(row => {
@@ -536,7 +541,9 @@
           if (selectEl && qtyEl) {
             let lightingType = selectEl.value; // "spot", "linear", "pendant"
             let quantity = parseInt(qtyEl.value) || 1;
-            let lightItem = lightingMappingMaytoni[lightingType] ? lightingMappingMaytoni[lightingType][color.toLowerCase()] : null;
+            // Приводим цвет к нижнему регистру
+            let col = color.toLowerCase();
+            let lightItem = (lightingMappingMaytoni[lightingType] && lightingMappingMaytoni[lightingType][col]) ? lightingMappingMaytoni[lightingType][col] : null;
             if (lightItem) {
               for (let i = 0; i < quantity; i++) {
                 selectedItems.push({ id: lightItem.id });
@@ -548,13 +555,10 @@
                   };
                 }
               }
-            } else {
-              console.warn("Для типа светильника '" + lightingType + "' и цвета '" + color + "' не найдены данные.");
             }
           }
         });
       }
-      console.log
       
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
@@ -591,7 +595,7 @@
         }
         if (shape !== "rectangle") {
           let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          let endCapsId = "TR3052-AL"; // Заглушка для встраиваемых систем (одинакова)
+          let endCapsId = "TR3052-AL";
           for (let i = 0; i < endCapsCount; i++) {
             selectedItems.push({ id: endCapsId });
           }
