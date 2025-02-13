@@ -74,7 +74,7 @@
       margin-top: 5px;
       text-align: center;
     }
-    /* Группа для ввода длин и кнопки добавления светильников */
+    /* Группа для ввода длин и кнопки "Добавить светильник" (кнопка располагается справа от полей ввода) */
     .input-group {
       display: flex;
       align-items: center;
@@ -82,12 +82,11 @@
       margin-top: 15px;
     }
     .input-group input[type="text"] {
-      width: 80px; /* укороченные поля ввода */
+      width: 80px;
       padding: 8px;
       font-size: 14px;
       box-sizing: border-box;
     }
-    /* Кнопка "Добавить светильник" – меньше и выровнена по центру вертикально */
     .add-lighting-button {
       width: 120px;
       padding: 5px 10px;
@@ -209,7 +208,7 @@
         </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
-      <!-- Группа для ввода длин и кнопки "Добавить светильник" (кнопка располагается справа от полей ввода) -->
+      <!-- Группа для ввода длин и кнопки "Добавить светильник" (кнопка справа от полей ввода) -->
       <div class="input-group">
         <div>
           <label for="lengthA">Длина а (см):</label>
@@ -239,13 +238,13 @@
   </div>
 
   <script>
-    // Функция для установки выбранной фигуры
+    /* Функция для установки выбранной фигуры */
     function selectShape(shape) {
       document.getElementById("selectedShape").value = shape;
       console.log("Выбрана фигура:", shape);
     }
 
-    // Функция для добавления строки выбора светильника
+    /* Функция для добавления строки выбора светильника */
     let lightingRowsCount = 0;
     const maxLightingRows = 3;
     function addLightingRow() {
@@ -309,7 +308,7 @@
       console.log("Удалена строка для выбора светильника.");
     }
 
-    // Функция обновления iframe для каждого производителя
+    /* Функция обновления iframe для каждого производителя */
     function updateManufacturerIframes(queryString, manufacturerList) {
       const container = document.getElementById("manufacturersContainer");
       container.innerHTML = ""; // Очистка предыдущих столбцов
@@ -327,7 +326,7 @@
       });
     }
 
-    // Функция для скачивания PDF с выбранными товарами
+    /* Функция для скачивания PDF с выбранными товарами */
     function downloadPDF(manufacturerTitle, iframeSelector) {
       const iframe = document.querySelector(iframeSelector);
       if (!iframe) {
@@ -351,17 +350,34 @@
       });
     }
 
-    // Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать")
+    /* Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать") */
     function safeShowSelection() {
       try {
+        // Считываем основные параметры формы
         const type = document.getElementById("type").value;
         const color = document.getElementById("color").value;
         const mounting = document.getElementById("mounting").value;
         const shape = document.getElementById("selectedShape").value;
         const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
         const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
-        const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}`;
+        
+        // Считываем данные по выбранным светильникам (если есть)
+        let lights = [];
+        const lightingRows = document.querySelectorAll(".lighting-row");
+        lightingRows.forEach(row => {
+          const selectEl = row.querySelector("select");
+          const qtyEl = row.querySelector("input[type='number']");
+          if (selectEl && qtyEl) {
+            lights.push({ type: selectEl.value, quantity: qtyEl.value });
+          }
+        });
+        const lightsParam = encodeURIComponent(JSON.stringify(lights));
+        
+        // Формируем query‑строку, включая данные о светильниках
+        const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}&lights=${lightsParam}`;
         console.log("Query-string:", queryString);
+        
+        // Определяем производителей по типу системы
         const manufacturersData = {
           "one-phase": [
             { title: "Maytoni UNITY", file: "maytoni.html" },
@@ -383,7 +399,9 @@
           document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
           return;
         }
+        // Обновляем iframe для каждого производителя
         updateManufacturerIframes(queryString, manufacturerList);
+        // Делаем видимой правую область с результатами
         document.getElementById("manufacturersContainer").style.display = "flex";
         document.getElementById("debug").textContent = "";
       } catch (e) {
