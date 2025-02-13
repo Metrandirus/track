@@ -88,7 +88,7 @@
     <div id="debug" class="debug"></div>
   </div>
   
-  <!-- (Если данный файл используется как часть index, в нём может быть контейнер для строк светильников) -->
+  <!-- Контейнер для динамически добавляемых строк выбора светильников (если он есть) -->
   <div id="lightingButtonsContainer"></div>
   
   <script>
@@ -106,7 +106,7 @@
               "straight": ["TRA001C-11B"],
               "L-shape": ["TRA001CL-11B"],
               "T-shape": ["TRA001CT-11B"],
-              "x": [] // Для X‑образной системы обрабатывается отдельно
+              "x": [] // Для X‑образной системы (обрабатывается отдельно)
             },
             "components": {
               "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/maytoni unity/TRX001-111B.png" },
@@ -127,7 +127,7 @@
               "straight": ["TRA002C-11B"],
               "L-shape": ["TRA002CL-11B"],
               "T-shape": ["TRA002CT-11B"],
-              "x": [] 
+              "x": []
             },
             "components": {
               "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м", "price": 1600, "image": "images/maytoni unity/TRX004-111B.png" },
@@ -355,7 +355,7 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
     
-    // Функция для получения выбранных светильников из query‑строки (если передан параметр lights)
+    // Функция для получения выбранных светильников из query-параметра "lights" (если передан)
     function getLightingSelections(params) {
       let lightsParam = params.get("lights");
       if (lightsParam) {
@@ -390,9 +390,8 @@
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
       
-      // Получаем массив выбранных светильников из параметра lights (если передан)
+      // Получаем выбранные светильники: сначала из query, затем из контейнера, если query не задан
       let selectedLightingOptions = getLightingSelections(params);
-      // Если параметр lights не передан, попробуем получить данные из контейнера (например, если maytoni открыт в iframe от index)
       if (selectedLightingOptions.length === 0) {
         let lightingContainer = document.getElementById("lightingButtonsContainer");
         if (!lightingContainer && window.parent && window.parent.document) {
@@ -412,7 +411,7 @@
         }
       }
       
-      console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
+      console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB, selectedLightingOptions });
       
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products[type] && products[type][color] && products[type][color]["surface"]) :
@@ -438,8 +437,7 @@
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                         getTracksForMaytoniSurface(lengthA, lengthOptions);
-      }
-      else if (shape === "L-shape") {
+      } else if (shape === "L-shape") {
         let legATracks = (mountingParam === "recessed") ?
                          getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                          getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -460,8 +458,7 @@
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
-      }
-      else if (shape === "T-shape") {
+      } else if (shape === "T-shape") {
         let topTracks = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                         getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -482,8 +479,7 @@
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
-      }
-      else if (shape === "P-shape") {
+      } else if (shape === "P-shape") {
         let sideTracks = (mountingParam === "recessed") ?
                          getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                          getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -506,8 +502,7 @@
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
-      }
-      else if (shape === "rectangle") {
+      } else if (shape === "rectangle") {
         let tracksA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                       getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -523,8 +518,7 @@
         for (let i = 0; i < straightForA + straightForB; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
-      }
-      else if (shape === "x") {
+      } else if (shape === "x") {
         // X‑образная система: два пересекающихся шинопровода, соединённые X‑образным коннектором
         let trackX = (mountingParam === "recessed") ?
                      getTracksForMaytoniRecessed(lengthA, lengthOptions) :
@@ -550,12 +544,11 @@
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
-      }
-      else {
+      } else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Для систем "straight" добавляем недостающие прямые коннекторы
+      // Если для систем "straight" добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -571,17 +564,8 @@
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
       /***** Добавление выбранных светильников *****/
-      // Попытаемся получить выбранные светильники либо из query-параметра lights, либо из контейнера lightingButtonsContainer
-      let selectedLightingOptions = [];
-      const lightsParam = params.get("lights");
-      if (lightsParam) {
-        try {
-          selectedLightingOptions = JSON.parse(decodeURIComponent(lightsParam));
-        } catch (e) {
-          console.error("Ошибка парсинга lights:", e);
-        }
-      }
-      // Если lights не переданы через query, пробуем взять их из контейнера (например, если maytoni открыт в iframe от index)
+      // Получаем выбранные светильники либо из query-параметра, либо из контейнера
+      let selectedLightingOptions = getLightingSelections(params);
       if (selectedLightingOptions.length === 0) {
         let lightingContainer = document.getElementById("lightingButtonsContainer");
         if (!lightingContainer && window.parent && window.parent.document) {
@@ -600,7 +584,6 @@
           });
         }
       }
-      
       // Добавляем позиции светильников в итоговый результат
       selectedLightingOptions.forEach(light => {
         let col = color.toLowerCase();
@@ -624,17 +607,15 @@
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
         // Для натяжного потолка – добавляем профиль.
-        // Суммируем только длины трековых сегментов (не учитывая светильники)
+        // Суммируем только длины трековых сегментов (светильники не учитываем)
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        // Профиль имеет длину 200 см – количество профилей = округляем вверх (trackLength/200)
         let profileCount = Math.ceil(trackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
         }
-      }
-      else if (mountingParam === "recessed") {
+      } else if (mountingParam === "recessed") {
         // Для встраиваемой системы – добавляем профиль для гипсокартонного потолка и заглушки (если система не "rectangle")
         let effectiveTrackLength = 0;
         if (shape === "straight") {
