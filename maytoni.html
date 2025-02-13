@@ -88,6 +88,9 @@
     <div id="debug" class="debug"></div>
   </div>
   
+  <!-- Контейнер для динамически добавляемых строк выбора светильников (если он есть) -->
+  <div id="lightingButtonsContainer"></div>
+  
   <script>
     /***** Встроенные данные о продуктах (Maytoni UNITY) *****/
     var products = {
@@ -102,17 +105,17 @@
             "connectors": {
               "straight": ["TRA001C-11B"],
               "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "T-shape": ["TRA001CT-11B"],
+              "x": [] // для X‑образной системы (обрабатывается отдельно)
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" },
-              /* Для НЕвстраиваемых систем добавляем X‑образные коннекторы: */
-              "TRA001CX-11B": { "name": "Коннектор Х-образный черный TRA001CX-11B", "price": 440, "image": "images/TRA001CX-11B.png" }
+              "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/maytoni unity/TRX001-111B.png" },
+              "TRX001-112B": { "name": "Шинопровод накладной черный 2м", "price": 2500, "image": "images/maytoni unity/TRX001-112B.png" },
+              "TRX001-113B": { "name": "Шинопровод накладной черный 3м", "price": 3490, "image": "images/maytoni unity/TRX001-113B.png" },
+              "TRA001C-11B": { "name": "Коннектор прямой черный", "price": 100, "image": "images/maytoni unity/TRA001C-11B.png" },
+              "TRA001CL-11B": { "name": "Коннектор угловой черный", "price": 150, "image": "images/maytoni unity/TRA001CL-11B.png" },
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный", "price": 200, "image": "images/maytoni unity/TRA001CT-11B.png" },
+              "TRA001CX-11B": { "name": "Коннектор Х-образный черный", "price": 440, "image": "images/maytoni unity/TRA001CX-11B.png" }
             }
           },
           "recessed": {
@@ -123,16 +126,16 @@
             "connectors": {
               "straight": ["TRA002C-11B"],
               "L-shape": ["TRA002CL-11B"],
-              "T-shape": ["TRA002CT-11B"]
+              "T-shape": ["TRA002CT-11B"],
+              "x": []
             },
             "components": {
-              "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м TRX004-111B", "price": 1600, "image": "images/TRX004-111B.png" },
-              "TRX004-112B": { "name": "Шинопровод встраиваемый черный 2м TRX004-112B", "price": 2600, "image": "images/TRX004-112B.png" },
-              "TRA002C-11B": { "name": "Коннектор прямой черный для встраивания TRA002C-11B", "price": 110, "image": "images/TRA002C-11B.png" },
-              "TRA002CL-11B": { "name": "Коннектор угловой черный для встраивания TRA002CL-11B", "price": 160, "image": "images/TRA002CL-11B.png" },
-              "TRA002CT-11B": { "name": "Коннектор Т-образный черный для встраивания TRA002CT-11B", "price": 210, "image": "images/TRA002CT-11B.png" },
-              /* Для встраиваемой системы добавляем X‑образные коннекторы: */
-              "TRA002CX-11B": { "name": "Коннектор Х-образный встраиваемый черный TRA002CX-11B", "price": 690, "image": "images/TRA002CX-11B.png" }
+              "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м", "price": 1600, "image": "images/maytoni unity/TRX004-111B.png" },
+              "TRX004-112B": { "name": "Шинопровод встраиваемый черный 2м", "price": 2600, "image": "images/maytoni unity/TRX004-112B.png" },
+              "TRA002C-11B": { "name": "Коннектор прямой для встраивания", "price": 110, "image": "images/maytoni unity/TRA002C-11B.png" },
+              "TRA002CL-11B": { "name": "Коннектор угловой для встраивания", "price": 160, "image": "images/maytoni unity/TRA002CL-11B.png" },
+              "TRA002CT-11B": { "name": "Коннектор Т-образный для встраивания", "price": 210, "image": "images/maytoni unity/TRA002CT-11B.png" },
+              "TRA002CX-11B": { "name": "Коннектор Х-образный встраиваемый черный", "price": 690, "image": "images/maytoni unity/TRA002CX-11B.png" }
             }
           },
           "stretch-ceiling": {
@@ -144,11 +147,12 @@
             "connectors": {
               "straight": ["TRA003C-11B"],
               "L-shape": ["TRA003CL-11B"],
-              "T-shape": ["TRA003CT-11B"]
+              "T-shape": ["TRA003CT-11B"],
+              "x": []
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка", "price": 5490, "image": "images/maytoni unity/TRA001MP-112S.png" }
             }
           },
           "hanging": {
@@ -160,15 +164,16 @@
             "connectors": {
               "straight": ["TRA001C-11B"],
               "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"]
+              "T-shape": ["TRA001CT-11B"],
+              "x": []
             },
             "components": {
-              "TRX001-111B": { "name": "Шинопровод накладной черный 1м TRX001-111B", "price": 1500, "image": "images/TRX001-111B.png" },
-              "TRX001-112B": { "name": "Шинопровод накладной черный 2м TRX001-112B", "price": 2500, "image": "images/TRX001-112B.png" },
-              "TRX001-113B": { "name": "Шинопровод накладной черный 3м TRX001-113B", "price": 3490, "image": "images/TRX001-113B.png" },
-              "TRA001C-11B": { "name": "Коннектор прямой черный TRA001C-11B", "price": 100, "image": "images/TRA001C-11B.png" },
-              "TRA001CL-11B": { "name": "Коннектор угловой черный TRA001CL-11B", "price": 150, "image": "images/TRA001CL-11B.png" },
-              "TRA001CT-11B": { "name": "Коннектор Т-образный черный TRA001CT-11B", "price": 200, "image": "images/TRA001CT-11B.png" }
+              "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/maytoni unity/TRX001-111B.png" },
+              "TRX001-112B": { "name": "Шинопровод накладной черный 2м", "price": 2500, "image": "images/maytoni unity/TRX001-112B.png" },
+              "TRX001-113B": { "name": "Шинопровод накладной черный 3м", "price": 3490, "image": "images/maytoni unity/TRX001-113B.png" },
+              "TRA001C-11B": { "name": "Коннектор прямой черный", "price": 100, "image": "images/maytoni unity/TRA001C-11B.png" },
+              "TRA001CL-11B": { "name": "Коннектор угловой черный", "price": 150, "image": "images/maytoni unity/TRA001CL-11B.png" },
+              "TRA001CT-11B": { "name": "Коннектор Т-образный черный", "price": 200, "image": "images/maytoni unity/TRA001CT-11B.png" }
             }
           }
         },
@@ -182,17 +187,17 @@
             "connectors": {
               "straight": ["TRA001C-11W"],
               "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
+              "T-shape": ["TRA001CT-11W"],
+              "x": []
             },
             "components": {
-              "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
-              "TRX001-112W": { "name": "Шинопровод накладной белый 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
-              "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
-              "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
-              "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" },
-              /* Для НЕвстраиваемых систем белый вариант X‑образного коннектора: */
-              "TRA001CX-11W": { "name": "Коннектор Х-образный белый TRA001CX-11W", "price": 440, "image": "images/TRA001CX-11W.png" }
+              "TRX001-111W": { "name": "Шинопровод накладной белый 1м", "price": 1550, "image": "images/maytoni unity/TRX001-111W.png" },
+              "TRX001-112W": { "name": "Шинопровод накладной белый 2м", "price": 2550, "image": "images/maytoni unity/TRX001-112W.png" },
+              "TRX001-113W": { "name": "Шинопровод накладной белый 3м", "price": 3550, "image": "images/maytoni unity/TRX001-113W.png" },
+              "TRA001C-11W": { "name": "Коннектор прямой белый", "price": 105, "image": "images/maytoni unity/TRA001C-11W.png" },
+              "TRA001CL-11W": { "name": "Коннектор угловой белый", "price": 155, "image": "images/maytoni unity/TRA001CL-11W.png" },
+              "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/maytoni unity/TRA001CT-11W.png" },
+              "TRA001CX-11W": { "name": "Коннектор Х-образный белый", "price": 440, "image": "images/maytoni unity/TRA001CX-11W.png" }
             }
           },
           "recessed": {
@@ -203,16 +208,16 @@
             "connectors": {
               "straight": ["TRA002C-11W"],
               "L-shape": ["TRA002CL-11W"],
-              "T-shape": ["TRA002CT-11W"]
+              "T-shape": ["TRA002CT-11W"],
+              "x": []
             },
             "components": {
-              "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м TRX004-111W", "price": 1650, "image": "images/TRX004-111W.png" },
-              "TRX004-112W": { "name": "Шинопровод встраиваемый белый 2м TRX004-112W", "price": 2650, "image": "images/TRX004-112W.png" },
-              "TRA002C-11W": { "name": "Коннектор прямой белый для встраивания TRA002C-11W", "price": 115, "image": "images/TRA002C-11W.png" },
-              "TRA002CL-11W": { "name": "Коннектор угловой белый для встраивания TRA002CL-11W", "price": 165, "image": "images/TRA002CL-11W.png" },
-              "TRA002CT-11W": { "name": "Коннектор Т-образный белый для встраивания TRA002CT-11W", "price": 215, "image": "images/TRA002CT-11W.png" },
-              /* Для встраиваемых систем добавляем X‑образный коннектор белый: */
-              "TRA002CX-11W": { "name": "Коннектор Х-образный встраиваемый белый TRA002CX-11W", "price": 690, "image": "images/TRA002CX-11W.png" }
+              "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м", "price": 1650, "image": "images/maytoni unity/TRX004-111W.png" },
+              "TRX004-112W": { "name": "Шинопровод встраиваемый белый 2м", "price": 2650, "image": "images/maytoni unity/TRX004-112W.png" },
+              "TRA002C-11W": { "name": "Коннектор прямой белый для встраивания", "price": 115, "image": "images/maytoni unity/TRA002C-11W.png" },
+              "TRA002CL-11W": { "name": "Коннектор угловой белый для встраивания", "price": 165, "image": "images/maytoni unity/TRA002CL-11W.png" },
+              "TRA002CT-11W": { "name": "Коннектор Т-образный белый для встраивания", "price": 215, "image": "images/maytoni unity/TRA002CT-11W.png" },
+              "TRA002CX-11W": { "name": "Коннектор Х-образный встраиваемый белый", "price": 690, "image": "images/maytoni unity/TRA002CX-11W.png" }
             }
           },
           "stretch-ceiling": {
@@ -224,11 +229,12 @@
             "connectors": {
               "straight": ["TRA001C-11W"],
               "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
+              "T-shape": ["TRA001CT-11W"],
+              "x": []
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
-              "TRA001MP-112S": { "name": "Профиль для натяжного потолка TRA001MP-112S", "price": 5490, "image": "images/TRA001MP-112S.png" }
+              "TRA001MP-112S": { "name": "Профиль для натяжного потолка", "price": 5490, "image": "images/maytoni unity/TRA001MP-112S.png" }
             }
           },
           "hanging": {
@@ -240,29 +246,39 @@
             "connectors": {
               "straight": ["TRA001C-11W"],
               "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"]
+              "T-shape": ["TRA001CT-11W"],
+              "x": []
             },
             "components": {
-              "TRX001-111W": { "name": "Шинопровод накладной белый 1м TRX001-111W", "price": 1550, "image": "images/TRX001-111W.png" },
-              "TRX001-112W": { "name": "Шинопровод накладной белый 2м TRX001-112W", "price": 2550, "image": "images/TRX001-112W.png" },
-              "TRX001-113W": { "name": "Шинопровод накладной белый 3м TRX001-113W", "price": 3550, "image": "images/TRX001-113W.png" },
-              "TRA001C-11W": { "name": "Коннектор прямой белый TRA001C-11W", "price": 105, "image": "images/TRA001C-11W.png" },
-              "TRA001CL-11W": { "name": "Коннектор угловой белый TRA001CL-11W", "price": 155, "image": "images/TRA001CL-11W.png" },
-              "TRA001CT-11W": { "name": "Коннектор Т-образный белый TRA001CT-11W", "price": 205, "image": "images/TRA001CT-11W.png" }
+              "TRX001-111W": { "name": "Шинопровод накладной белый 1м", "price": 1550, "image": "images/maytoni unity/TRX001-111W.png" },
+              "TRX001-112W": { "name": "Шинопровод накладной белый 2м", "price": 2550, "image": "images/maytoni unity/TRX001-112W.png" },
+              "TRX001-113W": { "name": "Шинопровод накладной белый 3м", "price": 3550, "image": "images/maytoni unity/TRX001-113W.png" },
+              "TRA001C-11W": { "name": "Коннектор прямой белый", "price": 105, "image": "images/maytoni unity/TRA001C-11W.png" },
+              "TRA001CL-11W": { "name": "Коннектор угловой белый", "price": 155, "image": "images/maytoni unity/TRA001CL-11W.png" },
+              "TRA001CT-11W": { "name": "Коннектор Т-образный белый", "price": 205, "image": "images/maytoni unity/TRA001CT-11W.png" }
             }
           }
         }
       }
     };
-    /***** Конец встроенных данных *****/
-
-    // Сопоставление для подвесов для режима hanging (Maytoni)
-    var suspensionMappingMaytoni = {
-      "TRA001CW-11B": { "name": "Подвес для Maytoni черный", "price": 490, "image": "images/TRA001CW-11B.png" },
-      "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/TRA001CW-11W.png" }
+    
+    /***** Дополнительные данные для светильников (Maytoni) *****/
+    var lightingMappingMaytoni = {
+      "spot": {
+        "black": { id: "TR020-1-GU10-B", name: "Трековый светильник Focus S черный", price: 1690, image: "images/maytoni unity/TR020-1-GU10-B.png" },
+        "white": { id: "TR020-1-GU10-W", name: "Трековый светильник Focus S белый", price: 1690, image: "images/maytoni unity/TR020-1-GU10-W.png" }
+      },
+      "linear": {
+        "black": { id: "TR000-1-12W4K-B", name: "Линейный светильник черный (12w 4000K)", price: 4390, image: "images/maytoni unity/TR000-1-12W4K-B.png" },
+        "white": { id: "TR000-1-12W4K-W", name: "Линейный светильник белый (12w 4000K)", price: 4390, image: "images/maytoni unity/TR000-1-12W4K-W.png" }
+      },
+      "pendant": {
+        "black": { id: "TR025-1-GU10-B", name: "Подвесной светильник черный", price: 2590, image: "images/maytoni unity/TR025-1-GU10-B.png" },
+        "white": { id: "TR008-1-GU10-W", name: "Подвесной светильник белый", price: 2600, image: "images/maytoni unity/TR008-1-GU10-W.png" }
+      }
     };
-
-    // Функция для подбора трековых элементов для Maytoni в режиме surface (варианты 1м, 2м, 3м)
+    
+    /***** Функции расчёта трековых сегментов *****/
     function getTracksForMaytoniSurface(legLength, lengthOptions) {
       let pieces = [];
       if (legLength % 400 === 0) {
@@ -296,7 +312,6 @@
       }
       return pieces;
     }
-    
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
       let pieces = [];
       if (legLength % 400 === 0) {
@@ -337,7 +352,35 @@
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
-
+    
+    // Функция для получения выбранных светильников из query-параметра "lights" или из контейнера
+    function getLightingSelections(params) {
+      let lightsParam = params.get("lights");
+      if (lightsParam) {
+        try {
+          return JSON.parse(decodeURIComponent(lightsParam));
+        } catch (e) {
+          console.error("Ошибка парсинга lights:", e);
+          return [];
+        }
+      }
+      let selections = [];
+      let lightingContainer = document.getElementById("lightingButtonsContainer");
+      if (lightingContainer) {
+        const lightingRows = lightingContainer.querySelectorAll(".lighting-row");
+        lightingRows.forEach(row => {
+          let selectEl = row.querySelector("select");
+          let qtyEl = row.querySelector("input[type='number']");
+          if (selectEl && qtyEl) {
+            let lightingType = selectEl.value; // "spot", "linear", "pendant"
+            let quantity = parseInt(qtyEl.value) || 1;
+            selections.push({ type: lightingType, quantity: quantity });
+          }
+        });
+      }
+      return selections;
+    }
+    
     window.safeShowSelection = function() {
       try {
         showSelection();
@@ -346,10 +389,11 @@
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     };
-
+    
+    /***** Основная функция подбора для Maytoni *****/
     window.showSelection = function() {
       console.log("Начало работы showSelection (Maytoni)");
-
+      
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "one-phase";
       const color = params.get("color") || "black";
@@ -357,16 +401,16 @@
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
-
+      
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
-
+      
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products[type] && products[type][color] && products[type][color]["surface"]) :
           (products[type] && products[type][color] && products[type][color][mountingParam]);
       if (!effectiveProduct) {
         throw new Error("Не найден комплект для выбранных параметров (effectiveProduct).");
       }
-
+      
       let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products[type][color]["stretch-ceiling"];
@@ -374,11 +418,12 @@
           components = Object.assign({}, components, ceilingProduct.components);
         }
       }
-
+      
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
-
+      
+      // Расчёт трековых сегментов по фигурам:
       if (shape === "straight") {
         selectedItems = (mountingParam === "recessed") ?
                         getTracksForMaytoniRecessed(lengthA, lengthOptions) :
@@ -469,9 +514,8 @@
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
       }
-      // Новая ветка: X-образная система
       else if (shape === "x") {
-        // Для X-образной системы подбираем два набора шинопроводов по длинам A и B
+        // X‑образная система: два набора шинопроводов по длинам A и B и один X‑образный коннектор
         let busbarA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                       getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -479,9 +523,7 @@
                       getTracksForMaytoniRecessed(lengthB, lengthOptions) :
                       getTracksForMaytoniSurface(lengthB, lengthOptions);
         selectedItems = busbarA.concat(busbarB);
-        // Выбираем X-образный коннектор в зависимости от режима монтажа:
-        // Если режим встраиваемый (recessed) – используем TRA002CX-11B/TRA002CX-11W, иначе – TRA001CX-11B/TRA001CX-11W.
-        let xConnector;
+        let xConnector = "";
         if (mountingParam === "recessed") {
           xConnector = (color === "black") ? "TRA002CX-11B" : "TRA002CX-11W";
         } else {
@@ -517,14 +559,33 @@
       }
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
-
-      // Добавляем подвод питания (один всегда)
-      let powerInput = (color === "black") ? "TR1100-BK" : "TR1100-WH";
-      selectedItems.push({ id: powerInput });
       
-      // Обработка дополнительных компонентов по режимам монтажа:
+      /***** Добавление выбранных светильников *****/
+      // Получаем выбранные светильники либо из query-параметра "lights", либо из контейнера lightingButtonsContainer
+      let selectedLightingOptions = getLightingSelections(params);
+      // Добавляем позиции светильников в итоговый результат
+      selectedLightingOptions.forEach(light => {
+        let col = color.toLowerCase();
+        let lightItem = (lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][col])
+                          ? lightingMappingMaytoni[light.type][col]
+                          : null;
+        if (lightItem) {
+          for (let i = 0; i < light.quantity; i++) {
+            selectedItems.push({ id: lightItem.id });
+            if (!components[lightItem.id]) {
+              components[lightItem.id] = {
+                name: lightItem.name,
+                price: lightItem.price,
+                image: lightItem.image
+              };
+            }
+          }
+        }
+      });
+      
+      /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка: добавляем профиль для натяжного потолка TR3050-AL
+        // Для натяжного потолка – добавляем профиль TR3050-AL и уголки (если форма содержит углы)
         let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
@@ -532,7 +593,6 @@
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TR3050-AL", pieceLength: 200 });
         }
-        // Если форма содержит углы (L, T, P) – добавляем уголки для профиля TR3031-AL (по количеству: T – 2 шт., иначе 1 шт.)
         if (["L-shape", "T-shape", "P-shape"].includes(shape)) {
           let angleCount = (shape === "T-shape") ? 2 : 1;
           for (let i = 0; i < angleCount; i++) {
@@ -541,7 +601,7 @@
         }
       }
       else if (mountingParam === "recessed") {
-        // Для встраиваемой системы: добавляем профиль для гипсокартонного потолка TR3020-AL и заглушки (если система не "rectangle")
+        // Для встраиваемой системы – добавляем профиль для гипсокартонного потолка (TR3020-AL) и заглушки (если не прямоугольник)
         let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
@@ -558,6 +618,7 @@
       }
       
       if (mountingParam === "hanging") {
+        // Для подвесной системы – добавляем подвесы
         let effectiveTrackLength = (shape === "straight") ? lengthA : (lengthA + lengthB);
         console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
         let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
@@ -569,8 +630,8 @@
       }
       
       console.log("Финальный результат подбора (Maytoni):", selectedItems);
-
-      // Группировка элементов: для трековых сегментов суммируем длину, для остальных – считаем количество.
+      
+      /***** Группировка элементов *****/
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -580,7 +641,7 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          groupedItems[id] = { totalLength: 0, count: 0, component: components[id] || suspensionMappingMaytoni[id] || {}, isTrack: isTrack };
+          groupedItems[id] = { totalLength: 0, count: 0, component: components[id] || {}, isTrack: isTrack };
         }
         if (isTrack) {
           groupedItems[id].totalLength += itemObj.pieceLength;
@@ -588,7 +649,7 @@
         groupedItems[id].count++;
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
-
+      
       let totalPrice = 0;
       let tbodyHTML = "";
       for (const [id, group] of Object.entries(groupedItems)) {
@@ -605,7 +666,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name}</td>
+              <td><img src="images/maytoni unity/${id}.png" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
@@ -615,13 +676,13 @@
           console.warn("Компонент с ID " + id + " не найден или не имеет имени.");
         }
       }
-
+      
       document.getElementById("results").innerHTML = tbodyHTML;
       document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
       document.getElementById("resultContainer").style.display = "block";
       console.log("Подбор завершён успешно (Maytoni).");
     };
-
+    
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
