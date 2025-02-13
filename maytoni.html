@@ -88,6 +88,9 @@
     <div id="debug" class="debug"></div>
   </div>
   
+  <!-- Контейнер для динамически добавляемых строк выбора светильников -->
+  <div id="lightingButtonsContainer"></div>
+  
   <script>
     /***** Встроенные данные о продуктах (Maytoni UNITY) *****/
     var products = {
@@ -259,10 +262,20 @@
       }
     };
     
-    /***** Сопоставление для подвесов для режима hanging (Maytoni) *****/
-    var suspensionMappingMaytoni = {
-      "TRA001CW-11B": { "name": "Подвес для Maytoni черный", "price": 490, "image": "images/maytoni unity/TRA001CW-11B.png" },
-      "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/maytoni unity/TRA001CW-11W.png" }
+    /***** Дополнительные данные для светильников (Maytoni) *****/
+    var lightingMappingMaytoni = {
+      "spot": {
+        "black": { id: "TR020-1-GU10-B", name: "Трековый светильник Focus S черный", price: 1690, image: "images/maytoni unity/TR020-1-GU10-B.png" },
+        "white": { id: "TR020-1-GU10-W", name: "Трековый светильник Focus S белый", price: 1690, image: "images/maytoni unity/TR020-1-GU10-W.png" }
+      },
+      "linear": {
+        "black": { id: "TR000-1-12W4K-B", name: "Линейный светильник черный (12w 4000K)", price: 4390, image: "images/maytoni unity/TR000-1-12W4K-B.png" },
+        "white": { id: "TR000-1-12W4K-W", name: "Линейный светильник белый (12w 4000K)", price: 4390, image: "images/maytoni unity/TR000-1-12W4K-W.png" }
+      },
+      "pendant": {
+        "black": { id: "TR025-1-GU10-B", name: "Подвесной светильник черный", price: 2590, image: "images/maytoni unity/TR025-1-GU10-B.png" },
+        "white": { id: "TR008-1-GU10-W", name: "Подвесной светильник белый", price: 2600, image: "images/maytoni unity/TR008-1-GU10-W.png" }
+      }
     };
     
     /***** Функции расчёта трековых сегментов *****/
@@ -299,6 +312,7 @@
       }
       return pieces;
     }
+    
     function getTracksForMaytoniRecessed(legLength, lengthOptions) {
       let pieces = [];
       if (legLength % 400 === 0) {
@@ -570,7 +584,7 @@
       
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка – добавляем профиль TRA001MP-112S и уголки (если фигура содержит углы)
+        // Для натяжного потолка – добавляем профиль TRA001MP-112S
         let trackLength = selectedItems.filter(item => item.pieceLength).reduce((sum, item) => sum + item.pieceLength, 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         let profileCount = Math.ceil(trackLength / 200);
@@ -581,15 +595,7 @@
             components["TRA001MP-112S"] = { name: "Профиль для натяжного потолка TRA001MP-112S", price: 5490, image: "images/maytoni unity/TRA001MP-112S.png" };
           }
         }
-        if (["L-shape", "T-shape", "P-shape"].includes(shape)) {
-          let angleCount = (shape === "T-shape") ? 2 : 1;
-          for (let i = 0; i < angleCount; i++) {
-            selectedItems.push({ id: "TR3031-AL" });
-            if (!components["TR3031-AL"]) {
-              components["TR3031-AL"] = { name: "Угол профиля TR3031-AL", price: 1975, image: "images/maytoni unity/TR3031-AL.png" };
-            }
-          }
-        }
+        // Удаляем добавление уголков – у Maytoni уголки не используются
       }
       else if (mountingParam === "recessed") {
         // Для встраиваемой системы – профили не добавляем (шиноводы уже встроены)
