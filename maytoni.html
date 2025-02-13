@@ -278,6 +278,12 @@
       }
     };
     
+    /***** Сопоставление для подвесов (Maytoni) *****/
+    var suspensionMappingMaytoni = {
+      "TRA001CW-11B": { "name": "Подвес для Maytoni черный", "price": 490, "image": "images/maytoni unity/TRA001CW-11B.png" },
+      "TRA001CW-11W": { "name": "Подвес для Maytoni белый", "price": 490, "image": "images/maytoni unity/TRA001CW-11W.png" }
+    };
+    
     /***** Функции расчёта трековых сегментов *****/
     function getTracksForMaytoniSurface(legLength, lengthOptions) {
       let pieces = [];
@@ -354,7 +360,7 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
     
-    // Функция для получения выбранных светильников
+    // Функция для получения выбранных светильников из контейнера (если они есть)
     function getLightingSelections(params) {
       let lightsParam = params.get("lights");
       if (lightsParam) {
@@ -592,10 +598,13 @@
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
           if (!components["TRA001MP-112S"]) {
-            components["TRA001MP-112S"] = { name: "Профиль для натяжного потолка TRA001MP-112S", price: 5490, image: "images/maytoni unity/TRA001MP-112S.png" };
+            components["TRA001MP-112S"] = { 
+              name: "Профиль для натяжного потолка TRA001MP-112S", 
+              price: 5490, 
+              image: "images/maytoni unity/TRA001MP-112S.png" 
+            };
           }
         }
-        // Удаляем добавление уголков – у Maytoni уголки не используются
       }
       else if (mountingParam === "recessed") {
         // Для встраиваемой системы – профили не добавляем (шиноводы уже встроены)
