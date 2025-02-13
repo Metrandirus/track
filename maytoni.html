@@ -88,7 +88,7 @@
     <div id="debug" class="debug"></div>
   </div>
   
-  <!-- Контейнер для динамически добавляемых строк выбора светильников (если используются в index) -->
+  <!-- Контейнер для динамически добавляемых строк выбора светильников (если он присутствует в этом документе) -->
   <div id="lightingButtonsContainer"></div>
   
   <script>
@@ -105,8 +105,7 @@
             "connectors": {
               "straight": ["TRA001C-11B"],
               "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"],
-              "x": []  // для X‑образной системы (обрабатывается отдельно)
+              "T-shape": ["TRA001CT-11B"]
             },
             "components": {
               "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/maytoni unity/TRX001-111B.png" },
@@ -126,8 +125,7 @@
             "connectors": {
               "straight": ["TRA002C-11B"],
               "L-shape": ["TRA002CL-11B"],
-              "T-shape": ["TRA002CT-11B"],
-              "x": []  // и для X‑образной системы
+              "T-shape": ["TRA002CT-11B"]
             },
             "components": {
               "TRX004-111B": { "name": "Шинопровод встраиваемый черный 1м", "price": 1600, "image": "images/maytoni unity/TRX004-111B.png" },
@@ -147,8 +145,7 @@
             "connectors": {
               "straight": ["TRA003C-11B"],
               "L-shape": ["TRA003CL-11B"],
-              "T-shape": ["TRA003CT-11B"],
-              "x": []  // для X‑образной системы не используется
+              "T-shape": ["TRA003CT-11B"]
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
@@ -164,8 +161,7 @@
             "connectors": {
               "straight": ["TRA001C-11B"],
               "L-shape": ["TRA001CL-11B"],
-              "T-shape": ["TRA001CT-11B"],
-              "x": []  // для X‑образной системы
+              "T-shape": ["TRA001CT-11B"]
             },
             "components": {
               "TRX001-111B": { "name": "Шинопровод накладной черный 1м", "price": 1500, "image": "images/maytoni unity/TRX001-111B.png" },
@@ -187,8 +183,7 @@
             "connectors": {
               "straight": ["TRA001C-11W"],
               "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"],
-              "x": []  // для X‑образной системы
+              "T-shape": ["TRA001CT-11W"]
             },
             "components": {
               "TRX001-111W": { "name": "Шинопровод накладной белый 1м", "price": 1550, "image": "images/maytoni unity/TRX001-111W.png" },
@@ -208,8 +203,7 @@
             "connectors": {
               "straight": ["TRA002C-11W"],
               "L-shape": ["TRA002CL-11W"],
-              "T-shape": ["TRA002CT-11W"],
-              "x": []  // для X‑образной системы
+              "T-shape": ["TRA002CT-11W"]
             },
             "components": {
               "TRX004-111W": { "name": "Шинопровод встраиваемый белый 1м", "price": 1650, "image": "images/maytoni unity/TRX004-111W.png" },
@@ -229,8 +223,7 @@
             "connectors": {
               "straight": ["TRA001C-11W"],
               "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"],
-              "x": []
+              "T-shape": ["TRA001CT-11W"]
             },
             "additionalComponents": ["TRA001MP-112S"],
             "components": {
@@ -246,8 +239,7 @@
             "connectors": {
               "straight": ["TRA001C-11W"],
               "L-shape": ["TRA001CL-11W"],
-              "T-shape": ["TRA001CT-11W"],
-              "x": []
+              "T-shape": ["TRA001CT-11W"]
             },
             "components": {
               "TRX001-111W": { "name": "Шинопровод накладной белый 1м", "price": 1550, "image": "images/maytoni unity/TRX001-111W.png" },
@@ -342,6 +334,7 @@
       return pieces;
     }
     
+    // Функция для определения номинальной длины трека по его id
     function getNominalLength(id) {
       if (id.indexOf("-111") !== -1) return 100;
       if (id.indexOf("-112") !== -1) return 200;
@@ -349,22 +342,9 @@
       return null;
     }
     
+    // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
-    }
-    
-    // Функция для парсинга параметра lights из query‑строки (если есть)
-    function getLightingSelections(params) {
-      let lightsParam = params.get("lights");
-      if (lightsParam) {
-        try {
-          return JSON.parse(decodeURIComponent(lightsParam));
-        } catch (e) {
-          console.error("Ошибка парсинга lights:", e);
-          return [];
-        }
-      }
-      return [];
     }
     
     window.safeShowSelection = function() {
@@ -387,9 +367,6 @@
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
-      
-      // Получаем массив выбранных светильников из query‑строки (если передан)
-      const selectedLightingOptions = getLightingSelections(params);
       
       console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
       
@@ -534,7 +511,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для Maytoni.");
       }
       
-      // Если для систем "straight" добавляем недостающие прямые коннекторы
+      // Для систем "straight" добавляем недостающие прямые коннекторы, если они ещё не добавлены.
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -550,40 +527,42 @@
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
       /***** Добавление выбранных светильников *****/
-      // Если в query передан параметр lights, он уже сериализован в JSON (массив объектов)
-      const lightsParam = params.get("lights");
-      let selectedLightingOptions = [];
-      if (lightsParam) {
-        try {
-          selectedLightingOptions = JSON.parse(decodeURIComponent(lightsParam));
-        } catch (e) {
-          console.error("Ошибка парсинга параметра lights:", e);
-        }
+      // Попытаемся найти контейнер строк светильников сначала в текущем документе,
+      // а если его нет, то попробуем получить его из родительского окна (index)
+      let lightingContainer = document.getElementById("lightingButtonsContainer");
+      if (!lightingContainer && window.parent && window.parent.document) {
+        lightingContainer = window.parent.document.getElementById("lightingButtonsContainer");
       }
-      // Для каждого выбранного светильника добавляем его в итоговый результат
-      selectedLightingOptions.forEach(light => {
-        // light.type может быть "spot", "linear" или "pendant"
-        let lightItem = (lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][color])
-                          ? lightingMappingMaytoni[light.type][color]
-                          : null;
-        if (lightItem) {
-          for (let i = 0; i < parseInt(light.quantity, 10); i++) {
-            selectedItems.push({ id: lightItem.id });
-            // Если компонент ещё не внесён, добавляем его в components
-            if (!components[lightItem.id]) {
-              components[lightItem.id] = {
-                name: lightItem.name,
-                price: lightItem.price,
-                image: lightItem.image
-              };
+      if (lightingContainer) {
+        const lightingRows = lightingContainer.querySelectorAll(".lighting-row");
+        lightingRows.forEach(row => {
+          let selectEl = row.querySelector("select");
+          let qtyEl = row.querySelector("input[type='number']");
+          if (selectEl && qtyEl) {
+            let lightingType = selectEl.value; // "spot", "linear", "pendant"
+            let quantity = parseInt(qtyEl.value) || 1;
+            // Приводим цвет к нижнему регистру
+            let col = color.toLowerCase();
+            let lightItem = (lightingMappingMaytoni[lightingType] && lightingMappingMaytoni[lightingType][col]) ? lightingMappingMaytoni[lightingType][col] : null;
+            if (lightItem) {
+              for (let i = 0; i < quantity; i++) {
+                selectedItems.push({ id: lightItem.id });
+                if (!components[lightItem.id]) {
+                  components[lightItem.id] = {
+                    name: lightItem.name,
+                    price: lightItem.price,
+                    image: lightItem.image
+                  };
+                }
+              }
             }
           }
-        }
-      });
+        });
+      }
       
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка – добавляем профиль.
+        // Для натяжного потолка – добавляем профиль
         // Суммируем только длины трековых сегментов
         let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
