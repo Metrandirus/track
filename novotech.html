@@ -80,7 +80,7 @@
           </tr>
         </thead>
         <tbody id="results">
-          <!-- Здесь будут выводиться результаты подбора -->
+          <!-- Результаты подбора будут выведены здесь -->
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
@@ -89,12 +89,18 @@
   </div>
   
   <script>
+    /***** Глобальная переменная для подвесов NOVOTECH *****/
+    var suspensionMapping = {
+      "135152": { "name": "Подвес черный NOVOTECH", "price": 430, "image": "images/novotech/135152.png" },
+      "135151": { "name": "Подвес белый NOVOTECH", "price": 430, "image": "images/novotech/135151.png" }
+    };
+
     /***** Встроенные данные для NOVOTECH *****/
     var products = {
       "novotech": {
         "black": {
           "surface": {
-            // Доступны только варианты 1м и 2м для базовых шинопроводов
+            // Доступны только варианты 1м и 2м
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["135136"] },  // 1м черный
               { "min": 101, "max": 200, "items": ["135138"] }   // 2м черный
@@ -103,7 +109,7 @@
               "straight": ["135140"],  // прямой черный
               "L-shape": ["135142"],   // угловой черный
               "T-shape": ["135144"],   // Т-образный черный
-              "x": []                  // X-образная система – обработаем отдельно
+              "x": []                  // для X-образной системы – обработаем отдельно
             },
             "components": {
               "135136": { "name": "Шинопровод накладной черный 1м (135136)", "price": 960, "image": "images/novotech/135136.png" },
@@ -114,7 +120,7 @@
             }
           },
           "hanging": {
-            // Для подвесного монтажа используем те же данные, что и для surface
+            // Для подвесного монтажа используются те же данные, что и для surface
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["135136"] },
               { "min": 101, "max": 200, "items": ["135138"] }
@@ -133,7 +139,6 @@
               "135144": { "name": "Коннектор Т-образный черный (135144)", "price": 350, "image": "images/novotech/135144.png" }
             }
           },
-          // Для новых режимов: stretch‑ceiling и recessed (встраиваемый)
           "stretch-ceiling": {
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["135136"] },
@@ -320,11 +325,11 @@
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
     
-    // Функция проверки режима монтажа для NOVOTECH – теперь доступны surface, hanging, stretch-ceiling и recessed.
+    // Функция проверки режима монтажа для NOVOTECH – теперь доступны surface, hanging, stretch‑ceiling и recessed.
     function checkMountingForNovotech(mountingParam) {
       if (["surface", "hanging", "stretch-ceiling", "recessed"].indexOf(mountingParam) === -1) {
         document.getElementById("resultContainer").style.display = "none";
-        document.getElementById("debug").textContent = "Для NOVOTECH доступны режимы: surface, hanging, stretch-ceiling и recessed.";
+        document.getElementById("debug").textContent = "Для NOVOTECH доступны режимы: surface, hanging, stretch‑ceiling и recessed.";
         return false;
       }
       return true;
@@ -344,10 +349,13 @@
       console.log("Начало работы showSelection (NOVOTECH)");
     
       const params = new URLSearchParams(window.location.search);
+      // Для NOVOTECH используем тип "novotech"
       const type = "novotech";
       const color = params.get("color") || "black";
       let mountingParam = params.get("mounting") || "surface";
+      
       if (!checkMountingForNovotech(mountingParam)) return;
+      
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
@@ -355,7 +363,7 @@
       console.log("Параметры подбора (NOVOTECH):", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
     
       // Для NOVOTECH базовые треки берём из "surface" если mountingParam не равен "hanging", иначе остаётся surface
-      let effectiveProduct = (mountingParam === "hanging") ?
+      let effectiveProduct = (mountingParam === "hanging" || mountingParam === "stretch-ceiling") ?
           (products.novotech && products.novotech[color] && products.novotech[color]["surface"]) :
           (products.novotech && products.novotech[color] && products.novotech[color][mountingParam]) ||
           (products.novotech && products.novotech[color] && products.novotech[color]["surface"]);
@@ -446,19 +454,18 @@
         }
       }
       else if (shape === "x") {
-        // X-образная система: как в L-shape, но заменяем угловой коннектор на X-коннектор
+        // X‑образная система: как в L-shape, но заменяем угловой коннектор на X-коннектор
         let legATracks = getTracksForNovotech(lengthA, lengthOptions);
         let legBTracks = getTracksForNovotech(lengthB, lengthOptions);
         selectedItems = legATracks.concat(legBTracks);
         // Выбираем X-коннектор в зависимости от режима монтажа:
+        // Для recessed (встраиваемый) используем: black – 135146, white – 135145
+        // Для остальных режимов оставляем коннекторы как для L-shape (либо можно задать отдельно)
         let xConnector;
         if (mountingParam === "recessed") {
-          // Для встраиваемой системы используем X-коннектор: для black – 135146, для white – 135145
           xConnector = (color === "black") ? "135146" : "135145";
         } else {
-          // Для остальных режимов используем те же, что для L-shape
-          xConnector = (color === "black") ? "135142" : "135141"; 
-          // Можно заменить на дополнительное условие, если требуется X-коннектор и для не-встраиваемых систем
+          xConnector = (color === "black") ? "135142" : "135141";
         }
         usedConnectors.push(wrapConnector(xConnector));
         if (legATracks.length > 1) {
@@ -476,7 +483,7 @@
         throw new Error("Логика для фигуры '" + shape + "' не реализована для NOVOTECH.");
       }
       
-      // Для систем "straight" – добавляем недостающие прямые коннекторы, если не были добавлены
+      // Для систем "straight" – добавляем недостающие прямые коннекторы, если они не были добавлены
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -489,21 +496,36 @@
         }
       }
       
-      console.log("Подобранные треки (до дополнительных компонентов):", selectedItems);
-    
+      console.log("Подобранные треки (до доп. компонентов):", selectedItems);
+      
       /***** Добавление выбранных светильников *****/
-      // Светильники выбираются через глобальный массив, например передаются в параметрах (в реальном случае – из index)
-      // Здесь предполагается, что если параметр "lights" существует, он является JSON-массивом.
+      // Если параметр "lights" передан (как JSON-массив), парсим его и добавляем соответствующие светильники
       let lightsParam = params.get("lights");
       if (lightsParam) {
         try {
           let lightingOptions = JSON.parse(lightsParam);
           lightingOptions.forEach(light => {
-            let lightItem = (lightingMappingMayotech[light.type] && lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][color]) 
-                              ? lightingMappingMaytoni[light.type][color] 
-                              : null;
-            // Альтернативно, если мы уже определили lightingMappingMaytoni выше – используем его
-            // (в данном примере мы будем брать данные из переменной lightingMappingMaytoni, определённой в нашем файле)
+            // Приводим цвет к нижнему регистру
+            let col = color.toLowerCase();
+            // Здесь используем переменную lightingMappingMaytoni, которая должна быть определена
+            // Если её нет, можно объявить её ниже
+            if (typeof lightingMappingMaytoni === "undefined") {
+              var lightingMappingMaytoni = {
+                "spot": {
+                  "black": { id: "TR020-1-GU10-B", name: "Трековый светильник Focus S черный (TR020-1-GU10-B)", price: 1690, image: "images/novotech/TR020-1-GU10-B.png" },
+                  "white": { id: "TR020-1-GU10-W", name: "Трековый светильник Focus S белый (TR020-1-GU10-W)", price: 1690, image: "images/novotech/TR020-1-GU10-W.png" }
+                },
+                "linear": {
+                  "black": { id: "TR000-1-12W4K-B", name: "Линейный светильник черный (TR000-1-12W4K-B)", price: 4390, image: "images/novotech/TR000-1-12W4K-B.png" },
+                  "white": { id: "TR000-1-12W4K-W", name: "Линейный светильник белый (TR000-1-12W4K-W)", price: 4390, image: "images/novotech/TR000-1-12W4K-W.png" }
+                },
+                "pendant": {
+                  "black": { id: "TR025-1-GU10-B", name: "Подвесной светильник черный (TR025-1-GU10-B)", price: 2590, image: "images/novotech/TR025-1-GU10-B.png" },
+                  "white": { id: "TR008-1-GU10-W", name: "Подвесной светильник белый (TR008-1-GU10-W)", price: 2600, image: "images/novotech/TR008-1-GU10-W.png" }
+                }
+              };
+            }
+            let lightItem = (lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][col]) ? lightingMappingMaytoni[light.type][col] : null;
             if (lightItem) {
               for (let i = 0; i < parseInt(light.quantity); i++) {
                 selectedItems.push({ id: lightItem.id });
@@ -525,7 +547,7 @@
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
         // Для натяжного потолка: профиль имеет длину 200 см
-        // Эффективная длина системы рассчитывается в зависимости от фигуры
+        // Эффективная длина системы рассчитывается по сумме длин (если фигура не straight – lengthA + lengthB; для straight – lengthA)
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -533,12 +555,16 @@
           effectiveTrackLength = lengthA + lengthB;
         } else if (shape === "rectangle") {
           effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
         }
         console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
+        // Добавляем профиль для натяжного потолка (артикул зависит от цвета)
+        let profileId = (color === "black") ? "135191" : "135192";
         for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "135" + (color === "black" ? "191" : "192"), pieceLength: 200 });
+          selectedItems.push({ id: profileId, pieceLength: 200 });
         }
         // Заглушки для натяжного потолка: фиксированное количество в зависимости от фигуры
         let endCapsCount = 0;
@@ -550,7 +576,7 @@
           endCapsCount = 2;
         }
         for (let i = 0; i < endCapsCount; i++) {
-          selectedItems.push({ id: (color === "black" ? "135187" : "135188") });
+          selectedItems.push({ id: (color === "black") ? "135187" : "135188" });
         }
       }
       else if (mountingParam === "recessed") {
@@ -562,6 +588,8 @@
           effectiveTrackLength = lengthA + lengthB;
         } else if (shape === "rectangle") {
           effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
         }
         console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 100);
@@ -569,8 +597,7 @@
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "358090", pieceLength: 100 });
         }
-        // Для встраиваемой системы добавляем соединители для каждого соединения профилей
-        // Количество соединений = (число профилей - 1)
+        // Для каждого соединения профилей (число профилей - 1) добавляем соединитель 358233
         if (profileCount > 1) {
           let connections = profileCount - 1;
           for (let i = 0; i < connections; i++) {
@@ -601,7 +628,8 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Ищем описание компонента сначала в products.novotech[color][...].components, затем в suspensionMapping, затем в additionalMappingNovotech
+          // Ищем описание компонента сначала в products.novotech[color]["surface"].components,
+          // затем в suspensionMapping, затем в additionalMappingNovotech
           let comp = (products.novotech[color]["surface"].components[id]) || suspensionMapping[id] || additionalMappingNovotech[id] || {};
           groupedItems[id] = { totalLength: 0, count: 0, component: comp, isTrack: isTrack };
         }
