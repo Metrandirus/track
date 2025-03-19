@@ -257,6 +257,38 @@
             usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
           }
         }
+      } else if (shape === "P-shape") {
+        let sideTracks = getTracksForSurface(lengthA, lengthOptions);
+        let connectingTracks = getTracksForSurface(lengthB, lengthOptions);
+        selectedItems = sideTracks.concat(sideTracks, connectingTracks);
+        usedConnectors.push(wrapConnector(effectiveProduct.connectors.L-shape[0]));
+        usedConnectors.push(wrapConnector(effectiveProduct.powerConnectors.L-shape[0]));
+        usedConnectors.push(wrapConnector(effectiveProduct.connectors.L-shape[0]));
+        usedConnectors.push(wrapConnector(effectiveProduct.powerConnectors.L-shape[0]));
+        if (sideTracks.length > 1) {
+          for (let i = 0; i < sideTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+        if (connectingTracks.length > 1) {
+          for (let i = 0; i < connectingTracks.length - 1; i++) {
+            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+          }
+        }
+      } else if (shape === "rectangle") {
+        let tracksA = getTracksForSurface(lengthA, lengthOptions);
+        let tracksB = getTracksForSurface(lengthB, lengthOptions);
+        selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
+        for (let i = 0; i < 4; i++) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors.L-shape[0]));
+          usedConnectors.push(wrapConnector(effectiveProduct.powerConnectors.L-shape[0]));
+        }
+        let straightForA = (tracksA.length > 1) ? 2 * (tracksA.length - 1) : 0;
+        let straightForB = (tracksB.length > 1) ? 2 * (tracksB.length - 1) : 0;
+        for (let i = 0; i < straightForA + straightForB; i++) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
+        }
       }
 
       // Добавляем комплект заглушек
