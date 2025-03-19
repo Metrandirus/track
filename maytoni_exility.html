@@ -297,23 +297,27 @@
     };
 
     window.showSelection = function() {
-      console.log("Начало работы showSelection (Maytoni Exility)");
-      
-      const params = new URLSearchParams(window.location.search);
-      const color = params.get("color") || "black";
-      const mountingParam = params.get("mounting") || "surface";
-      if (!checkMountingForNovotech(mountingParam)) return;
+  console.log("Начало работы showSelection (Maytoni Exility)");
+  
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get("type") || "magnetic"; // Получаем тип системы из параметров
+  const color = params.get("color") || "black";
+  const mountingParam = params.get("mounting") || "surface";
+  if (!checkMountingForNovotech(mountingParam)) return;
 
-      const shape = params.get("shape") || "straight";
-      const lengthA = parseFloat(params.get("lengthA")) || 150;
-      const lengthB = parseFloat(params.get("lengthB")) || 0;
+  const shape = params.get("shape") || "straight";
+  const lengthA = parseFloat(params.get("lengthA")) || 150;
+  const lengthB = parseFloat(params.get("lengthB")) || 0;
 
-      console.log("Параметры подбора:", { color, mounting: mountingParam, shape, lengthA, lengthB });
+  console.log("Параметры подбора:", { type, color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      let effectiveProduct = products.magnetic[color][mountingParam];
-      if (!effectiveProduct) {
-        throw new Error("Не найден комплект для выбранных параметров.");
-      }
+  // Используем параметр type для выбора типа системы из объекта products
+  let effectiveProduct = products[type][color][mountingParam];
+  if (!effectiveProduct) {
+    throw new Error("Не найден комплект для выбранных параметров.");
+  }
+
+    
 
       let components = effectiveProduct.components;
       const lengthOptions = effectiveProduct.lengthOptions;
