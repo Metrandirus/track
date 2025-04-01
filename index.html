@@ -108,7 +108,33 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Правая область: блок с 5 столбцами производителей */
+    /* Сворачиваемый блок производителей */
+    #manufacturerControlsContainer {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    #manufacturerHeader {
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #manufacturerControls {
+      display: none;
+      border: 1px solid #ddd;
+      border-top: none;
+      padding: 10px;
+      background-color: #fff;
+    }
+    #manufacturerControls label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    /* Правая область: блок с производителями (столбцы с брендами) */
     .manufacturers-container {
       flex: 2 1 500px;
       display: none;
@@ -139,26 +165,6 @@
       border: none;
       width: 100%;
     }
-    /* Стили для блока управления производителями */
-    #manufacturerControls {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      padding: 10px;
-      max-width: 220px;
-      z-index: 1000;
-    }
-    #manufacturerControls h3 {
-      margin: 0 0 10px 0;
-      font-size: 14px;
-    }
-    #manufacturerControls label {
-      display: block;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
     .debug {
       margin-top: 10px;
       font-size: 12px;
@@ -167,10 +173,12 @@
   </style>
 </head>
 <body>
-  <!-- Блок управления производителями (список брендов) -->
-  <div id="manufacturerControls" style="display:none;">
-    <h3>Производители</h3>
-    <div id="manufacturerCheckboxes"></div>
+  <!-- Сворачиваемый блок производителей (находится над колонками) -->
+  <div id="manufacturerControlsContainer">
+    <div id="manufacturerHeader">Все производители</div>
+    <div id="manufacturerControls">
+      <div id="manufacturerCheckboxes"></div>
+    </div>
   </div>
 
   <div class="container">
@@ -251,9 +259,9 @@
       <div id="debug" class="debug"></div>
     </div>
 
-    <!-- Правая область: блок с 5 столбцами производителей -->
+    <!-- Правая область: блок с производителями (столбцы с брендами) -->
     <div class="manufacturers-container" id="manufacturersContainer">
-      <!-- Здесь будут динамически создаваться столбцы -->
+      <!-- Здесь будут динамически создаваться столбцы производителей -->
     </div>
   </div>
 
@@ -343,7 +351,7 @@
         `;
         container.appendChild(col);
       });
-      // Инициализируем сортировку колонок с помощью jQuery UI
+      // Инициализируем сортировку столбцов с помощью jQuery UI
       $("#manufacturersContainer").sortable({
         axis: "x",
         containment: "parent"
@@ -352,7 +360,7 @@
       updateManufacturerControls(manufacturerList);
     }
 
-    /* Функция обновления блока управления производителями (чекбоксы для скрытия/показа колонок) */
+    /* Функция обновления блока управления производителями (чекбоксы для скрытия/показа столбцов) */
     function updateManufacturerControls(manufacturerList) {
       const controlsDiv = document.getElementById("manufacturerCheckboxes");
       controlsDiv.innerHTML = "";
@@ -362,9 +370,17 @@
         label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" checked> ${man.title}`;
         controlsDiv.appendChild(label);
       });
-      // Показываем блок управления, если есть производители
-      document.getElementById("manufacturerControls").style.display = manufacturerList.length ? "block" : "none";
     }
+
+    // Обработчик клика по заголовку сворачиваемой области производителей
+    document.getElementById("manufacturerHeader").addEventListener("click", function() {
+      const controls = document.getElementById("manufacturerControls");
+      if (controls.style.display === "none" || controls.style.display === "") {
+        controls.style.display = "block";
+      } else {
+        controls.style.display = "none";
+      }
+    });
 
     // Обработчик клика по чекбоксам в блоке управления производителями
     document.addEventListener("change", function(e) {
