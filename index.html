@@ -20,7 +20,7 @@
       padding: 0;
       box-sizing: border-box;
     }
-    /* Шапка */
+    /* Шапка страницы */
     #headerRow {
       width: 100%;
       background-color: #fff;
@@ -445,14 +445,17 @@
         const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}&lights=${lightsParam}`;
         console.log("Query-string:", queryString);
         
-        // Определяем производителей по типу системы
+        // Определяем производителей по типу системы и добавляем новые бренды в категорию "one-phase"
         const manufacturersData = {
           "one-phase": [
             { title: "Maytoni UNITY", file: "maytoni.html" },
             { title: "NOVOTECH", file: "novotech.html" },
             { title: "ST LUCE", file: "st_luce.html" },
             { title: "AMBRELA", file: "ambrela.html" },
-            { title: "DENKIRS", file: "denkirs.html" }
+            { title: "DENKIRS", file: "denkirs.html" },
+            { title: "Arlight", file: "arlight.html" },
+            { title: "Elektrostandard", file: "elektrostandard.html" },
+            { title: "lightstar", file: "lightstar.html" }
           ],
           "magnetic": [
             { title: "Maytoni S35", file: "maytoni_s35.html" },
