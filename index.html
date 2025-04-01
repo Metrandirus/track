@@ -1,128 +1,449 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Бренды</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <style>
-        #brandList {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ccc;
-            padding: 10px;
-            width: 200px;
-        }
-        #brandTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 50px;
-        }
-        #brandTable th, #brandTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        #brandTable th {
-            cursor: move;
-            background-color: #f2f2f2;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Подбор трековой системы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Подключаем библиотеки для создания PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <!-- Подключаем jQuery и jQuery UI для сортировки -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <style>
+    /* Стили для всей страницы */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e7f5fd;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    /* Левая область: форма выбора */
+    .form-container {
+      flex: 1 1 300px;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      max-width: 350px;
+    }
+    .form-container h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .form-container label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .form-container select,
+    .form-container input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .shape-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .shape-options div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ddd;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      width: calc(50% - 5px);
+      box-sizing: border-box;
+    }
+    .shape-options img {
+      width: 50px;
+      height: auto;
+    }
+    .shape-options label {
+      font-size: 12px;
+      margin-top: 5px;
+      text-align: center;
+    }
+    /* Группа для ввода длин и кнопки "Добавить светильник" (кнопка справа от полей ввода) */
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .input-group input[type="text"] {
+      width: 80px;
+      padding: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .add-lighting-button {
+      width: 120px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+    }
+    /* Кнопка "Подобрать" располагается ниже остальных элементов */
+    .button-container {
+      margin-top: 20px;
+    }
+    .button-container button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    /* Правая область: блок с 5 столбцами производителей */
+    .manufacturers-container {
+      flex: 2 1 500px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .manufacturer-column {
+      flex: 1 1 calc(20% - 10px);
+      background-color: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      /* Высота столбцов – на всю высоту экрана */
+      height: 100vh;
+    }
+    .manufacturer-title {
+      background-color: #f4f4f4;
+      padding: 5px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+    .manufacturer-iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+    /* Стили для блока управления производителями */
+    #manufacturerControls {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 10px;
+      max-width: 220px;
+      z-index: 1000;
+    }
+    #manufacturerControls h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+    }
+    #manufacturerControls label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .debug {
+      margin-top: 10px;
+      font-size: 12px;
+      color: red;
+    }
+  </style>
 </head>
 <body>
+  <!-- Блок управления производителями (список брендов) -->
+  <div id="manufacturerControls" style="display:none;">
+    <h3>Производители</h3>
+    <div id="manufacturerCheckboxes"></div>
+  </div>
 
-<div id="brandList">
-    <h3>Выберите бренды:</h3>
-    <form id="brandForm">
-        <label><input type="checkbox" name="brand" value="brand1" checked> Бренд 1</label><br>
-        <label><input type="checkbox" name="brand" value="brand2" checked> Бренд 2</label><br>
-        <label><input type="checkbox" name="brand" value="brand3" checked> Бренд 3</label><br>
-        <!-- Добавьте дополнительные бренды по мере необходимости -->
-    </form>
-</div>
+  <div class="container">
+    <!-- Левая область: форма выбора -->
+    <div class="form-container">
+      <h2>Подбор трековой системы</h2>
+      <label for="type">Тип:</label>
+      <select id="type" name="type">
+        <option value="one-phase">Однофазный</option>
+        <option value="magnetic">Магнитный</option>
+      </select>
+      <label for="color">Цвет:</label>
+      <select id="color" name="color">
+        <option value="black">Черный</option>
+        <option value="white">Белый</option>
+      </select>
+      <label for="mounting">Способ монтажа:</label>
+      <select id="mounting" name="mounting">
+        <option value="surface">Накладной</option>
+        <option value="recessed">Встраиваемый</option>
+        <option value="stretch-ceiling">В натяжной потолок</option>
+        <option value="hanging">Подвесной</option>
+      </select>
+      <label>Фигура:</label>
+      <div class="shape-options">
+        <div>
+          <img src="images/straight.png" alt="Прямая">
+          <input type="radio" id="straight" name="shape" value="straight" onclick="selectShape('straight')">
+          <label for="straight">Прямая</label>
+        </div>
+        <div>
+          <img src="images/L-shape.png" alt="L-образная">
+          <input type="radio" id="L-shape" name="shape" value="L-shape" onclick="selectShape('L-shape')">
+          <label for="L-shape">L-образная</label>
+        </div>
+        <div>
+          <img src="images/T-shape.png" alt="T-образная">
+          <input type="radio" id="T-shape" name="shape" value="T-shape" onclick="selectShape('T-shape')">
+          <label for="T-shape">T-образная</label>
+        </div>
+        <div>
+          <img src="images/P-shape.png" alt="П-образная">
+          <input type="radio" id="P-shape" name="shape" value="P-shape" onclick="selectShape('P-shape')">
+          <label for="P-shape">П-образная</label>
+        </div>
+        <div>
+          <img src="images/rectangle.png" alt="Прямоугольник">
+          <input type="radio" id="rectangle" name="shape" value="rectangle" onclick="selectShape('rectangle')">
+          <label for="rectangle">Прямоугольник</label>
+        </div>
+        <div>
+          <img src="images/x.png" alt="Х-образная">
+          <input type="radio" id="x" name="shape" value="x" onclick="selectShape('x')">
+          <label for="x">Х-образная</label>
+        </div>
+      </div>
+      <input type="hidden" id="selectedShape" name="selectedShape" value="">
+      <!-- Группа для ввода длин и кнопки "Добавить светильник" (кнопка справа от полей ввода) -->
+      <div class="input-group">
+        <div>
+          <label for="lengthA">Длина а (см):</label>
+          <input type="text" id="lengthA" name="lengthA" placeholder="Длина а">
+        </div>
+        <div>
+          <label for="lengthB">Длина б (см):</label>
+          <input type="text" id="lengthB" name="lengthB" placeholder="Длина б">
+        </div>
+        <div>
+          <button type="button" class="add-lighting-button" onclick="addLightingRow()">Добавить светильник</button>
+        </div>
+      </div>
+      <!-- Контейнер для строк выбора светильников -->
+      <div id="lightingButtonsContainer"></div>
+      <!-- Кнопка "Подобрать" располагается ниже остальных элементов -->
+      <div class="button-container">
+        <button type="button" onclick="safeShowSelection()">Подобрать</button>
+      </div>
+      <div id="debug" class="debug"></div>
+    </div>
 
-<table id="brandTable">
-    <thead>
-        <tr>
-            <th data-brand="brand1">Бренд 1</th>
-            <th data-brand="brand2">Бренд 2</th>
-            <th data-brand="brand3">Бренд 3</th>
-            <!-- Добавьте дополнительные заголовки колонок по мере необходимости -->
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Данные 1-1</td>
-            <td>Данные 2-1</td>
-            <td>Данные 3-1</td>
-            <!-- Добавьте дополнительные ячейки данных по мере необходимости -->
-        </tr>
-        <tr>
-            <td>Данные 1-2</td>
-            <td>Данные 2-2</td>
-            <td>Данные 3-2</td>
-            <!-- Добавьте дополнительные ячейки данных по мере необходимости -->
-        </tr>
-        <!-- Добавьте дополнительные строки данных по мере необходимости -->
-    </tbody>
-</table>
+    <!-- Правая область: блок с 5 столбцами производителей -->
+    <div class="manufacturers-container" id="manufacturersContainer">
+      <!-- Здесь будут динамически создаваться столбцы -->
+    </div>
+  </div>
 
-<script>
-    $(document).ready(function() {
-        // Делает колонки перемещаемыми
-        $("#brandTable thead tr").sortable({
-            items: "th",
-            cursor: "move",
-            axis: "x",
-            update: function(event, ui) {
-                var newOrder = $(this).children().map(function() {
-                    return $(this).data("brand");
-                }).get();
-                rearrangeColumns(newOrder);
-            }
+  <script>
+    /* Функция для установки выбранной фигуры */
+    function selectShape(shape) {
+      document.getElementById("selectedShape").value = shape;
+      console.log("Выбрана фигура:", shape);
+    }
+
+    /* Функция для добавления строки выбора светильника */
+    let lightingRowsCount = 0;
+    const maxLightingRows = 3;
+    function addLightingRow() {
+      if (lightingRowsCount >= maxLightingRows) {
+        alert("Можно добавить не более " + maxLightingRows + " вариантов светильников.");
+        return;
+      }
+      lightingRowsCount++;
+      const selectedValues = [];
+      const existingSelects = document.querySelectorAll("[id^='light']");
+      existingSelects.forEach(select => {
+        if (select.value) selectedValues.push(select.value);
+      });
+      const allOptions = [
+        { value: "spot", text: "Как споты" },
+        { value: "linear", text: "Линейный" },
+        { value: "pendant", text: "Подвесной" }
+      ];
+      const availableOptions = allOptions.filter(opt => !selectedValues.includes(opt.value));
+      if (availableOptions.length === 0) {
+        alert("Все варианты светильников уже выбраны.");
+        return;
+      }
+      let selectHTML = `<select id="light${lightingRowsCount}" name="light${lightingRowsCount}">`;
+      availableOptions.forEach(opt => {
+        selectHTML += `<option value="${opt.value}">${opt.text}</option>`;
+      });
+      selectHTML += `</select>`;
+      const container = document.createElement("div");
+      container.className = "lighting-row";
+      container.id = "lightingRow" + lightingRowsCount;
+      container.innerHTML = `
+        ${selectHTML}
+        <div class="quantity-controls">
+          <button type="button" onclick="decreaseQuantity('light${lightingRowsCount}')">-</button>
+          <input type="number" id="quantity${lightingRowsCount}" name="quantity${lightingRowsCount}" value="1" min="1" style="width: 60px;">
+          <button type="button" onclick="increaseQuantity('light${lightingRowsCount}')">+</button>
+        </div>
+        <button type="button" class="remove-button" onclick="removeLightingRow('lightingRow${lightingRowsCount}')">Удалить</button>
+      `;
+      document.getElementById("lightingButtonsContainer").appendChild(container);
+      console.log("Добавлена строка для выбора светильника.");
+    }
+
+    function increaseQuantity(lightId) {
+      const quantityInput = document.getElementById("quantity" + lightId.slice(-1));
+      quantityInput.value = parseInt(quantityInput.value) + 1;
+    }
+
+    function decreaseQuantity(lightId) {
+      const quantityInput = document.getElementById("quantity" + lightId.slice(-1));
+      if (parseInt(quantityInput.value) > 1) {
+        quantityInput.value = parseInt(quantityInput.value) - 1;
+      }
+    }
+
+    function removeLightingRow(rowId) {
+      const row = document.getElementById(rowId);
+      row.parentNode.removeChild(row);
+      lightingRowsCount--;
+      console.log("Удалена строка для выбора светильника.");
+    }
+
+    /* Функция обновления iframe для каждого производителя */
+    function updateManufacturerIframes(queryString, manufacturerList) {
+      const container = document.getElementById("manufacturersContainer");
+      container.innerHTML = ""; // Очистка предыдущих столбцов
+      manufacturerList.forEach(man => {
+        const col = document.createElement("div");
+        col.className = "manufacturer-column";
+        // Добавляем data-атрибут для идентификации производителя
+        col.setAttribute("data-manufacturer", man.title);
+        col.innerHTML = `
+          <div class="manufacturer-title">${man.title}</div>
+          <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
+        `;
+        container.appendChild(col);
+      });
+      // Инициализируем сортировку колонок с помощью jQuery UI
+      $("#manufacturersContainer").sortable({
+        axis: "x",
+        containment: "parent"
+      });
+      // Обновляем блок управления производителями
+      updateManufacturerControls(manufacturerList);
+    }
+
+    /* Функция обновления блока управления производителями (чекбоксы для скрытия/показа колонок) */
+    function updateManufacturerControls(manufacturerList) {
+      const controlsDiv = document.getElementById("manufacturerCheckboxes");
+      controlsDiv.innerHTML = "";
+      manufacturerList.forEach(man => {
+        const id = "chk_" + man.title.replace(/\s/g, "_");
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" checked> ${man.title}`;
+        controlsDiv.appendChild(label);
+      });
+      // Показываем блок управления, если есть производители
+      document.getElementById("manufacturerControls").style.display = manufacturerList.length ? "block" : "none";
+    }
+
+    // Обработчик клика по чекбоксам в блоке управления производителями
+    document.addEventListener("change", function(e) {
+      if (e.target && e.target.matches("#manufacturerCheckboxes input[type='checkbox']")) {
+        const manufacturer = e.target.value;
+        const visible = e.target.checked;
+        // Ищем все колонки с данным производителем и скрываем/показываем их
+        const cols = document.querySelectorAll(`.manufacturer-column[data-manufacturer="${manufacturer}"]`);
+        cols.forEach(col => {
+          col.style.display = visible ? "flex" : "none";
         });
-
-        // Обработчик изменения состояния чекбоксов
-        $("#brandForm input[type='checkbox']").change(function() {
-            var brand = $(this).val();
-            var isChecked = $(this).is(":checked");
-            toggleColumn(brand, isChecked);
-        });
-
-        // Функция для перестановки колонок в соответствии с новым порядком
-        function rearrangeColumns(order) {
-            var $table = $("#brandTable");
-            var $rows = $table.find("tr");
-
-            $rows.each(function() {
-                var $cells = $(this).children();
-                var newCells = [];
-                order.forEach(function(brand) {
-                    var $cell = $cells.filter("[data-brand='" + brand + "'], th[data-brand='" + brand + "']");
-                    newCells.push($cell);
-                });
-                $(this).append(newCells);
-            });
-        }
-
-        // Функция для отображения или скрытия колонок
-        function toggleColumn(brand, show) {
-            var index = $("#brandTable th[data-brand='" + brand + "']").index();
-            if (show) {
-                $("#brandTable tr").each(function() {
-                    $(this).children().eq(index).show();
-                });
-            } else {
-                $("#brandTable tr").each(function() {
-                    $(this).children().eq(index).hide();
-                });
-            }
-        }
+      }
     });
-</script>
 
+    /* Функция для скачивания PDF с выбранными товарами */
+    function downloadPDF(manufacturerTitle, iframeSelector) {
+      // Данная функция не используется, так как кнопка "Скачать PDF" удалена
+      console.log("downloadPDF вызвана для", manufacturerTitle);
+    }
+
+    /* Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать") */
+    function safeShowSelection() {
+      try {
+        // Считываем основные параметры формы
+        const type = document.getElementById("type").value;
+        const color = document.getElementById("color").value;
+        const mounting = document.getElementById("mounting").value;
+        const shape = document.getElementById("selectedShape").value;
+        const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
+        const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
+        
+        // Считываем данные по выбранным светильникам (если есть)
+        let lights = [];
+        const lightingRows = document.querySelectorAll(".lighting-row");
+        lightingRows.forEach(row => {
+          const selectEl = row.querySelector("select");
+          const qtyEl = row.querySelector("input[type='number']");
+          if (selectEl && qtyEl) {
+            lights.push({ type: selectEl.value, quantity: qtyEl.value });
+          }
+        });
+        const lightsParam = encodeURIComponent(JSON.stringify(lights));
+        
+        // Формируем query‑строку, включая данные о светильниках
+        const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}&lights=${lightsParam}`;
+        console.log("Query-string:", queryString);
+        
+        // Определяем производителей по типу системы
+        const manufacturersData = {
+          "one-phase": [
+            { title: "Maytoni UNITY", file: "maytoni.html" },
+            { title: "NOVOTECH", file: "novotech.html" },
+            { title: "ST LUCE", file: "st_luce.html" },
+            { title: "AMBRELA", file: "ambrela.html" },
+            { title: "DENKIRS", file: "denkirs.html" }
+          ],
+          "magnetic": [
+            { title: "Maytoni S35", file: "maytoni_s35.html" },
+            { title: "Maytoni EXILITY", file: "maytoni_exility.html" },
+            { title: "ST LUCE 220", file: "st_luce_220.html" },
+            { title: "ST LUCE 48", file: "st_luce_48.html" },
+            { title: "DENKIRS 220", file: "denkirs_220.html" }
+          ]
+        };
+        const manufacturerList = manufacturersData[type] || [];
+        if (manufacturerList.length === 0) {
+          document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
+          return;
+        }
+        // Обновляем iframe для каждого производителя
+        updateManufacturerIframes(queryString, manufacturerList);
+        // Делаем видимой правую область с результатами
+        document.getElementById("manufacturersContainer").style.display = "flex";
+        document.getElementById("debug").textContent = "";
+      } catch (e) {
+        console.error("Ошибка в safeShowSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+      }
+    }
+  </script>
 </body>
 </html>
