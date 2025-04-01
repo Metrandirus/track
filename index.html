@@ -78,7 +78,7 @@
       margin-top: 5px;
       text-align: center;
     }
-    /* Группа для ввода длин и кнопки "Добавить светильник" (кнопка справа от полей ввода) */
+    /* Группа для ввода длин и кнопки "Добавить светильник" */
     .input-group {
       display: flex;
       align-items: center;
@@ -108,14 +108,19 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Сворачиваемый блок производителей */
+    /* Сворачиваемый блок производителей в правом верхнем углу */
     #manufacturerControlsContainer {
-      width: 100%;
-      margin-bottom: 10px;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 200px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      z-index: 1000;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
     }
     #manufacturerHeader {
       background-color: #f4f4f4;
-      border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
       font-weight: bold;
@@ -124,10 +129,7 @@
     }
     #manufacturerControls {
       display: none;
-      border: 1px solid #ddd;
-      border-top: none;
       padding: 10px;
-      background-color: #fff;
     }
     #manufacturerControls label {
       display: block;
@@ -149,7 +151,6 @@
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      /* Высота столбцов – на всю высоту экрана */
       height: 100vh;
     }
     .manufacturer-title {
@@ -173,7 +174,7 @@
   </style>
 </head>
 <body>
-  <!-- Сворачиваемый блок производителей (находится над колонками) -->
+  <!-- Сворачиваемый блок производителей (правый верхний угол) -->
   <div id="manufacturerControlsContainer">
     <div id="manufacturerHeader">Все производители</div>
     <div id="manufacturerControls">
@@ -236,7 +237,7 @@
         </div>
       </div>
       <input type="hidden" id="selectedShape" name="selectedShape" value="">
-      <!-- Группа для ввода длин и кнопки "Добавить светильник" (кнопка справа от полей ввода) -->
+      <!-- Группа для ввода длин и кнопки "Добавить светильник" -->
       <div class="input-group">
         <div>
           <label for="lengthA">Длина а (см):</label>
@@ -375,11 +376,7 @@
     // Обработчик клика по заголовку сворачиваемой области производителей
     document.getElementById("manufacturerHeader").addEventListener("click", function() {
       const controls = document.getElementById("manufacturerControls");
-      if (controls.style.display === "none" || controls.style.display === "") {
-        controls.style.display = "block";
-      } else {
-        controls.style.display = "none";
-      }
+      controls.style.display = (controls.style.display === "none" || controls.style.display === "") ? "block" : "none";
     });
 
     // Обработчик клика по чекбоксам в блоке управления производителями
