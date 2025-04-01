@@ -370,6 +370,11 @@
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
         `;
+        // Если для данного производителя чекбокс не отмечен, скрываем колонку
+        const chk = document.getElementById("chk_" + man.title.replace(/\s/g, "_"));
+        if(chk && !chk.checked) {
+          col.style.display = "none";
+        }
         container.appendChild(col);
       });
       // Инициализируем сортировку столбцов с помощью jQuery UI
@@ -385,10 +390,12 @@
     function updateManufacturerControls(manufacturerList) {
       const controlsDiv = document.getElementById("manufacturerCheckboxes");
       controlsDiv.innerHTML = "";
-      manufacturerList.forEach(man => {
+      manufacturerList.forEach((man, index) => {
         const id = "chk_" + man.title.replace(/\s/g, "_");
+        // Для первых 5 брендов устанавливаем checked, для остальных – нет
+        const isChecked = index < 5 ? "checked" : "";
         const label = document.createElement("label");
-        label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" checked> ${man.title}`;
+        label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" ${isChecked}> ${man.title}`;
         controlsDiv.appendChild(label);
       });
     }
@@ -445,7 +452,7 @@
         const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}&lights=${lightsParam}`;
         console.log("Query-string:", queryString);
         
-        // Определяем производителей по типу системы и добавляем новые бренды в категорию "one-phase"
+        // Определяем производителей по типу системы
         const manufacturersData = {
           "one-phase": [
             { title: "Maytoni UNITY", file: "maytoni.html" },
