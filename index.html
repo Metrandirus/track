@@ -34,6 +34,7 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       box-sizing: border-box;
       max-width: 350px;
+      position: relative;
     }
     .form-container h2 {
       font-size: 18px;
@@ -108,15 +109,12 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Сворачиваемый блок производителей в правом верхнем углу */
+    /* Блок управления производителями – перемещён под кнопку "Подобрать" */
     #manufacturerControlsContainer {
-      position: fixed;
-      top: 20px;
-      right: 20px;
+      margin-top: 10px;
       width: 200px;
       border: 1px solid #ddd;
       background-color: #fff;
-      z-index: 1000;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
     }
     #manufacturerHeader {
@@ -174,14 +172,6 @@
   </style>
 </head>
 <body>
-  <!-- Сворачиваемый блок производителей (правый верхний угол) -->
-  <div id="manufacturerControlsContainer">
-    <div id="manufacturerHeader">Все производители</div>
-    <div id="manufacturerControls">
-      <div id="manufacturerCheckboxes"></div>
-    </div>
-  </div>
-
   <div class="container">
     <!-- Левая область: форма выбора -->
     <div class="form-container">
@@ -256,6 +246,13 @@
       <!-- Кнопка "Подобрать" располагается ниже остальных элементов -->
       <div class="button-container">
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
+      </div>
+      <!-- Сворачиваемый блок производителей перемещён под кнопкой "Подобрать" -->
+      <div id="manufacturerControlsContainer">
+        <div id="manufacturerHeader">Все производители</div>
+        <div id="manufacturerControls">
+          <div id="manufacturerCheckboxes"></div>
+        </div>
       </div>
       <div id="debug" class="debug"></div>
     </div>
