@@ -17,13 +17,58 @@
       font-family: Arial, sans-serif;
       background-color: #e7f5fd;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       box-sizing: border-box;
     }
+    /* Шапка */
+    #headerRow {
+      width: 100%;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 20px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    #headerRow h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    /* Окно "Все производители" в правом верхнем углу шапки */
+    #manufacturerControlsContainer {
+      position: absolute;
+      right: 20px;
+      top: 10px;
+      width: 200px;
+      border: 1px solid #ddd;
+      background-color: #fff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    #manufacturerHeader {
+      background-color: #f4f4f4;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #manufacturerControls {
+      display: none;
+      padding: 10px;
+    }
+    #manufacturerControls label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    /* Основной контейнер (смещён ниже шапки) */
     .container {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
+      padding: 20px;
     }
     /* Левая область: форма выбора */
     .form-container {
@@ -34,7 +79,6 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       box-sizing: border-box;
       max-width: 350px;
-      position: relative;
     }
     .form-container h2 {
       font-size: 18px;
@@ -109,30 +153,10 @@
       font-size: 16px;
       cursor: pointer;
     }
-    /* Блок управления производителями – перемещён под кнопку "Подобрать" */
-    #manufacturerControlsContainer {
+    .debug {
       margin-top: 10px;
-      width: 200px;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    }
-    #manufacturerHeader {
-      background-color: #f4f4f4;
-      padding: 10px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    #manufacturerControls {
-      display: none;
-      padding: 10px;
-    }
-    #manufacturerControls label {
-      display: block;
       font-size: 12px;
-      margin-bottom: 5px;
+      color: red;
     }
     /* Правая область: блок с производителями (столбцы с брендами) */
     .manufacturers-container {
@@ -164,18 +188,24 @@
       border: none;
       width: 100%;
     }
-    .debug {
-      margin-top: 10px;
-      font-size: 12px;
-      color: red;
-    }
   </style>
 </head>
 <body>
+  <!-- Шапка страницы -->
+  <div id="headerRow">
+    <h1>Подбор трековой системы</h1>
+    <!-- Окно "Все производители" в правом верхнем углу шапки -->
+    <div id="manufacturerControlsContainer">
+      <div id="manufacturerHeader">Все производители</div>
+      <div id="manufacturerControls">
+        <div id="manufacturerCheckboxes"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <!-- Левая область: форма выбора -->
     <div class="form-container">
-      <h2>Подбор трековой системы</h2>
       <label for="type">Тип:</label>
       <select id="type" name="type">
         <option value="one-phase">Однофазный</option>
@@ -246,13 +276,6 @@
       <!-- Кнопка "Подобрать" располагается ниже остальных элементов -->
       <div class="button-container">
         <button type="button" onclick="safeShowSelection()">Подобрать</button>
-      </div>
-      <!-- Сворачиваемый блок производителей перемещён под кнопкой "Подобрать" -->
-      <div id="manufacturerControlsContainer">
-        <div id="manufacturerHeader">Все производители</div>
-        <div id="manufacturerControls">
-          <div id="manufacturerCheckboxes"></div>
-        </div>
       </div>
       <div id="debug" class="debug"></div>
     </div>
