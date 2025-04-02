@@ -36,6 +36,19 @@
       margin: 0;
       font-size: 20px;
     }
+    /* Кнопка "Корзина" в шапке (в правом верхнем углу) */
+    #cartButton {
+      position: absolute;
+      right: 230px;
+      top: 10px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+    }
     /* Окно "Все производители" в правом верхнем углу шапки – изначально скрыто */
     #manufacturerControlsContainer {
       position: absolute;
@@ -63,6 +76,34 @@
       display: block;
       font-size: 12px;
       margin-bottom: 5px;
+    }
+    /* Модальное окно корзины */
+    #cartModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    #cartModalContent {
+      background-color: #fff;
+      width: 90%;
+      max-width: 600px;
+      padding: 20px;
+      border-radius: 8px;
+      position: relative;
+    }
+    #closeCartModal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      background: none;
+      border: none;
     }
     /* Основной контейнер (смещён ниже шапки) */
     .container {
@@ -191,18 +232,28 @@
       border: none;
       width: 100%;
     }
-    /* Кнопка "В корзину" под каждым производителем */
-    .add-to-cart-button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 8px;
-      cursor: pointer;
-      font-size: 14px;
+    /* Блок с информацией о товаре и кнопкой "В корзину" */
+    .manufacturer-total {
+      padding: 5px;
+      background-color: #fafafa;
+      border-top: 1px solid #ddd;
       text-align: center;
     }
+    .total-price {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .add-to-cart-button {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 3px;
+    }
     .add-to-cart-button:hover {
-      background-color: #45a049;
+      background-color: #333;
     }
   </style>
 </head>
@@ -210,6 +261,8 @@
   <!-- Шапка страницы -->
   <div id="headerRow">
     <h1>Подбор трековой системы</h1>
+    <!-- Кнопка "Корзина" в шапке -->
+    <button id="cartButton" onclick="openCartModal()">Корзина</button>
     <!-- Окно "Все производители" (изначально скрыто) -->
     <div id="manufacturerControlsContainer">
       <div id="manufacturerHeader">Все производители</div>
@@ -302,6 +355,14 @@
     </div>
   </div>
 
+  <!-- Модальное окно корзины -->
+  <div id="cartModal">
+    <div id="cartModalContent">
+      <button id="closeCartModal" onclick="closeCartModal()">✖</button>
+      <iframe id="cartIframe" src="cart.html" style="width:100%; height:400px; border:none;"></iframe>
+    </div>
+  </div>
+
   <script>
     /* Функция для установки выбранной фигуры */
     function selectShape(shape) {
@@ -385,7 +446,10 @@
         col.innerHTML = `
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
-          <button class="add-to-cart-button" onclick="addToCart('${man.title}', 'iframe-${man.title}')">В корзину</button>
+          <div class="manufacturer-total">
+            <div class="total-price">Цена: ---</div>
+            <button class="add-to-cart-button" onclick="addToCart('${man.title}', 'iframe-${man.title}')">&#128722;</button>
+          </div>
         `;
         container.appendChild(col);
       });
@@ -406,7 +470,7 @@
       controlsDiv.innerHTML = "";
       manufacturerList.forEach((man, index) => {
         const id = "chk_" + man.title.replace(/\s/g, "_");
-        // Для первых 5 брендов ставим галочку, для новых (Arlight, Elektrostandard, lightstar) – нет
+        // Для первых 5 брендов ставим галочку, для новых – нет
         const isChecked = (index < 5) ? "checked" : "";
         const label = document.createElement("label");
         label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" ${isChecked}> ${man.title}`;
@@ -436,7 +500,6 @@
       if (e.target && e.target.matches("#manufacturerCheckboxes input[type='checkbox']")) {
         const manufacturer = e.target.value;
         const visible = e.target.checked;
-        // Ищем все колонки с данным производителем и скрываем/показываем их
         const cols = document.querySelectorAll(`.manufacturer-column[data-manufacturer="${manufacturer}"]`);
         cols.forEach(col => {
           col.style.display = visible ? "flex" : "none";
@@ -451,7 +514,7 @@
         const doc = iframe.contentWindow.document;
         const resultsTable = doc.getElementById("resultsTable");
         if (resultsTable) {
-          // Для простоты, сохраняем innerHTML таблицы как товар
+          // Сохраняем innerHTML таблицы как товар
           const cartItem = { manufacturer: manufacturerTitle, tableHTML: resultsTable.innerHTML };
           let cart = [];
           if (localStorage.getItem("cart")) {
@@ -468,9 +531,14 @@
       }
     }
 
-    /* Функция для скачивания PDF с выбранными товарами (не используется) */
-    function downloadPDF(manufacturerTitle, iframeSelector) {
-      console.log("downloadPDF вызвана для", manufacturerTitle);
+    /* Функция для открытия модального окна корзины */
+    function openCartModal() {
+      document.getElementById("cartModal").style.display = "flex";
+    }
+
+    /* Функция для закрытия модального окна корзины */
+    function closeCartModal() {
+      document.getElementById("cartModal").style.display = "none";
     }
 
     /* Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать") */
