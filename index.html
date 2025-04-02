@@ -232,16 +232,12 @@
       border: none;
       width: 100%;
     }
-    /* Блок с информацией о товаре и кнопкой "В корзину" */
+    /* Блок для кнопки "В корзину" под iframe производителя */
     .manufacturer-total {
       padding: 5px;
       background-color: #fafafa;
       border-top: 1px solid #ddd;
       text-align: center;
-    }
-    .total-price {
-      font-size: 14px;
-      margin-bottom: 5px;
     }
     .add-to-cart-button {
       background-color: #000;
@@ -447,7 +443,6 @@
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
           <div class="manufacturer-total">
-            <div class="total-price">Цена: ---</div>
             <button class="add-to-cart-button" onclick="addToCart('${man.title}', 'iframe-${man.title}')">&#128722;</button>
           </div>
         `;
