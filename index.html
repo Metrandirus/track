@@ -373,11 +373,6 @@
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
         `;
-        // Если для данного производителя чекбокс не отмечен, скрываем колонку
-        const chk = document.getElementById("chk_" + man.title.replace(/\s/g, "_"));
-        if(chk && !chk.checked) {
-          col.style.display = "none";
-        }
         container.appendChild(col);
       });
       // Инициализируем сортировку столбцов с помощью jQuery UI
@@ -387,6 +382,8 @@
       });
       // Обновляем блок управления производителями
       updateManufacturerControls(manufacturerList);
+      // Применяем отображение столбцов в соответствии с чекбоксами
+      updateManufacturerColumnsDisplay(manufacturerList);
     }
 
     /* Функция обновления блока управления производителями (чекбоксы для скрытия/показа столбцов) */
@@ -395,12 +392,22 @@
       controlsDiv.innerHTML = "";
       manufacturerList.forEach((man, index) => {
         const id = "chk_" + man.title.replace(/\s/g, "_");
-        // Для новых брендов Arlight, Elektrostandard, lightstar не ставим галочки
-        const unchecked = ["Arlight", "Elektrostandard", "lightstar"];
-        const isChecked = (index < 5 && unchecked.indexOf(man.title) === -1) ? "checked" : "";
+        // Для первых 5 брендов ставим галочку, для новых (Arlight, Elektrostandard, lightstar) - нет
+        const isChecked = (index < 5) ? "checked" : "";
         const label = document.createElement("label");
         label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" ${isChecked}> ${man.title}`;
         controlsDiv.appendChild(label);
+      });
+    }
+
+    // Функция для применения состояния чекбоксов к столбцам
+    function updateManufacturerColumnsDisplay(manufacturerList) {
+      manufacturerList.forEach(man => {
+        const chk = document.getElementById("chk_" + man.title.replace(/\s/g, "_"));
+        const cols = document.querySelectorAll(`.manufacturer-column[data-manufacturer="${man.title}"]`);
+        cols.forEach(col => {
+          col.style.display = (chk && chk.checked) ? "flex" : "none";
+        });
       });
     }
 
