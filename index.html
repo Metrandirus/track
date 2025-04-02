@@ -191,6 +191,19 @@
       border: none;
       width: 100%;
     }
+    /* Кнопка "В корзину" под каждым производителем */
+    .add-to-cart-button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: center;
+    }
+    .add-to-cart-button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -360,7 +373,7 @@
       console.log("Удалена строка для выбора светильника.");
     }
 
-    /* Функция обновления iframe для каждого производителя */
+    /* Функция обновления iframe для каждого производителя и добавления кнопки "В корзину" */
     function updateManufacturerIframes(queryString, manufacturerList) {
       const container = document.getElementById("manufacturersContainer");
       container.innerHTML = ""; // Очистка предыдущих столбцов
@@ -372,6 +385,7 @@
         col.innerHTML = `
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
+          <button class="add-to-cart-button" onclick="addToCart('${man.title}', 'iframe-${man.title}')">В корзину</button>
         `;
         container.appendChild(col);
       });
@@ -392,7 +406,7 @@
       controlsDiv.innerHTML = "";
       manufacturerList.forEach((man, index) => {
         const id = "chk_" + man.title.replace(/\s/g, "_");
-        // Для первых 5 брендов ставим галочку, для новых (Arlight, Elektrostandard, lightstar) - нет
+        // Для первых 5 брендов ставим галочку, для новых (Arlight, Elektrostandard, lightstar) – нет
         const isChecked = (index < 5) ? "checked" : "";
         const label = document.createElement("label");
         label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" ${isChecked}> ${man.title}`;
@@ -400,7 +414,7 @@
       });
     }
 
-    // Функция для применения состояния чекбоксов к столбцам
+    // Функция применения состояния чекбоксов к столбцам
     function updateManufacturerColumnsDisplay(manufacturerList) {
       manufacturerList.forEach(man => {
         const chk = document.getElementById("chk_" + man.title.replace(/\s/g, "_"));
@@ -430,9 +444,32 @@
       }
     });
 
-    /* Функция для скачивания PDF с выбранными товарами */
+    /* Функция для добавления товаров в корзину из столбца производителя */
+    function addToCart(manufacturerTitle, iframeId) {
+      const iframe = document.getElementById(iframeId);
+      if (iframe && iframe.contentWindow) {
+        const doc = iframe.contentWindow.document;
+        const resultsTable = doc.getElementById("resultsTable");
+        if (resultsTable) {
+          // Для простоты, сохраняем innerHTML таблицы как товар
+          const cartItem = { manufacturer: manufacturerTitle, tableHTML: resultsTable.innerHTML };
+          let cart = [];
+          if (localStorage.getItem("cart")) {
+            cart = JSON.parse(localStorage.getItem("cart"));
+          }
+          cart.push(cartItem);
+          localStorage.setItem("cart", JSON.stringify(cart));
+          alert("Товары от " + manufacturerTitle + " добавлены в корзину");
+        } else {
+          alert("Список товаров не найден для " + manufacturerTitle);
+        }
+      } else {
+        alert("Ошибка доступа к данным производителя " + manufacturerTitle);
+      }
+    }
+
+    /* Функция для скачивания PDF с выбранными товарами (не используется) */
     function downloadPDF(manufacturerTitle, iframeSelector) {
-      // Функция не используется, кнопка "Скачать PDF" удалена
       console.log("downloadPDF вызвана для", manufacturerTitle);
     }
 
@@ -488,7 +525,7 @@
           document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
           return;
         }
-        // Обновляем iframe для каждого производителя
+        // Обновляем iframe для каждого производителя и добавляем кнопку "В корзину"
         updateManufacturerIframes(queryString, manufacturerList);
         // Делаем видимой правую область с результатами
         document.getElementById("manufacturersContainer").style.display = "flex";
