@@ -5,61 +5,157 @@
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #e7f5fd;
       font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
       padding: 20px;
-      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
+      margin-bottom: 20px;
     }
-    .cart-item {
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #fff;
-    }
-    .cart-item h3 {
-      margin-top: 0;
-    }
-    .cart-item table {
+    .results-table {
       width: 100%;
       border-collapse: collapse;
+      background-color: white;
+      table-layout: auto;
     }
-    .cart-item table, .cart-item th, .cart-item td {
+    .results-table th, .results-table td {
       border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: left;
+      font-size: 13px;
     }
-    .cart-item th, .cart-item td {
-      padding: 5px;
+    .results-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    .results-table th:nth-child(2),
+    .results-table td:nth-child(2) {
+      text-align: center;
+      width: 60px;
+    }
+    .results-table th:nth-child(3),
+    .results-table td:nth-child(3) {
+      width: 90px;
+    }
+    .results-table th:nth-child(4),
+    .results-table td:nth-child(4) {
+      width: 100px;
+    }
+    .delete-button {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .delete-button:hover {
+      background-color: #c9302c;
+    }
+    .total-price {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .debug {
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
       text-align: center;
     }
   </style>
 </head>
 <body>
-  <h1>Корзина</h1>
-  <div id="cartContainer"></div>
+  <div class="container">
+    <h1>Корзина</h1>
+    <table class="results-table" id="resultsTable">
+      <thead>
+        <tr>
+          <th>Наименование</th>
+          <th>Кол.</th>
+          <th>Цена за шт.</th>
+          <th>Общая цена</th>
+          <th>Действие</th>
+        </tr>
+      </thead>
+      <tbody id="results"></tbody>
+    </table>
+    <div id="totalPrice" class="total-price"></div>
+    <div id="debug" class="debug"></div>
+  </div>
+
   <script>
+    // Функция загрузки корзины и отрисовки таблицы
     function loadCart() {
-      const cartContainer = document.getElementById("cartContainer");
-      cartContainer.innerHTML = "";
+      const results = document.getElementById("results");
+      const totalPriceDiv = document.getElementById("totalPrice");
+      results.innerHTML = "";
       let cart = [];
       if (localStorage.getItem("cart")) {
         cart = JSON.parse(localStorage.getItem("cart"));
       }
+      
       if (cart.length === 0) {
-        cartContainer.innerHTML = "<p>Корзина пуста</p>";
-      } else {
-        cart.forEach((item, index) => {
-          const div = document.createElement("div");
-          div.className = "cart-item";
-          div.innerHTML = `
-            <h3>${item.manufacturer}</h3>
-            <div>${item.tableHTML}</div>
-          `;
-          cartContainer.appendChild(div);
-        });
+        results.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Корзина пуста</td></tr>";
+        totalPriceDiv.textContent = "";
+        return;
+      }
+      
+      let overallTotal = 0;
+      cart.forEach((item, index) => {
+        // Предположим, что объект товара имеет следующие свойства:
+        // name – наименование товара,
+        // quantity – количество,
+        // unitPrice – цена за единицу,
+        // totalPrice – общая цена (quantity * unitPrice).
+        // Если данные не заданы, используем тестовые значения.
+        const name = item.name || item.manufacturer || "Товар";
+        const quantity = parseFloat(item.quantity) || 1;
+        const unitPrice = parseFloat(item.unitPrice) || 0;
+        const totalPrice = quantity * unitPrice;
+        overallTotal += totalPrice;
+        
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${name}</td>
+          <td style="text-align:center;">${quantity}</td>
+          <td>${unitPrice.toFixed(2)}</td>
+          <td>${totalPrice.toFixed(2)}</td>
+          <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
+        `;
+        results.appendChild(tr);
+      });
+      
+      totalPriceDiv.textContent = "Итоговая стоимость: " + overallTotal.toFixed(2) + " руб.";
+    }
+
+    // Функция удаления товара из корзины по индексу
+    function deleteCartItem(index) {
+      let cart = [];
+      if (localStorage.getItem("cart")) {
+        cart = JSON.parse(localStorage.getItem("cart"));
+      }
+      if (index >= 0 && index < cart.length) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
       }
     }
+
+    // При загрузке страницы выполняем отрисовку корзины
     loadCart();
   </script>
 </body>
