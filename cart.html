@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Корзина</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .cart-item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #fff;
+    }
+    .cart-item h3 {
+      margin-top: 0;
+    }
+    .cart-item table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .cart-item table, .cart-item th, .cart-item td {
+      border: 1px solid #ddd;
+    }
+    .cart-item th, .cart-item td {
+      padding: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Корзина</h1>
+  <div id="cartContainer"></div>
+  <script>
+    function loadCart() {
+      const cartContainer = document.getElementById("cartContainer");
+      cartContainer.innerHTML = "";
+      let cart = [];
+      if (localStorage.getItem("cart")) {
+        cart = JSON.parse(localStorage.getItem("cart"));
+      }
+      if (cart.length === 0) {
+        cartContainer.innerHTML = "<p>Корзина пуста</p>";
+      } else {
+        cart.forEach((item, index) => {
+          const div = document.createElement("div");
+          div.className = "cart-item";
+          div.innerHTML = `
+            <h3>${item.manufacturer}</h3>
+            <div>${item.tableHTML}</div>
+          `;
+          cartContainer.appendChild(div);
+        });
+      }
+    }
+    loadCart();
+  </script>
+</body>
+</html>
