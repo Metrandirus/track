@@ -36,7 +36,7 @@
       margin: 0;
       font-size: 20px;
     }
-    /* Окно "Все производители" в правом верхнем углу шапки */
+    /* Окно "Все производители" в правом верхнем углу шапки – изначально скрыто */
     #manufacturerControlsContainer {
       position: absolute;
       right: 20px;
@@ -45,6 +45,7 @@
       border: 1px solid #ddd;
       background-color: #fff;
       box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      display: none;
     }
     #manufacturerHeader {
       background-color: #f4f4f4;
@@ -162,11 +163,12 @@
     .manufacturers-container {
       flex: 2 1 500px;
       display: none;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 10px;
+      overflow-x: auto;
     }
     .manufacturer-column {
-      flex: 1 1 calc(20% - 10px);
+      flex: 1 1 auto;
       background-color: white;
       border: 1px solid #ddd;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
@@ -174,6 +176,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      min-width: 200px;
     }
     .manufacturer-title {
       background-color: #f4f4f4;
@@ -194,7 +197,7 @@
   <!-- Шапка страницы -->
   <div id="headerRow">
     <h1>Подбор трековой системы</h1>
-    <!-- Окно "Все производители" в правом верхнем углу шапки -->
+    <!-- Окно "Все производители" (изначально скрыто) -->
     <div id="manufacturerControlsContainer">
       <div id="manufacturerHeader">Все производители</div>
       <div id="manufacturerControls">
@@ -392,8 +395,9 @@
       controlsDiv.innerHTML = "";
       manufacturerList.forEach((man, index) => {
         const id = "chk_" + man.title.replace(/\s/g, "_");
-        // Для первых 5 брендов устанавливаем checked, для остальных – нет
-        const isChecked = index < 5 ? "checked" : "";
+        // Для новых брендов Arlight, Elektrostandard, lightstar не ставим галочки
+        const unchecked = ["Arlight", "Elektrostandard", "lightstar"];
+        const isChecked = (index < 5 && unchecked.indexOf(man.title) === -1) ? "checked" : "";
         const label = document.createElement("label");
         label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" ${isChecked}> ${man.title}`;
         controlsDiv.appendChild(label);
@@ -421,7 +425,7 @@
 
     /* Функция для скачивания PDF с выбранными товарами */
     function downloadPDF(manufacturerTitle, iframeSelector) {
-      // Данная функция не используется, так как кнопка "Скачать PDF" удалена
+      // Функция не используется, кнопка "Скачать PDF" удалена
       console.log("downloadPDF вызвана для", manufacturerTitle);
     }
 
@@ -481,6 +485,10 @@
         updateManufacturerIframes(queryString, manufacturerList);
         // Делаем видимой правую область с результатами
         document.getElementById("manufacturersContainer").style.display = "flex";
+        // Показываем окно "Все производители" только если общее количество брендов больше 5
+        if (manufacturerList.length > 5) {
+          document.getElementById("manufacturerControlsContainer").style.display = "block";
+        }
         document.getElementById("debug").textContent = "";
       } catch (e) {
         console.error("Ошибка в safeShowSelection:", e);
