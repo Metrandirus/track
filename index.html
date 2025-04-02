@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем библиотеки для создания PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
   <!-- Подключаем jQuery и jQuery UI для сортировки -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -443,7 +440,7 @@
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
           <div class="manufacturer-total">
-            <button class="add-to-cart-button" onclick="addToCart('${man.title}', 'iframe-${man.title}')">&#128722;</button>
+            <button class="add-to-cart-button" onclick="addToCart('${man.title}', 'iframe-${man.title}')">В корзину</button>
           </div>
         `;
         container.appendChild(col);
