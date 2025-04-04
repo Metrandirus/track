@@ -64,6 +64,12 @@
       color: red;
       margin-top: 10px;
     }
+    .add-to-cart-button {
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -671,14 +677,36 @@
       }
       
       document.getElementById("results").innerHTML = tbodyHTML;
-      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
+      document.getElementById("totalPrice").innerHTML = 
+        `<div>Итого: ${totalPrice}₽</div>
+         <button id="addToCartFromMaytoni" class="add-to-cart-button" onclick="addToCartFromMaytoni()">В корзину</button>`;
       document.getElementById("resultContainer").style.display = "block";
       console.log("Подбор завершён успешно (Maytoni).");
+      
+      // При необходимости можно сохранить текущее сгруппированное множество в переменную,
+      // которая будет использоваться функцией addToCartFromMaytoni()
+      window.currentMaytoniSelection = groupedItems;
     };
     
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
+    
+    /***** Функция для добавления товаров в корзину *****/
+    function addToCartFromMaytoni() {
+      if (!currentMaytoniSelection) {
+        alert("Нет данных для добавления в корзину.");
+        return;
+      }
+      let cart = [];
+      if (localStorage.getItem("cart")) {
+        cart = JSON.parse(localStorage.getItem("cart"));
+      }
+      // Добавляем текущее сгруппированное множество в корзину
+      cart.push(currentMaytoniSelection);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Товары добавлены в корзину.");
+    }
   </script>
 </body>
 </html>
