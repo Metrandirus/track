@@ -86,7 +86,7 @@
       
       let cart = JSON.parse(cartData);
       
-      if (cart.length === 0) {
+      if (!Array.isArray(cart) || cart.length === 0) {
         cartContainer.innerHTML = '<p class="empty-cart">Корзина пуста.</p>';
         return;
       }
@@ -94,20 +94,28 @@
       let html = '<table><thead><tr><th>Наименование</th><th>Количество</th><th>Цена за шт.</th><th>Общая цена</th></tr></thead><tbody>';
       let grandTotal = 0;
       
-      // В корзине может быть несколько выборов (наборов товаров)
-      cart.forEach((selection, index) => {
-        html += `<tr><td colspan="4" class="selection-title">Выбор №${index + 1}</td></tr>`;
-        for (let id in selection) {
+      // В корзине может быть несколько наборов (selection)
+      cart.forEach((selection, selectionIndex) => {
+        html += `<tr><td colspan="4" class="selection-title">Выбор №${selectionIndex + 1}</td></tr>`;
+        // Проходим по всем ключам объекта selection
+        Object.keys(selection).forEach(id => {
           let group = selection[id];
+          if (!group) return;
           let comp = group.component;
-          if (!comp || !comp.name) continue;
+          if (!comp || !comp.name) return;
           
           let qty = 0;
+          // Если это трек (имеется длина)
           if (group.isTrack && group.totalLength > 0) {
             // Определяем номинальную длину для расчёта количества
-            let nominal = id.indexOf("-111") !== -1 ? 100 :
-                          id.indexOf("-112") !== -1 ? 200 :
-                          id.indexOf("-113") !== -1 ? 300 : 1;
+            let nominal = 1;
+            if (id.indexOf("-111") !== -1) {
+              nominal = 100;
+            } else if (id.indexOf("-112") !== -1) {
+              nominal = 200;
+            } else if (id.indexOf("-113") !== -1) {
+              nominal = 300;
+            }
             qty = Math.ceil(group.totalLength / nominal);
           } else {
             qty = group.count;
@@ -117,12 +125,12 @@
           grandTotal += cost;
           
           html += `<tr>
-            <td><img src="${comp.image}" alt="${comp.name}"> ${comp.name} ${id}</td>
+            <td><img src="${comp.image}" alt="${comp.name}"> ${comp.name} (${id})</td>
             <td>${qty} шт.</td>
             <td>${comp.price}₽</td>
             <td>${cost}₽</td>
           </tr>`;
-        }
+        });
       });
       
       html += '</tbody></table>';
