@@ -5,158 +5,139 @@
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: #e7f5fd;
+    body {
       font-family: Arial, sans-serif;
+      background-color: #e7f5fd;
+      margin: 0;
+      padding: 20px;
     }
     .container {
       max-width: 800px;
       margin: auto;
-      background-color: white;
+      background-color: #fff;
       padding: 20px;
       border: 1px solid #ddd;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
-      margin-bottom: 20px;
     }
-    .results-table {
+    table {
       width: 100%;
       border-collapse: collapse;
-      background-color: white;
-      table-layout: auto;
+      margin-bottom: 20px;
     }
-    .results-table th, .results-table td {
+    th, td {
+      padding: 8px;
       border: 1px solid #ddd;
-      padding: 6px 8px;
       text-align: left;
-      font-size: 13px;
     }
-    .results-table th {
+    th {
       background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    .results-table th:nth-child(2),
-    .results-table td:nth-child(2) {
-      text-align: center;
-      width: 60px;
-    }
-    .results-table th:nth-child(3),
-    .results-table td:nth-child(3) {
-      width: 90px;
-    }
-    .results-table th:nth-child(4),
-    .results-table td:nth-child(4) {
-      width: 100px;
-    }
-    .delete-button {
-      background-color: #d9534f;
-      color: #fff;
-      border: none;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 12px;
-      border-radius: 3px;
-    }
-    .delete-button:hover {
-      background-color: #c9302c;
     }
     .total-price {
-      font-weight: bold;
       text-align: right;
-      margin-top: 10px;
-      font-size: 14px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 20px;
     }
-    .debug {
-      font-size: 12px;
-      color: red;
-      margin-top: 10px;
+    .empty-cart {
       text-align: center;
+      font-size: 18px;
+    }
+    .clear-button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+    }
+    .selection-title {
+      background-color: #ddd;
+      font-weight: bold;
+      text-align: center;
+    }
+    img {
+      width: 50px;
+      vertical-align: middle;
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Корзина</h1>
-    <table class="results-table" id="resultsTable">
-      <thead>
-        <tr>
-          <th>Наименование</th>
-          <th>Кол.</th>
-          <th>Цена за шт.</th>
-          <th>Общая цена</th>
-          <th>Действие</th>
-        </tr>
-      </thead>
-      <tbody id="results"></tbody>
-    </table>
-    <div id="totalPrice" class="total-price"></div>
-    <div id="debug" class="debug"></div>
+    <div id="cartContainer"></div>
+    <button class="clear-button" onclick="clearCart()">Очистить корзину</button>
   </div>
-
+  
   <script>
-    // Функция загрузки корзины и отрисовки таблицы
-    function loadCart() {
-      const results = document.getElementById("results");
-      const totalPriceDiv = document.getElementById("totalPrice");
-      results.innerHTML = "";
-      let cart = [];
-      if (localStorage.getItem("cart")) {
-        cart = JSON.parse(localStorage.getItem("cart"));
-      }
+    // Функция для отображения товаров из корзины
+    function displayCart() {
+      let cartData = localStorage.getItem("cart");
+      let cartContainer = document.getElementById("cartContainer");
       
-      if (cart.length === 0) {
-        results.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Корзина пуста</td></tr>";
-        totalPriceDiv.textContent = "";
+      if (!cartData) {
+        cartContainer.innerHTML = '<p class="empty-cart">Корзина пуста.</p>';
         return;
       }
       
-      let overallTotal = 0;
-      cart.forEach((item, index) => {
-        // Предположим, что объект товара имеет следующие свойства:
-        // name – наименование товара,
-        // quantity – количество,
-        // unitPrice – цена за единицу,
-        // totalPrice – общая цена (quantity * unitPrice).
-        // Если данные не заданы, используем тестовые значения.
-        const name = item.name || item.manufacturer || "Товар";
-        const quantity = parseFloat(item.quantity) || 1;
-        const unitPrice = parseFloat(item.unitPrice) || 0;
-        const totalPrice = quantity * unitPrice;
-        overallTotal += totalPrice;
-        
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${name}</td>
-          <td style="text-align:center;">${quantity}</td>
-          <td>${unitPrice.toFixed(2)}</td>
-          <td>${totalPrice.toFixed(2)}</td>
-          <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
-        `;
-        results.appendChild(tr);
+      let cart = JSON.parse(cartData);
+      
+      if (cart.length === 0) {
+        cartContainer.innerHTML = '<p class="empty-cart">Корзина пуста.</p>';
+        return;
+      }
+      
+      let html = '<table><thead><tr><th>Наименование</th><th>Количество</th><th>Цена за шт.</th><th>Общая цена</th></tr></thead><tbody>';
+      let grandTotal = 0;
+      
+      // В корзине может быть несколько выборов (наборов товаров)
+      cart.forEach((selection, index) => {
+        html += `<tr><td colspan="4" class="selection-title">Выбор №${index + 1}</td></tr>`;
+        for (let id in selection) {
+          let group = selection[id];
+          let comp = group.component;
+          if (!comp || !comp.name) continue;
+          
+          let qty = 0;
+          if (group.isTrack && group.totalLength > 0) {
+            // Определяем номинальную длину для расчёта количества
+            let nominal = id.indexOf("-111") !== -1 ? 100 :
+                          id.indexOf("-112") !== -1 ? 200 :
+                          id.indexOf("-113") !== -1 ? 300 : 1;
+            qty = Math.ceil(group.totalLength / nominal);
+          } else {
+            qty = group.count;
+          }
+          
+          let cost = qty * comp.price;
+          grandTotal += cost;
+          
+          html += `<tr>
+            <td><img src="${comp.image}" alt="${comp.name}"> ${comp.name} ${id}</td>
+            <td>${qty} шт.</td>
+            <td>${comp.price}₽</td>
+            <td>${cost}₽</td>
+          </tr>`;
+        }
       });
       
-      totalPriceDiv.textContent = "Итоговая стоимость: " + overallTotal.toFixed(2) + " руб.";
+      html += '</tbody></table>';
+      html += `<div class="total-price">Итого: ${grandTotal}₽</div>`;
+      
+      cartContainer.innerHTML = html;
     }
-
-    // Функция удаления товара из корзины по индексу
-    function deleteCartItem(index) {
-      let cart = [];
-      if (localStorage.getItem("cart")) {
-        cart = JSON.parse(localStorage.getItem("cart"));
-      }
-      if (index >= 0 && index < cart.length) {
-        cart.splice(index, 1);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        loadCart();
-      }
+    
+    // Функция для очистки корзины
+    function clearCart() {
+      localStorage.removeItem("cart");
+      displayCart();
     }
-
-    // При загрузке страницы выполняем отрисовку корзины
-    loadCart();
+    
+    window.onload = displayCart;
   </script>
 </body>
 </html>
