@@ -23,21 +23,6 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    /* Кнопка "Обновить корзину" */
-    #updateCartButton {
-      display: block;
-      margin: 0 auto 20px auto;
-      background-color: #000;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      font-size: 14px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #updateCartButton:hover {
-      background-color: #333;
-    }
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -91,8 +76,6 @@
 <body>
   <div class="container">
     <h1>Корзина</h1>
-    <!-- Кнопка обновления корзины -->
-    <button id="updateCartButton" onclick="loadCart()">Обновить корзину</button>
     <div id="cartContent">
       <!-- Здесь будет динамически сформированная таблица с товарами -->
     </div>
@@ -123,7 +106,6 @@
               <th>Кол.</th>
               <th>Цена за шт.</th>
               <th>Общая цена</th>
-              <th>Действие</th>
             </tr>
           </thead>
           <tbody>`;
@@ -141,7 +123,6 @@
             <td style="text-align:center;">${count} шт.</td>
             <td>${unitPrice}₽</td>
             <td>${total}₽</td>
-            <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
           </tr>`;
         });
         html += `</tbody>
@@ -151,33 +132,7 @@
       document.getElementById("cartContent").innerHTML = html;
     }
     
-    function deleteCartItem(index) {
-      let cart = [];
-      try {
-        if (localStorage.getItem("cart")) {
-          cart = JSON.parse(localStorage.getItem("cart"));
-        }
-      } catch (e) {
-        alert("Ошибка чтения корзины.");
-        return;
-      }
-      if (index >= 0 && index < cart.length) {
-        cart.splice(index, 1);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        loadCart();
-      }
-    }
-    
     document.addEventListener("DOMContentLoaded", loadCart);
-    window.addEventListener("pageshow", loadCart);
-    
-    // Делаем окно корзины изменяемым (resizable) с помощью jQuery UI
-    $(document).ready(function(){
-      $("#cartContent").resizable({
-        minWidth: 400,
-        minHeight: 300
-      });
-    });
   </script>
 </body>
 </html>
