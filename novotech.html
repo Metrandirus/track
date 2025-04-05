@@ -64,6 +64,16 @@
       color: red;
       margin-top: 10px;
     }
+    .add-to-cart-button {
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 5px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
@@ -244,7 +254,7 @@
               "x": []
             },
             "components": {
-              // Профиль для натяжного потолка – для белого вариант
+              // Профиль для натяжного потолка: для белого вариант
               "135192": { "name": "Профиль для натяжного потолка белый 2м", "price": 6400, "image": "images/novotech/135192.png" },
               "135188": { "name": "Заглушка для профиля белая", "price": 1100, "image": "images/novotech/135188.png" }
             }
@@ -442,7 +452,7 @@
         }
       }
       else if (shape === "x") {
-        // X‑образная система: аналогична L‑образной, но вместо углового коннектора используем X‑образный
+        // X‑образная система: два набора шинопроводов и один X‑образный коннектор
         let busbarA = getTracksForNovotech(lengthA, lengthOptions);
         let busbarB = getTracksForNovotech(lengthB, lengthOptions);
         selectedItems = busbarA.concat(busbarB);
@@ -480,7 +490,6 @@
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
     
       /***** Добавление выбранных светильников *****/
-      // Ожидается, что параметр "lights" передаётся в URL как JSON-массив.
       let lightsParam = params.get("lights") || "[]";
       let selectedLightingOptions;
       try {
@@ -489,9 +498,8 @@
         selectedLightingOptions = [];
       }
       selectedLightingOptions.forEach(light => {
-        // Обратите внимание: переменная lightingMappingMaytoni
-        let lightItem = (lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][color]) 
-                          ? lightingMappingMaytoni[light.type][color]
+        let lightItem = (lightingMappingMayotech[light.type] && lightingMappingMayotech[light.type][color]) 
+                          ? lightingMappingMayotech[light.type][color]
                           : null;
         if (lightItem) {
           for (let i = 0; i < parseInt(light.quantity, 10); i++) {
@@ -509,7 +517,6 @@
     
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка: профиль имеет длину 2м (200 см)
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -523,13 +530,10 @@
         console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
         let profileCount = Math.ceil(effectiveTrackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
-        // Выбираем профиль по цвету: для черного – 135191, для белого – 135192
         let profileId = (color === "black") ? "135191" : "135192";
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: profileId, pieceLength: 200 });
         }
-        // Добавляем заглушки для профиля – фиксированное количество:
-        // для прямого, L, P – 2 шт., для T – 3 шт., для X – 4 шт.
         let capCount = 0;
         if (shape === "T-shape") {
           capCount = 3;
@@ -544,7 +548,6 @@
         }
       }
       else if (mountingParam === "recessed") {
-        // Для встраиваемой системы: профиль имеет длину 1м (100 см)
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -561,7 +564,6 @@
         for (let i = 0; i < profileCount; i++) {
           selectedItems.push({ id: "358090", pieceLength: 100 });
         }
-        // Если профилей больше одного, для каждого соединения (профилей-1) добавляем соединитель 358233
         if (profileCount > 1) {
           let connectorCount = profileCount - 1;
           for (let i = 0; i < connectorCount; i++) {
@@ -569,7 +571,7 @@
           }
         }
       }
-      
+    
       if (mountingParam === "hanging") {
         let effectiveTrackLength = 0;
         if (shape === "straight") {
@@ -589,7 +591,7 @@
           selectedItems.push({ id: suspensionId });
         }
       }
-      
+    
       console.log("Финальный результат подбора (NOVOTECH):", selectedItems);
     
       /***** Группировка элементов *****/
@@ -602,8 +604,6 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Сначала ищем описание компонента в products.novotech[color]["surface"].components,
-          // затем в suspensionMapping, затем в компонентах для профилей (если имеются)
           let comp = (products.novotech[color]["surface"].components[id]) || suspensionMapping[id] || {};
           groupedItems[id] = { totalLength: 0, count: 0, component: comp, isTrack: isTrack };
         }
@@ -642,14 +642,45 @@
       }
     
       document.getElementById("results").innerHTML = tbodyHTML;
-      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
+      document.getElementById("totalPrice").innerHTML = 
+        `<div>Итоговая стоимость: ${totalPrice}₽</div>
+         <button id="addToCartFromNovotech" class="add-to-cart-button" onclick="addToCartFromNovotech()">В корзину</button>`;
       document.getElementById("resultContainer").style.display = "block";
       console.log("Подбор завершён успешно (NOVOTECH).");
+    
+      // Сохраняем сгруппированные данные в глобальную переменную
+      window.currentNovotechSelection = groupedItems;
     };
     
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
+    
+    /***** Функция для добавления товаров в корзину (Подход A для NOVOTECH) *****/
+    function addToCartFromNovotech() {
+      if (!window.currentNovotechSelection) {
+        alert("Нет данных для добавления в корзину.");
+        return;
+      }
+      let cart = [];
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
+      }
+      // Преобразуем сгруппированный объект в плоский массив объектов { component, count }
+      for (const [id, group] of Object.entries(window.currentNovotechSelection)) {
+        cart.push({
+          component: group.component,
+          count: group.count
+        });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Товары добавлены в корзину.");
+    }
   </script>
 </body>
 </html>
