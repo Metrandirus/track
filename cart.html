@@ -5,147 +5,134 @@
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #e7f5fd;
+    html, body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      background-color: #e7f5fd;
+      font-family: Arial, sans-serif;
     }
     .container {
       max-width: 800px;
-      margin: auto;
-      background-color: #fff;
+      margin: 20px auto;
+      background-color: white;
       padding: 20px;
       border: 1px solid #ddd;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
+      margin-bottom: 20px;
     }
-    table {
+    .results-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      background-color: white;
+      table-layout: auto;
+      margin-top: 10px;
     }
-    th, td {
-      padding: 8px;
+    .results-table th, .results-table td {
       border: 1px solid #ddd;
+      padding: 6px 8px;
+      font-size: 13px;
       text-align: left;
     }
-    th {
+    .results-table th {
       background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    .results-table th:nth-child(2),
+    .results-table td:nth-child(2) {
+      text-align: center;
+      width: 60px;
+    }
+    .results-table th:nth-child(3),
+    .results-table td:nth-child(3) {
+      width: 90px;
+    }
+    .results-table th:nth-child(4),
+    .results-table td:nth-child(4) {
+      width: 100px;
+    }
+    .results-table img {
+      width: 50px;
+      height: auto;
+      margin-right: 10px;
+      vertical-align: middle;
     }
     .total-price {
+      font-weight: bold;
       text-align: right;
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 20px;
+      margin-top: 10px;
+      font-size: 14px;
     }
-    .empty-cart {
+    .debug {
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
       text-align: center;
-      font-size: 18px;
-    }
-    .clear-button {
-      background-color: #f44336;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      display: block;
-      margin: 0 auto;
-    }
-    .selection-title {
-      background-color: #ddd;
-      font-weight: bold;
-      text-align: center;
-    }
-    img {
-      width: 50px;
-      vertical-align: middle;
-      margin-right: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Корзина</h1>
-    <div id="cartContainer"></div>
-    <button class="clear-button" onclick="clearCart()">Очистить корзину</button>
+    <div id="cartContent">
+      <!-- Здесь будет динамически сформированная таблица с товарами -->
+    </div>
+    <div id="debug" class="debug"></div>
   </div>
   
   <script>
-    // Функция для отображения товаров из корзины
-    function displayCart() {
-      let cartData = localStorage.getItem("cart");
-      let cartContainer = document.getElementById("cartContainer");
-      
-      if (!cartData) {
-        cartContainer.innerHTML = '<p class="empty-cart">Корзина пуста.</p>';
+    function loadCart() {
+      let cart = [];
+      const debugDiv = document.getElementById("debug");
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        debugDiv.textContent = "Ошибка чтения корзины.";
         return;
       }
       
-      let cart = JSON.parse(cartData);
-      
-      if (!Array.isArray(cart) || cart.length === 0) {
-        cartContainer.innerHTML = '<p class="empty-cart">Корзина пуста.</p>';
-        return;
-      }
-      
-      let html = '<table><thead><tr><th>Наименование</th><th>Количество</th><th>Цена за шт.</th><th>Общая цена</th></tr></thead><tbody>';
-      let grandTotal = 0;
-      
-      // В корзине может быть несколько наборов (selection)
-      cart.forEach((selection, selectionIndex) => {
-        html += `<tr><td colspan="4" class="selection-title">Выбор №${selectionIndex + 1}</td></tr>`;
-        // Проходим по всем ключам объекта selection
-        Object.keys(selection).forEach(id => {
-          let group = selection[id];
-          if (!group) return;
-          let comp = group.component;
-          if (!comp || !comp.name) return;
-          
-          let qty = 0;
-          // Если это трек (имеется длина)
-          if (group.isTrack && group.totalLength > 0) {
-            // Определяем номинальную длину для расчёта количества
-            let nominal = 1;
-            if (id.indexOf("-111") !== -1) {
-              nominal = 100;
-            } else if (id.indexOf("-112") !== -1) {
-              nominal = 200;
-            } else if (id.indexOf("-113") !== -1) {
-              nominal = 300;
-            }
-            qty = Math.ceil(group.totalLength / nominal);
-          } else {
-            qty = group.count;
-          }
-          
-          let cost = qty * comp.price;
-          grandTotal += cost;
-          
+      let html = "";
+      if (cart.length === 0) {
+        html = "<p style='text-align:center;'>Корзина пуста</p>";
+      } else {
+        html += `<table class="results-table">
+          <thead>
+            <tr>
+              <th>Наименование</th>
+              <th>Кол.</th>
+              <th>Цена за шт.</th>
+              <th>Общая цена</th>
+            </tr>
+          </thead>
+          <tbody>`;
+        let overallTotal = 0;
+        cart.forEach((item, index) => {
+          const comp = item.component || {};
+          const name = comp.name || "Товар";
+          const image = comp.image || "";
+          const unitPrice = parseFloat(comp.price) || 0;
+          const count = parseInt(item.count) || 1;
+          const total = unitPrice * count;
+          overallTotal += total;
           html += `<tr>
-            <td><img src="${comp.image}" alt="${comp.name}"> ${comp.name} (${id})</td>
-            <td>${qty} шт.</td>
-            <td>${comp.price}₽</td>
-            <td>${cost}₽</td>
+            <td><img src="${image}" alt="${name}">${name}</td>
+            <td style="text-align:center;">${count} шт.</td>
+            <td>${unitPrice}₽</td>
+            <td>${total}₽</td>
           </tr>`;
         });
-      });
-      
-      html += '</tbody></table>';
-      html += `<div class="total-price">Итого: ${grandTotal}₽</div>`;
-      
-      cartContainer.innerHTML = html;
+        html += `</tbody>
+        </table>
+        <div class="total-price">Итоговая стоимость: ${overallTotal.toFixed(2)}₽</div>`;
+      }
+      document.getElementById("cartContent").innerHTML = html;
     }
     
-    // Функция для очистки корзины
-    function clearCart() {
-      localStorage.removeItem("cart");
-      displayCart();
-    }
-    
-    window.onload = displayCart;
+    document.addEventListener("DOMContentLoaded", loadCart);
   </script>
 </body>
 </html>
