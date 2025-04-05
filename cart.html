@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Подключаем jQuery и jQuery UI для функционала изменения размера -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <style>
     html, body {
       margin: 0;
@@ -33,8 +37,8 @@
     .results-table th, .results-table td {
       border: 1px solid #ddd;
       padding: 6px 8px;
-      font-size: 13px;
       text-align: left;
+      font-size: 13px;
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -42,8 +46,8 @@
     }
     .results-table th:nth-child(2),
     .results-table td:nth-child(2) {
-      text-align: center;
       width: 60px;
+      text-align: center;
     }
     .results-table th:nth-child(3),
     .results-table td:nth-child(3) {
@@ -83,6 +87,7 @@
   </div>
   
   <script>
+    // Функция загрузки корзины и отрисовки таблицы
     function loadCart() {
       let cart = [];
       const debugDiv = document.getElementById("debug");
@@ -106,11 +111,14 @@
               <th>Кол.</th>
               <th>Цена за шт.</th>
               <th>Общая цена</th>
+              <th>Действие</th>
             </tr>
           </thead>
           <tbody>`;
         let overallTotal = 0;
         cart.forEach((item, index) => {
+          // Предполагается, что каждый элемент корзины – это объект с полями:
+          // item.component, item.count
           const comp = item.component || {};
           const name = comp.name || "Товар";
           const image = comp.image || "";
@@ -123,6 +131,7 @@
             <td style="text-align:center;">${count} шт.</td>
             <td>${unitPrice}₽</td>
             <td>${total}₽</td>
+            <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
           </tr>`;
         });
         html += `</tbody>
@@ -132,7 +141,39 @@
       document.getElementById("cartContent").innerHTML = html;
     }
     
+    // Функция удаления товара из корзины по индексу
+    function deleteCartItem(index) {
+      let cart = [];
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
+      }
+      if (index >= 0 && index < cart.length) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
+      }
+    }
+    
+    // Обновляем корзину при событии pageshow (каждый раз, когда страница становится активной)
+    window.addEventListener("pageshow", loadCart);
+    
+    // Также вызываем loadCart при загрузке
     document.addEventListener("DOMContentLoaded", loadCart);
+    
+    // Делаем окно корзины изменяемым (resizable) с помощью jQuery UI
+    $(document).ready(function(){
+      $("#cartContent").resizable({
+        // Опционально: минимальные размеры
+        minWidth: 400,
+        minHeight: 300,
+        // Можно добавить другие опции
+      });
+    });
   </script>
 </body>
 </html>
