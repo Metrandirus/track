@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI для функционала изменения размера -->
+  <!-- Подключаем jQuery и jQuery UI для возможности изменения размера окна корзины -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -27,6 +27,21 @@
       text-align: center;
       margin-bottom: 20px;
     }
+    /* Кнопка обновления корзины вверху */
+    #updateCartButton {
+      display: block;
+      margin: 0 auto 20px auto;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #updateCartButton:hover {
+      background-color: #333;
+    }
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -37,8 +52,8 @@
     .results-table th, .results-table td {
       border: 1px solid #ddd;
       padding: 6px 8px;
-      text-align: left;
       font-size: 13px;
+      text-align: left;
     }
     .results-table th {
       background-color: #f4f4f4;
@@ -46,8 +61,8 @@
     }
     .results-table th:nth-child(2),
     .results-table td:nth-child(2) {
-      width: 60px;
       text-align: center;
+      width: 60px;
     }
     .results-table th:nth-child(3),
     .results-table td:nth-child(3) {
@@ -62,6 +77,18 @@
       height: auto;
       margin-right: 10px;
       vertical-align: middle;
+    }
+    .delete-button {
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .delete-button:hover {
+      background-color: #c9302c;
     }
     .total-price {
       font-weight: bold;
@@ -80,6 +107,8 @@
 <body>
   <div class="container">
     <h1>Корзина</h1>
+    <!-- Кнопка для обновления корзины -->
+    <button id="updateCartButton" onclick="loadCart()">Обновить корзину</button>
     <div id="cartContent">
       <!-- Здесь будет динамически сформированная таблица с товарами -->
     </div>
@@ -117,8 +146,6 @@
           <tbody>`;
         let overallTotal = 0;
         cart.forEach((item, index) => {
-          // Предполагается, что каждый элемент корзины – это объект с полями:
-          // item.component, item.count
           const comp = item.component || {};
           const name = comp.name || "Товар";
           const image = comp.image || "";
@@ -159,19 +186,17 @@
       }
     }
     
-    // Обновляем корзину при событии pageshow (каждый раз, когда страница становится активной)
-    window.addEventListener("pageshow", loadCart);
-    
-    // Также вызываем loadCart при загрузке
+    // Обновляем корзину при загрузке страницы
     document.addEventListener("DOMContentLoaded", loadCart);
+    
+    // Обновляем корзину каждый раз при событии pageshow (если используется, например, в мобильном браузере)
+    window.addEventListener("pageshow", loadCart);
     
     // Делаем окно корзины изменяемым (resizable) с помощью jQuery UI
     $(document).ready(function(){
       $("#cartContent").resizable({
-        // Опционально: минимальные размеры
         minWidth: 400,
-        minHeight: 300,
-        // Можно добавить другие опции
+        minHeight: 300
       });
     });
   </script>
