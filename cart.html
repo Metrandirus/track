@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI для возможности изменения размера окна корзины -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <style>
     html, body {
       margin: 0;
@@ -27,7 +23,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    /* Кнопка обновления корзины вверху */
+    /* Кнопка "Обновить корзину" */
     #updateCartButton {
       display: block;
       margin: 0 auto 20px auto;
@@ -78,18 +74,6 @@
       margin-right: 10px;
       vertical-align: middle;
     }
-    .delete-button {
-      background-color: #d9534f;
-      color: #fff;
-      border: none;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 12px;
-      border-radius: 3px;
-    }
-    .delete-button:hover {
-      background-color: #c9302c;
-    }
     .total-price {
       font-weight: bold;
       text-align: right;
@@ -107,7 +91,7 @@
 <body>
   <div class="container">
     <h1>Корзина</h1>
-    <!-- Кнопка для обновления корзины -->
+    <!-- Кнопка обновления корзины -->
     <button id="updateCartButton" onclick="loadCart()">Обновить корзину</button>
     <div id="cartContent">
       <!-- Здесь будет динамически сформированная таблица с товарами -->
@@ -116,7 +100,6 @@
   </div>
   
   <script>
-    // Функция загрузки корзины и отрисовки таблицы
     function loadCart() {
       let cart = [];
       const debugDiv = document.getElementById("debug");
@@ -168,7 +151,6 @@
       document.getElementById("cartContent").innerHTML = html;
     }
     
-    // Функция удаления товара из корзины по индексу
     function deleteCartItem(index) {
       let cart = [];
       try {
@@ -186,10 +168,7 @@
       }
     }
     
-    // Обновляем корзину при загрузке страницы
     document.addEventListener("DOMContentLoaded", loadCart);
-    
-    // Обновляем корзину каждый раз при событии pageshow (если используется, например, в мобильном браузере)
     window.addEventListener("pageshow", loadCart);
     
     // Делаем окно корзины изменяемым (resizable) с помощью jQuery UI
