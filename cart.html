@@ -23,21 +23,6 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    /* Кнопка "Обновить корзину" */
-    #updateCartButton {
-      display: block;
-      margin: 0 auto 20px auto;
-      background-color: #000;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      font-size: 14px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #updateCartButton:hover {
-      background-color: #333;
-    }
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -55,10 +40,11 @@
       background-color: #f4f4f4;
       font-weight: bold;
     }
-    .results-table th:nth-child(2),
-    .results-table td:nth-child(2) {
+    /* Новая колонка для артикула */
+    .results-table th:nth-child(1),
+    .results-table td:nth-child(1) {
+      width: 80px;
       text-align: center;
-      width: 60px;
     }
     .results-table th:nth-child(3),
     .results-table td:nth-child(3) {
@@ -66,6 +52,11 @@
     }
     .results-table th:nth-child(4),
     .results-table td:nth-child(4) {
+      width: 40px;
+      text-align: center;
+    }
+    .results-table th:nth-child(5),
+    .results-table td:nth-child(5) {
       width: 100px;
     }
     .results-table img {
@@ -86,15 +77,35 @@
       margin-top: 10px;
       text-align: center;
     }
+    .clear-cart-button, .delete-button, .add-to-cart-button {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-top: 5px;
+    }
+    .clear-cart-button:hover, .delete-button:hover, .add-to-cart-button:hover {
+      background-color: #333;
+    }
+    .delete-button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Корзина</h1>
-    <!-- Кнопка обновления корзины -->
-    <button id="updateCartButton" onclick="loadCart()">Обновить корзину</button>
     <div id="cartContent">
       <!-- Здесь будет динамически сформированная таблица с товарами -->
+    </div>
+    <div id="totalPrice" class="total-price"></div>
+    <!-- Кнопка для очистки корзины -->
+    <div style="text-align:center; margin-top:10px;">
+      <button class="clear-cart-button" onclick="clearCart()">Очистить корзину</button>
     </div>
     <div id="debug" class="debug"></div>
   </div>
@@ -119,6 +130,7 @@
         html += `<table class="results-table">
           <thead>
             <tr>
+              <th>Артикул</th>
               <th>Наименование</th>
               <th>Кол.</th>
               <th>Цена за шт.</th>
@@ -130,6 +142,9 @@
         let overallTotal = 0;
         cart.forEach((item, index) => {
           const comp = item.component || {};
+          const article = item.component && comp.name ? comp.name : "Нет данных";
+          // Здесь артикул можно считать равным идентификатору компонента
+          const id = comp && comp.image ? item.component.id || "N/A" : "N/A";
           const name = comp.name || "Товар";
           const image = comp.image || "";
           const unitPrice = parseFloat(comp.price) || 0;
@@ -137,6 +152,7 @@
           const total = unitPrice * count;
           overallTotal += total;
           html += `<tr>
+            <td style="text-align:center;">${id}</td>
             <td><img src="${image}" alt="${name}">${name}</td>
             <td style="text-align:center;">${count} шт.</td>
             <td>${unitPrice}₽</td>
@@ -168,16 +184,15 @@
       }
     }
     
+    function clearCart() {
+      if (confirm("Вы действительно хотите очистить корзину?")) {
+        localStorage.setItem("cart", JSON.stringify([]));
+        loadCart();
+      }
+    }
+    
     document.addEventListener("DOMContentLoaded", loadCart);
     window.addEventListener("pageshow", loadCart);
-    
-    // Делаем окно корзины изменяемым (resizable) с помощью jQuery UI
-    $(document).ready(function(){
-      $("#cartContent").resizable({
-        minWidth: 400,
-        minHeight: 300
-      });
-    });
   </script>
 </body>
 </html>
