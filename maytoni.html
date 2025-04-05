@@ -69,6 +69,13 @@
       font-size: 14px;
       cursor: pointer;
       margin-top: 5px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+    }
+    .add-to-cart-button:hover {
+      background-color: #333;
     }
   </style>
 </head>
@@ -528,7 +535,6 @@
         }
       }
       else if (shape === "x") {
-        // X‑образная система: два набора шинопроводов по длинам A и B и один X‑образный коннектор
         let busbarA = (mountingParam === "recessed") ?
                       getTracksForMaytoniRecessed(lengthA, lengthOptions) :
                       getTracksForMaytoniSurface(lengthA, lengthOptions);
@@ -596,8 +602,7 @@
       
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        // Для натяжного потолка – добавляем профиль TRA001MP-112S
-        let trackLength = selectedItems.filter(item => item.pieceLength).reduce((sum, item) => sum + item.pieceLength, 0);
+        let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength")).reduce((sum, item) => sum + item.pieceLength, 0);
         console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
         let profileCount = Math.ceil(trackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
@@ -617,8 +622,7 @@
       }
       
       if (mountingParam === "hanging") {
-        // Для подвесной системы – добавляем подвесы
-        let trackLength = selectedItems.filter(item => item.pieceLength).reduce((sum, item) => sum + item.pieceLength, 0);
+        let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength")).reduce((sum, item) => sum + item.pieceLength, 0);
         console.log("Общая длина треков (hanging):", trackLength, "см");
         let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
         console.log("Подвесов для добавления (hanging):", suspCount);
@@ -681,29 +685,38 @@
         `<div>Итого: ${totalPrice}₽</div>
          <button id="addToCartFromMaytoni" class="add-to-cart-button" onclick="addToCartFromMaytoni()">В корзину</button>`;
       document.getElementById("resultContainer").style.display = "block";
-      console.log("Подбор завершён успешно (Maytoni).");
       
-      // При необходимости можно сохранить текущее сгруппированное множество в переменную,
-      // которая будет использоваться функцией addToCartFromMaytoni()
+      // Сохраняем сгруппированные данные в глобальную переменную
       window.currentMaytoniSelection = groupedItems;
+      console.log("Подбор завершён успешно (Maytoni).");
     };
     
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
     
-    /***** Функция для добавления товаров в корзину *****/
+    /***** Функция для добавления товаров в корзину (Подход A) *****/
     function addToCartFromMaytoni() {
-      if (!currentMaytoniSelection) {
+      if (!window.currentMaytoniSelection) {
         alert("Нет данных для добавления в корзину.");
         return;
       }
       let cart = [];
-      if (localStorage.getItem("cart")) {
-        cart = JSON.parse(localStorage.getItem("cart"));
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
       }
-      // Добавляем текущее сгруппированное множество в корзину
-      cart.push(currentMaytoniSelection);
+      // Преобразуем сгруппированный объект в плоский массив объектов { component, count }
+      for (const [id, group] of Object.entries(window.currentMaytoniSelection)) {
+        cart.push({
+          component: group.component,
+          count: group.count
+        });
+      }
       localStorage.setItem("cart", JSON.stringify(cart));
       alert("Товары добавлены в корзину.");
     }
