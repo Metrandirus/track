@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI для сортировки -->
+  <!-- Подключаем jQuery и jQuery UI (если нужно для сортировки столбцов производителей) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -33,7 +33,7 @@
       margin: 0;
       font-size: 20px;
     }
-    /* Кнопка "Корзина" в шапке (в правом верхнем углу) */
+    /* Кнопка "Корзина" (вместо "Открыть корзину") */
     #cartButton {
       position: absolute;
       right: 230px;
@@ -74,7 +74,7 @@
       font-size: 12px;
       margin-bottom: 5px;
     }
-    /* Модальное окно корзины – теперь окно открывается сразу при клике на кнопку "Корзина" */
+    /* Модальное окно корзины */
     #cartModal {
       display: none;
       position: fixed;
@@ -92,7 +92,6 @@
       padding: 20px;
       border-radius: 8px;
       position: relative;
-      /* Сделаем окно изменяемым по размеру через jQuery UI */
     }
     #closeCartModal {
       position: absolute;
@@ -198,7 +197,7 @@
       font-size: 12px;
       color: red;
     }
-    /* Блок с производителями */
+    /* Блок с производителями (столбцы брендов) */
     .manufacturers-container {
       flex: 2 1 500px;
       display: none;
@@ -242,7 +241,7 @@
   <!-- Шапка страницы -->
   <div id="headerRow">
     <h1>Подбор трековой системы</h1>
-    <!-- Кнопка "Корзина" в шапке -->
+    <!-- Кнопка "Корзина" -->
     <button id="cartButton" onclick="openCartModal()">Корзина</button>
     <!-- Окно "Все производители" (изначально скрыто) -->
     <div id="manufacturerControlsContainer">
@@ -337,10 +336,11 @@
     </div>
   </div>
 
-  <!-- Модальное окно корзины, которое открывается сразу при клике на "Корзина" -->
+  <!-- Модальное окно корзины -->
   <div id="cartModal">
     <div id="cartModalContent">
       <button id="closeCartModal" onclick="closeCartModal()">✖</button>
+      <!-- Внутри сразу iframe с cart.html, без дополнительной кнопки -->
       <iframe id="cartIframe" src="cart.html" style="width:100%; height:400px; border:none;"></iframe>
     </div>
   </div>
@@ -428,9 +428,7 @@
         col.innerHTML = `
           <div class="manufacturer-title">${man.title}</div>
           <iframe class="manufacturer-iframe" id="iframe-${man.title}" src="${man.file + queryString}"></iframe>
-          <div class="manufacturer-total">
-            <!-- Кнопка "В корзину" удалена, её можно добавить позже -->
-          </div>
+          <div class="manufacturer-total"></div>
         `;
         container.appendChild(col);
       });
@@ -481,7 +479,6 @@
       if (e.target && e.target.matches("#manufacturerCheckboxes input[type='checkbox']")) {
         const manufacturer = e.target.value;
         const visible = e.target.checked;
-        // Ищем все колонки с данным производителем и скрываем/показываем их
         const cols = document.querySelectorAll(`.manufacturer-column[data-manufacturer="${manufacturer}"]`);
         cols.forEach(col => {
           col.style.display = visible ? "flex" : "none";
@@ -489,9 +486,8 @@
       }
     });
 
-    /* Функция для открытия модального окна корзины */
+    /* Функция для открытия модального окна корзины (прямо при клике на "Корзина") */
     function openCartModal() {
-      // Открываем окно корзины сразу (без дополнительного клика)
       document.getElementById("cartModal").style.display = "flex";
     }
 
@@ -565,47 +561,6 @@
         console.error("Ошибка в safeShowSelection:", e);
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
-    }
-    
-    document.addEventListener("DOMContentLoaded", function() {
-      setTimeout(window.safeShowSelection, 1000);
-    });
-    
-    /***** Функция для добавления товаров в корзину (Подход A) *****/
-    function addToCartFromMaytoni() {
-      if (!window.currentMaytoniSelection) {
-        alert("Нет данных для добавления в корзину.");
-        return;
-      }
-      let cart = [];
-      try {
-        if (localStorage.getItem("cart")) {
-          cart = JSON.parse(localStorage.getItem("cart"));
-        }
-      } catch (e) {
-        alert("Ошибка чтения корзины.");
-        return;
-      }
-      // Преобразуем сгруппированный объект в плоский массив объектов { article, component, count }
-      for (const [id, group] of Object.entries(window.currentMaytoniSelection)) {
-        cart.push({
-          article: id,
-          component: group.component,
-          count: group.count
-        });
-      }
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert("Товары добавлены в корзину.");
-    }
-    
-    /* Функция для открытия модального окна корзины сразу при клике на кнопку "Корзина" */
-    function openCartModal() {
-      document.getElementById("cartModal").style.display = "flex";
-    }
-    
-    /* Функция для закрытия модального окна корзины */
-    function closeCartModal() {
-      document.getElementById("cartModal").style.display = "none";
     }
   </script>
 </body>
