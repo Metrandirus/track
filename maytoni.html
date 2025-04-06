@@ -580,14 +580,19 @@
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
       /***** Добавление выбранных светильников *****/
-      let selectedLightingOptions = getLightingSelections(params);
+      let lightsParam = params.get("lights") || "[]";
+      let selectedLightingOptions;
+      try {
+        selectedLightingOptions = JSON.parse(lightsParam);
+      } catch (e) {
+        selectedLightingOptions = [];
+      }
       selectedLightingOptions.forEach(light => {
-        let col = color.toLowerCase();
-        let lightItem = (lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][col])
-                          ? lightingMappingMaytoni[light.type][col]
+        let lightItem = (lightingMappingMaytoni[light.type] && lightingMappingMaytoni[light.type][color]) 
+                          ? lightingMappingMaytoni[light.type][color]
                           : null;
         if (lightItem) {
-          for (let i = 0; i < light.quantity; i++) {
+          for (let i = 0; i < parseInt(light.quantity, 10); i++) {
             selectedItems.push({ id: lightItem.id });
             if (!components[lightItem.id]) {
               components[lightItem.id] = {
@@ -602,29 +607,74 @@
       
       /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength")).reduce((sum, item) => sum + item.pieceLength, 0);
-        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        let profileCount = Math.ceil(trackLength / 200);
+        let effectiveTrackLength = 0;
+        if (shape === "straight") {
+          effectiveTrackLength = lengthA;
+        } else if (["L-shape", "T-shape", "P-shape", "x"].includes(shape)) {
+          effectiveTrackLength = lengthA + lengthB;
+        } else if (shape === "rectangle") {
+          effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
+        }
+        console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
+        let profileCount = Math.ceil(effectiveTrackLength / 200);
         console.log("Профилей для добавления (stretch-ceiling):", profileCount);
+        let profileId = (color === "black") ? "135191" : "135192";
         for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: "TRA001MP-112S", pieceLength: 200 });
-          if (!components["TRA001MP-112S"]) {
-            components["TRA001MP-112S"] = { 
-              name: "Профиль для натяжного потолка TRA001MP-112S", 
-              price: 5490, 
-              image: "images/maytoni unity/TRA001MP-112S.png" 
-            };
-          }
+          selectedItems.push({ id: profileId, pieceLength: 200 });
+        }
+        let capCount = 0;
+        if (shape === "T-shape") {
+          capCount = 3;
+        } else if (shape === "x") {
+          capCount = 4;
+        } else if (["straight", "L-shape", "P-shape", "rectangle"].includes(shape)) {
+          capCount = 2;
+        }
+        let capId = (color === "black") ? "135187" : "135188";
+        for (let i = 0; i < capCount; i++) {
+          selectedItems.push({ id: capId });
         }
       }
       else if (mountingParam === "recessed") {
-        // Для встраиваемой системы – профили не добавляем (шиноводы уже встроены)
+        let effectiveTrackLength = 0;
+        if (shape === "straight") {
+          effectiveTrackLength = lengthA;
+        } else if (["L-shape", "T-shape", "P-shape", "x"].includes(shape)) {
+          effectiveTrackLength = lengthA + lengthB;
+        } else if (shape === "rectangle") {
+          effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
+        }
+        console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
+        let profileCount = Math.ceil(effectiveTrackLength / 100);
+        console.log("Встраиваемых профилей для добавления (recessed):", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: "358090", pieceLength: 100 });
+        }
+        if (profileCount > 1) {
+          let connectorCount = profileCount - 1;
+          for (let i = 0; i < connectorCount; i++) {
+            selectedItems.push({ id: "358233" });
+          }
+        }
       }
       
       if (mountingParam === "hanging") {
-        let trackLength = selectedItems.filter(item => item.hasOwnProperty("pieceLength")).reduce((sum, item) => sum + item.pieceLength, 0);
-        console.log("Общая длина треков (hanging):", trackLength, "см");
-        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
+        let effectiveTrackLength = 0;
+        if (shape === "straight") {
+          effectiveTrackLength = lengthA;
+        } else if (["L-shape", "T-shape", "P-shape", "x"].includes(shape)) {
+          effectiveTrackLength = lengthA + lengthB;
+        } else if (shape === "rectangle") {
+          effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
+        }
+        console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
+        let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
         console.log("Подвесов для добавления (hanging):", suspCount);
         let suspensionId = (color === "black") ? "TRA001CW-11B" : "TRA001CW-11W";
         for (let i = 0; i < suspCount; i++) {
@@ -682,7 +732,7 @@
       
       document.getElementById("results").innerHTML = tbodyHTML;
       document.getElementById("totalPrice").innerHTML = 
-        `<div>Итого: ${totalPrice}₽</div>
+        `<div>Итоговая стоимость: ${totalPrice}₽</div>
          <button id="addToCartFromMaytoni" class="add-to-cart-button" onclick="addToCartFromMaytoni()">В корзину</button>`;
       document.getElementById("resultContainer").style.display = "block";
       
@@ -710,9 +760,10 @@
         alert("Ошибка чтения корзины.");
         return;
       }
-      // Преобразуем сгруппированный объект в плоский массив объектов { component, count }
+      // Преобразуем сгруппированный объект в плоский массив объектов { article, component, count }
       for (const [id, group] of Object.entries(window.currentMaytoniSelection)) {
         cart.push({
+          article: id, // Артикул равен ключу группы
           component: group.component,
           count: group.count
         });
