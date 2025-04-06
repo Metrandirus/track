@@ -23,6 +23,21 @@
       text-align: center;
       margin-bottom: 20px;
     }
+    /* Кнопка обновления корзины */
+    .refresh-cart-button {
+      display: block;
+      margin: 0 auto 10px auto;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .refresh-cart-button:hover {
+      background-color: #333;
+    }
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -99,6 +114,10 @@
 <body>
   <div class="container">
     <h1>Корзина</h1>
+    <!-- Кнопка обновления корзины -->
+    <div style="text-align:center; margin-bottom:10px;">
+      <button class="refresh-cart-button" onclick="loadCart()">Обновить корзину</button>
+    </div>
     <div id="cartContent">
       <!-- Здесь будет динамически сформированная таблица с товарами -->
     </div>
@@ -142,9 +161,8 @@
         let overallTotal = 0;
         cart.forEach((item, index) => {
           const comp = item.component || {};
-          const article = item.component && comp.name ? comp.name : "Нет данных";
-          // Здесь артикул можно считать равным идентификатору компонента
-          const id = comp && comp.image ? item.component.id || "N/A" : "N/A";
+          // Предполагается, что артикул хранится в comp.id
+          const article = comp.id || "N/A";
           const name = comp.name || "Товар";
           const image = comp.image || "";
           const unitPrice = parseFloat(comp.price) || 0;
@@ -152,7 +170,7 @@
           const total = unitPrice * count;
           overallTotal += total;
           html += `<tr>
-            <td style="text-align:center;">${id}</td>
+            <td style="text-align:center;">${article}</td>
             <td><img src="${image}" alt="${name}">${name}</td>
             <td style="text-align:center;">${count} шт.</td>
             <td>${unitPrice}₽</td>
