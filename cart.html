@@ -16,12 +16,17 @@
       font-family: Arial, sans-serif;
     }
     .container {
-      max-width: 1000px;
+      max-width: 800px;
       margin: 20px auto;
       background-color: white;
       padding: 20px;
       border: 1px solid #ddd;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      /* Задаём минимальные размеры, чтобы контейнер можно было изменять */
+      min-width: 600px;
+      min-height: 300px;
+      /* Если содержимое не влезает, появится скролл */
+      overflow: auto;
     }
     h1 {
       text-align: center;
@@ -165,7 +170,7 @@
         let overallTotal = 0;
         cart.forEach((item, index) => {
           const comp = item.component || {};
-          // Выводим артикул из поля article, сохраненного при добавлении
+          // Берем артикул из поля article, которое сохраняется при добавлении
           const article = item.article || comp.id || "N/A";
           const name = comp.name || "Товар";
           const image = comp.image || "";
@@ -216,10 +221,10 @@
     document.addEventListener("DOMContentLoaded", loadCart);
     window.addEventListener("pageshow", loadCart);
     
-    // Делаем окно корзины изменяемым с помощью jQuery UI
+    // Делаем окно корзины изменяемым с помощью jQuery UI на уровне всего контейнера
     $(document).ready(function(){
-      $("#cartContent").resizable({
-        minWidth: 400,
+      $(".container").resizable({
+        minWidth: 600,
         minHeight: 300
       });
     });
