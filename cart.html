@@ -2,216 +2,140 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Корзина (Modal)</title>
+  <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI -->
+  <!-- Подключаем jQuery и jQuery UI (для сортировки производителей и диалогового окна) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <style>
+    /* Стили для всей страницы */
     body {
+      font-family: Arial, sans-serif;
+      background-color: #e7f5fd;
       margin: 0;
       padding: 0;
-      background-color: #e7f5fd;
-      font-family: Arial, sans-serif;
+      box-sizing: border-box;
     }
-    /* Стили для кнопки открытия корзины (пример) */
-    .open-cart-button {
-      display: inline-block;
-      margin: 20px;
+    /* Шапка страницы */
+    #headerRow {
+      width: 100%;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 20px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    #headerRow h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    /* Кнопка "Корзина" – расположена в правом верхнем углу */
+    #cartButton {
+      position: absolute;
+      right: 20px;
+      top: 10px;
       background-color: #000;
       color: #fff;
       border: none;
-      padding: 10px 16px;
+      padding: 8px 12px;
+      cursor: pointer;
       font-size: 14px;
       border-radius: 4px;
-      cursor: pointer;
     }
-    .open-cart-button:hover {
-      background-color: #333;
-    }
-    /* Стили таблицы внутри модального окна */
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      table-layout: auto;
-      margin-top: 10px;
-    }
-    .results-table th, .results-table td {
+    /* Окно "Все производители" остаётся без изменений */
+    #manufacturerControlsContainer {
+      position: absolute;
+      right: 120px;
+      top: 10px;
+      width: 200px;
       border: 1px solid #ddd;
-      padding: 6px 8px;
-      font-size: 13px;
-      text-align: left;
+      background-color: #fff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      display: none;
     }
-    .results-table th {
+    #manufacturerHeader {
       background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    /* Колонка для артикула */
-    .results-table th:nth-child(1),
-    .results-table td:nth-child(1) {
-      width: 80px;
+      padding: 10px;
       text-align: center;
-    }
-    .results-table img {
-      width: 50px;
-      height: auto;
-      margin-right: 10px;
-      vertical-align: middle;
-    }
-    .total-price {
       font-weight: bold;
-      text-align: right;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .debug {
-      font-size: 12px;
-      color: red;
-      margin-top: 10px;
-      text-align: center;
-    }
-    .delete-button, .clear-cart-button, .refresh-cart-button {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      padding: 5px 10px;
       font-size: 14px;
       cursor: pointer;
-      border-radius: 3px;
-      margin-top: 5px;
     }
-    .delete-button:hover, .clear-cart-button:hover, .refresh-cart-button:hover {
-      background-color: #333;
+    #manufacturerControls {
+      display: none;
+      padding: 10px;
     }
-    .delete-button {
-      padding: 4px 8px;
+    #manufacturerControls label {
+      display: block;
       font-size: 12px;
+      margin-bottom: 5px;
     }
+    /* Основной контейнер для формы и производителей */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+    }
+    /* Остальные стили для формы, производителей и т.д. остаются без изменений */
+    /* ... */
   </style>
 </head>
 <body>
-
-  <!-- Кнопка, по которой мы открываем модальное окно корзины -->
-  <button class="open-cart-button" onclick="openCartDialog()">Открыть корзину</button>
-
-  <!-- Модальное окно jQuery UI Dialog -->
-  <div id="cartModal" title="Корзина" style="display:none;">
-    <div id="cartContent">
-      <!-- Здесь будет таблица корзины, динамически сформированная -->
+  <!-- Шапка страницы -->
+  <div id="headerRow">
+    <h1>Подбор трековой системы</h1>
+    <!-- Кнопка "Корзина" в шапке, которая сразу открывает модальное окно -->
+    <button id="cartButton" onclick="openCartModal()">Корзина</button>
+    <div id="manufacturerControlsContainer">
+      <div id="manufacturerHeader">Все производители</div>
+      <div id="manufacturerControls">
+        <div id="manufacturerCheckboxes"></div>
+      </div>
     </div>
-    <div id="totalPrice" class="total-price"></div>
-    <div style="text-align:center; margin-top:10px;">
-      <button class="refresh-cart-button" onclick="loadCart()">Обновить корзину</button>
-      <button class="clear-cart-button" onclick="clearCart()">Очистить корзину</button>
+  </div>
+
+  <div class="container">
+    <!-- Левая область: форма выбора -->
+    <div class="form-container">
+      <!-- Ваш код формы выбора остается без изменений -->
+      <!-- ... -->
     </div>
-    <div id="debug" class="debug"></div>
+    <!-- Правая область: блок с производителями -->
+    <div class="manufacturers-container" id="manufacturersContainer">
+      <!-- Здесь будут динамически создаваться столбцы производителей -->
+    </div>
+  </div>
+
+  <!-- Модальное окно корзины (jQuery UI Dialog) -->
+  <div id="cartDialog" title="Корзина" style="display:none;">
+    <iframe id="cartIframe" src="cart.html" style="width:100%; height:400px; border:none;"></iframe>
   </div>
 
   <script>
-    // Пример данных в корзине (для теста). Обычно берем из localStorage.
-    // При реальном использовании - loadCart() будет считывать из localStorage
-    // и формировать таблицу.
-    
-    function openCartDialog() {
-      // Открываем jQuery UI Dialog
-      $("#cartModal").dialog("open");
-      loadCart();
+    /* Функция для открытия модального окна корзины */
+    function openCartModal() {
+      $("#cartDialog").dialog("open");
     }
 
-    function loadCart() {
-      let cart = [];
-      const debugDiv = document.getElementById("debug");
-      try {
-        if (localStorage.getItem("cart")) {
-          cart = JSON.parse(localStorage.getItem("cart"));
-        }
-      } catch (e) {
-        debugDiv.textContent = "Ошибка чтения корзины.";
-        return;
-      }
-
-      let html = "";
-      if (cart.length === 0) {
-        html = "<p style='text-align:center;'>Корзина пуста</p>";
-      } else {
-        html += `<table class="results-table">
-          <thead>
-            <tr>
-              <th>Артикул</th>
-              <th>Наименование</th>
-              <th>Кол.</th>
-              <th>Цена за шт.</th>
-              <th>Общая цена</th>
-              <th>Действие</th>
-            </tr>
-          </thead>
-          <tbody>`;
-        let overallTotal = 0;
-        cart.forEach((item, index) => {
-          const comp = item.component || {};
-          // Артикул берем из item.article (сохраняется при добавлении в корзину)
-          const article = item.article || comp.id || "N/A";
-          const name = comp.name || "Товар";
-          const image = comp.image || "";
-          const unitPrice = parseFloat(comp.price) || 0;
-          const count = parseInt(item.count) || 1;
-          const total = unitPrice * count;
-          overallTotal += total;
-          html += `<tr>
-            <td style="text-align:center;">${article}</td>
-            <td><img src="${image}" alt="${name}">${name}</td>
-            <td style="text-align:center;">${count} шт.</td>
-            <td>${unitPrice}₽</td>
-            <td>${total}₽</td>
-            <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
-          </tr>`;
-        });
-        html += `</tbody>
-        </table>
-        <div class="total-price">Итоговая стоимость: ${overallTotal.toFixed(2)}₽</div>`;
-      }
-      document.getElementById("cartContent").innerHTML = html;
-    }
-
-    function deleteCartItem(index) {
-      let cart = [];
-      try {
-        if (localStorage.getItem("cart")) {
-          cart = JSON.parse(localStorage.getItem("cart"));
-        }
-      } catch (e) {
-        alert("Ошибка чтения корзины.");
-        return;
-      }
-      if (index >= 0 && index < cart.length) {
-        cart.splice(index, 1);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        loadCart();
-      }
-    }
-
-    function clearCart() {
-      if (confirm("Вы действительно хотите очистить корзину?")) {
-        localStorage.setItem("cart", JSON.stringify([]));
-        loadCart();
-      }
-    }
-
-    // Инициализация jQuery UI Dialog
+    /* Инициализация модального окна корзины через jQuery UI Dialog */
     $(document).ready(function() {
-      $("#cartModal").dialog({
+      $("#cartDialog").dialog({
         autoOpen: false,
         modal: true,
-        // Размеры по умолчанию
         width: 800,
         minWidth: 600,
         minHeight: 300,
-        // Разрешаем изменение размера
         resizable: true
       });
     });
+    
+    /* Остальной код (форма, сортировка производителей и т.д.) остается без изменений */
+    /* ... */
   </script>
 </body>
 </html>
