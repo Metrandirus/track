@@ -2,140 +2,173 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Подбор трековой системы</title>
+  <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI (для сортировки производителей и диалогового окна) -->
+  <!-- Подключаем jQuery и jQuery UI (если требуется для дополнительных функций) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <style>
-    /* Стили для всей страницы */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #e7f5fd;
+    html, body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
+      background-color: #e7f5fd;
+      font-family: Arial, sans-serif;
     }
-    /* Шапка страницы */
-    #headerRow {
+    .results-table {
       width: 100%;
-      background-color: #fff;
-      border-bottom: 1px solid #ddd;
-      padding: 10px 20px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+      border-collapse: collapse;
+      background-color: white;
+      table-layout: auto;
+      margin-top: 10px;
     }
-    #headerRow h1 {
-      margin: 0;
-      font-size: 20px;
+    .results-table th, .results-table td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      font-size: 13px;
+      text-align: left;
     }
-    /* Кнопка "Корзина" – расположена в правом верхнем углу */
-    #cartButton {
-      position: absolute;
-      right: 20px;
-      top: 10px;
+    .results-table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    /* Колонка для артикула */
+    .results-table th:nth-child(1),
+    .results-table td:nth-child(1) {
+      width: 80px;
+      text-align: center;
+    }
+    .results-table img {
+      width: 50px;
+      height: auto;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    .total-price {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .debug {
+      font-size: 12px;
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .clear-cart-button, .delete-button, .refresh-cart-button {
       background-color: #000;
       color: #fff;
       border: none;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 14px;
-      border-radius: 4px;
-    }
-    /* Окно "Все производители" остаётся без изменений */
-    #manufacturerControlsContainer {
-      position: absolute;
-      right: 120px;
-      top: 10px;
-      width: 200px;
-      border: 1px solid #ddd;
-      background-color: #fff;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      display: none;
-    }
-    #manufacturerHeader {
-      background-color: #f4f4f4;
-      padding: 10px;
-      text-align: center;
-      font-weight: bold;
+      padding: 5px 10px;
       font-size: 14px;
       cursor: pointer;
+      border-radius: 3px;
+      margin-top: 5px;
     }
-    #manufacturerControls {
-      display: none;
-      padding: 10px;
+    .clear-cart-button:hover, .delete-button:hover, .refresh-cart-button:hover {
+      background-color: #333;
     }
-    #manufacturerControls label {
-      display: block;
+    .delete-button {
+      padding: 4px 8px;
       font-size: 12px;
-      margin-bottom: 5px;
     }
-    /* Основной контейнер для формы и производителей */
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
-    }
-    /* Остальные стили для формы, производителей и т.д. остаются без изменений */
-    /* ... */
   </style>
 </head>
 <body>
-  <!-- Шапка страницы -->
-  <div id="headerRow">
-    <h1>Подбор трековой системы</h1>
-    <!-- Кнопка "Корзина" в шапке, которая сразу открывает модальное окно -->
-    <button id="cartButton" onclick="openCartModal()">Корзина</button>
-    <div id="manufacturerControlsContainer">
-      <div id="manufacturerHeader">Все производители</div>
-      <div id="manufacturerControls">
-        <div id="manufacturerCheckboxes"></div>
-      </div>
-    </div>
+  <!-- Здесь выводится содержимое корзины -->
+  <div id="cartContent">
+    <!-- Таблица корзины сформируется динамически -->
   </div>
-
-  <div class="container">
-    <!-- Левая область: форма выбора -->
-    <div class="form-container">
-      <!-- Ваш код формы выбора остается без изменений -->
-      <!-- ... -->
-    </div>
-    <!-- Правая область: блок с производителями -->
-    <div class="manufacturers-container" id="manufacturersContainer">
-      <!-- Здесь будут динамически создаваться столбцы производителей -->
-    </div>
+  <div id="totalPrice" class="total-price"></div>
+  <div style="text-align:center; margin-top:10px;">
+    <button class="refresh-cart-button" onclick="loadCart()">Обновить корзину</button>
+    <button class="clear-cart-button" onclick="clearCart()">Очистить корзину</button>
   </div>
-
-  <!-- Модальное окно корзины (jQuery UI Dialog) -->
-  <div id="cartDialog" title="Корзина" style="display:none;">
-    <iframe id="cartIframe" src="cart.html" style="width:100%; height:400px; border:none;"></iframe>
-  </div>
+  <div id="debug" class="debug"></div>
 
   <script>
-    /* Функция для открытия модального окна корзины */
-    function openCartModal() {
-      $("#cartDialog").dialog("open");
+    function loadCart() {
+      let cart = [];
+      const debugDiv = document.getElementById("debug");
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        debugDiv.textContent = "Ошибка чтения корзины.";
+        return;
+      }
+      
+      let html = "";
+      if (cart.length === 0) {
+        html = "<p style='text-align:center;'>Корзина пуста</p>";
+      } else {
+        html += `<table class="results-table">
+          <thead>
+            <tr>
+              <th>Артикул</th>
+              <th>Наименование</th>
+              <th>Кол.</th>
+              <th>Цена за шт.</th>
+              <th>Общая цена</th>
+              <th>Действие</th>
+            </tr>
+          </thead>
+          <tbody>`;
+        let overallTotal = 0;
+        cart.forEach((item, index) => {
+          const comp = item.component || {};
+          // Артикул берем из сохранённого поля item.article (если установлено), иначе из comp.id
+          const article = item.article || comp.id || "N/A";
+          const name = comp.name || "Товар";
+          const image = comp.image || "";
+          const unitPrice = parseFloat(comp.price) || 0;
+          const count = parseInt(item.count) || 1;
+          const total = unitPrice * count;
+          overallTotal += total;
+          html += `<tr>
+            <td style="text-align:center;">${article}</td>
+            <td><img src="${image}" alt="${name}">${name}</td>
+            <td style="text-align:center;">${count} шт.</td>
+            <td>${unitPrice}₽</td>
+            <td>${total}₽</td>
+            <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
+          </tr>`;
+        });
+        html += `</tbody>
+        </table>
+        <div class="total-price">Итоговая стоимость: ${overallTotal.toFixed(2)}₽</div>`;
+      }
+      document.getElementById("cartContent").innerHTML = html;
     }
-
-    /* Инициализация модального окна корзины через jQuery UI Dialog */
-    $(document).ready(function() {
-      $("#cartDialog").dialog({
-        autoOpen: false,
-        modal: true,
-        width: 800,
-        minWidth: 600,
-        minHeight: 300,
-        resizable: true
-      });
-    });
     
-    /* Остальной код (форма, сортировка производителей и т.д.) остается без изменений */
-    /* ... */
+    function deleteCartItem(index) {
+      let cart = [];
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
+      }
+      if (index >= 0 && index < cart.length) {
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart();
+      }
+    }
+    
+    function clearCart() {
+      if (confirm("Вы действительно хотите очистить корзину?")) {
+        localStorage.setItem("cart", JSON.stringify([]));
+        loadCart();
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", loadCart);
+    window.addEventListener("pageshow", loadCart);
   </script>
 </body>
 </html>
