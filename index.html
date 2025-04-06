@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Подбор трековой системы</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI (если нужно для сортировки столбцов производителей) -->
+  <!-- Подключаем jQuery и jQuery UI (для сортировки производителей и диалогового окна) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -33,10 +33,10 @@
       margin: 0;
       font-size: 20px;
     }
-    /* Кнопка "Корзина" (вместо "Открыть корзину") */
+    /* Кнопка "Корзина" – теперь расположена в правом верхнем углу и при клике сразу открывает окно корзины */
     #cartButton {
       position: absolute;
-      right: 230px;
+      right: 20px;
       top: 10px;
       background-color: #000;
       color: #fff;
@@ -46,10 +46,10 @@
       font-size: 14px;
       border-radius: 4px;
     }
-    /* Окно "Все производители" в правом верхнем углу шапки – изначально скрыто */
+    /* Окно "Все производители" остаётся без изменений */
     #manufacturerControlsContainer {
       position: absolute;
-      right: 20px;
+      right: 120px;
       top: 10px;
       width: 200px;
       border: 1px solid #ddd;
@@ -74,42 +74,13 @@
       font-size: 12px;
       margin-bottom: 5px;
     }
-    /* Модальное окно корзины */
-    #cartModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.6);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-    }
-    #cartModalContent {
-      background-color: #fff;
-      width: 90%;
-      max-width: 600px;
-      padding: 20px;
-      border-radius: 8px;
-      position: relative;
-    }
-    #closeCartModal {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      cursor: pointer;
-      font-size: 18px;
-      background: none;
-      border: none;
-    }
-    /* Основной контейнер (смещён ниже шапки) */
+    /* Основной контейнер (форма и результаты) */
     .container {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
       padding: 20px;
     }
-    /* Левая область: форма выбора */
     .form-container {
       flex: 1 1 300px;
       background-color: white;
@@ -162,7 +133,6 @@
       margin-top: 5px;
       text-align: center;
     }
-    /* Группа для ввода длин и кнопки "Добавить светильник" */
     .input-group {
       display: flex;
       align-items: center;
@@ -182,7 +152,6 @@
       cursor: pointer;
       text-align: center;
     }
-    /* Кнопка "Подобрать" располагается ниже остальных элементов */
     .button-container {
       margin-top: 20px;
     }
@@ -197,7 +166,6 @@
       font-size: 12px;
       color: red;
     }
-    /* Блок с производителями (столбцы брендов) */
     .manufacturers-container {
       flex: 2 1 500px;
       display: none;
@@ -241,9 +209,8 @@
   <!-- Шапка страницы -->
   <div id="headerRow">
     <h1>Подбор трековой системы</h1>
-    <!-- Кнопка "Корзина" -->
-    <button id="cartButton" onclick="openCartModal()">Корзина</button>
-    <!-- Окно "Все производители" (изначально скрыто) -->
+    <!-- Кнопка "Корзина" в правом верхнем углу, сразу открывающая модальное окно корзины -->
+    <button id="cartButton" onclick="openCartDialog()">Корзина</button>
     <div id="manufacturerControlsContainer">
       <div id="manufacturerHeader">Все производители</div>
       <div id="manufacturerControls">
@@ -336,13 +303,9 @@
     </div>
   </div>
 
-  <!-- Модальное окно корзины -->
-  <div id="cartModal">
-    <div id="cartModalContent">
-      <button id="closeCartModal" onclick="closeCartModal()">✖</button>
-      <!-- Внутри сразу iframe с cart.html, без дополнительной кнопки -->
-      <iframe id="cartIframe" src="cart.html" style="width:100%; height:400px; border:none;"></iframe>
-    </div>
+  <!-- Модальное окно корзины (jQuery UI Dialog) -->
+  <div id="cartDialog" title="Корзина" style="display:none;">
+    <iframe id="cartIframe" src="cart.html" style="width:100%; height:400px; border:none;"></iframe>
   </div>
 
   <script>
@@ -443,13 +406,13 @@
       updateManufacturerColumnsDisplay(manufacturerList);
     }
 
-    /* Функция обновления блока управления производителями (чекбоксы для скрытия/показывания столбцов) */
+    /* Функция обновления блока управления производителями (чекбоксы) */
     function updateManufacturerControls(manufacturerList) {
       const controlsDiv = document.getElementById("manufacturerCheckboxes");
       controlsDiv.innerHTML = "";
       manufacturerList.forEach((man, index) => {
         const id = "chk_" + man.title.replace(/\s/g, "_");
-        // Для первых 5 брендов ставим галочку, для новых – нет
+        // Для первых 5 брендов ставим галочку, для остальных – нет
         const isChecked = (index < 5) ? "checked" : "";
         const label = document.createElement("label");
         label.innerHTML = `<input type="checkbox" id="${id}" value="${man.title}" ${isChecked}> ${man.title}`;
@@ -457,7 +420,6 @@
       });
     }
 
-    // Функция применения состояния чекбоксов к столбцам
     function updateManufacturerColumnsDisplay(manufacturerList) {
       manufacturerList.forEach(man => {
         const chk = document.getElementById("chk_" + man.title.replace(/\s/g, "_"));
@@ -468,13 +430,11 @@
       });
     }
 
-    // Обработчик клика по заголовку сворачиваемой области производителей
     document.getElementById("manufacturerHeader").addEventListener("click", function() {
       const controls = document.getElementById("manufacturerControls");
       controls.style.display = (controls.style.display === "none" || controls.style.display === "") ? "block" : "none";
     });
 
-    // Обработчик клика по чекбоксам в блоке управления производителями
     document.addEventListener("change", function(e) {
       if (e.target && e.target.matches("#manufacturerCheckboxes input[type='checkbox']")) {
         const manufacturer = e.target.value;
@@ -486,20 +446,9 @@
       }
     });
 
-    /* Функция для открытия модального окна корзины (прямо при клике на "Корзина") */
-    function openCartModal() {
-      document.getElementById("cartModal").style.display = "flex";
-    }
-
-    /* Функция для закрытия модального окна корзины */
-    function closeCartModal() {
-      document.getElementById("cartModal").style.display = "none";
-    }
-
-    /* Функция обновления параметров и отображения результата (вызывается при нажатии "Подобрать") */
+    /* Функция обновления параметров и отображения результата (при нажатии "Подобрать") */
     function safeShowSelection() {
       try {
-        // Считываем основные параметры формы
         const type = document.getElementById("type").value;
         const color = document.getElementById("color").value;
         const mounting = document.getElementById("mounting").value;
@@ -507,7 +456,6 @@
         const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
         const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
         
-        // Считываем данные по выбранным светильникам (если есть)
         let lights = [];
         const lightingRows = document.querySelectorAll(".lighting-row");
         lightingRows.forEach(row => {
@@ -518,12 +466,9 @@
           }
         });
         const lightsParam = encodeURIComponent(JSON.stringify(lights));
-        
-        // Формируем query‑строку, включая данные о светильниках
         const queryString = `?type=${type}&color=${color}&mounting=${mounting}&shape=${shape}&lengthA=${lengthA}&lengthB=${lengthB}&lights=${lightsParam}`;
         console.log("Query-string:", queryString);
         
-        // Определяем производителей по типу системы
         const manufacturersData = {
           "one-phase": [
             { title: "Maytoni UNITY", file: "maytoni.html" },
@@ -548,11 +493,8 @@
           document.getElementById("debug").textContent = "Производители для выбранного типа не заданы.";
           return;
         }
-        // Обновляем iframe для каждого производителя
         updateManufacturerIframes(queryString, manufacturerList);
-        // Делаем видимой правую область с результатами
         document.getElementById("manufacturersContainer").style.display = "flex";
-        // Показываем окно "Все производители" только если общее количество брендов больше 5
         if (manufacturerList.length > 5) {
           document.getElementById("manufacturerControlsContainer").style.display = "block";
         }
@@ -562,6 +504,53 @@
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      setTimeout(window.safeShowSelection, 1000);
+    });
+    
+    /* Функция для добавления товаров в корзину (Подход A) */
+    function addToCartFromMaytoni() {
+      if (!window.currentMaytoniSelection) {
+        alert("Нет данных для добавления в корзину.");
+        return;
+      }
+      let cart = [];
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
+      }
+      for (const [id, group] of Object.entries(window.currentMaytoniSelection)) {
+        cart.push({
+          article: id,
+          component: group.component,
+          count: group.count
+        });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Товары добавлены в корзину.");
+    }
+    
+    /* Функция для открытия модального окна корзины сразу при клике на "Корзина" */
+    function openCartModal() {
+      $("#cartDialog").dialog("open");
+    }
+    
+    /* Инициализация модального окна корзины через jQuery UI Dialog */
+    $(document).ready(function() {
+      $("#cartDialog").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 800,
+        minWidth: 600,
+        minHeight: 300,
+        resizable: true
+      });
+    });
   </script>
 </body>
 </html>
