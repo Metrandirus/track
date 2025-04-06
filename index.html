@@ -74,7 +74,7 @@
       font-size: 12px;
       margin-bottom: 5px;
     }
-    /* Модальное окно корзины */
+    /* Модальное окно корзины – теперь окно открывается сразу при клике на кнопку "Корзина" */
     #cartModal {
       display: none;
       position: fixed;
@@ -92,6 +92,7 @@
       padding: 20px;
       border-radius: 8px;
       position: relative;
+      /* Сделаем окно изменяемым по размеру через jQuery UI */
     }
     #closeCartModal {
       position: absolute;
@@ -197,7 +198,7 @@
       font-size: 12px;
       color: red;
     }
-    /* Правая область: блок с производителями (столбцы с брендами) */
+    /* Блок с производителями */
     .manufacturers-container {
       flex: 2 1 500px;
       display: none;
@@ -229,7 +230,6 @@
       border: none;
       width: 100%;
     }
-    /* Блок для кнопки "В корзину" под iframe производителя - временно удалён */
     .manufacturer-total {
       padding: 5px;
       background-color: #fafafa;
@@ -256,6 +256,7 @@
   <div class="container">
     <!-- Левая область: форма выбора -->
     <div class="form-container">
+      <h2>Подбор трековой системы</h2>
       <label for="type">Тип:</label>
       <select id="type" name="type">
         <option value="one-phase">Однофазный</option>
@@ -336,7 +337,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно корзины -->
+  <!-- Модальное окно корзины, которое открывается сразу при клике на "Корзина" -->
   <div id="cartModal">
     <div id="cartModalContent">
       <button id="closeCartModal" onclick="closeCartModal()">✖</button>
@@ -480,6 +481,7 @@
       if (e.target && e.target.matches("#manufacturerCheckboxes input[type='checkbox']")) {
         const manufacturer = e.target.value;
         const visible = e.target.checked;
+        // Ищем все колонки с данным производителем и скрываем/показываем их
         const cols = document.querySelectorAll(`.manufacturer-column[data-manufacturer="${manufacturer}"]`);
         cols.forEach(col => {
           col.style.display = visible ? "flex" : "none";
@@ -489,6 +491,7 @@
 
     /* Функция для открытия модального окна корзины */
     function openCartModal() {
+      // Открываем окно корзины сразу (без дополнительного клика)
       document.getElementById("cartModal").style.display = "flex";
     }
 
@@ -562,6 +565,47 @@
         console.error("Ошибка в safeShowSelection:", e);
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      setTimeout(window.safeShowSelection, 1000);
+    });
+    
+    /***** Функция для добавления товаров в корзину (Подход A) *****/
+    function addToCartFromMaytoni() {
+      if (!window.currentMaytoniSelection) {
+        alert("Нет данных для добавления в корзину.");
+        return;
+      }
+      let cart = [];
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
+      }
+      // Преобразуем сгруппированный объект в плоский массив объектов { article, component, count }
+      for (const [id, group] of Object.entries(window.currentMaytoniSelection)) {
+        cart.push({
+          article: id,
+          component: group.component,
+          count: group.count
+        });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Товары добавлены в корзину.");
+    }
+    
+    /* Функция для открытия модального окна корзины сразу при клике на кнопку "Корзина" */
+    function openCartModal() {
+      document.getElementById("cartModal").style.display = "flex";
+    }
+    
+    /* Функция для закрытия модального окна корзины */
+    function closeCartModal() {
+      document.getElementById("cartModal").style.display = "none";
     }
   </script>
 </body>
