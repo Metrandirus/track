@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Подключаем jQuery и jQuery UI для возможности изменения размера окна -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <style>
     html, body {
       margin: 0;
@@ -12,7 +16,7 @@
       font-family: Arial, sans-serif;
     }
     .container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 20px auto;
       background-color: white;
       padding: 20px;
@@ -22,6 +26,21 @@
     h1 {
       text-align: center;
       margin-bottom: 20px;
+    }
+    /* Кнопка обновления корзины */
+    .refresh-cart-button {
+      display: block;
+      margin: 0 auto 10px auto;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .refresh-cart-button:hover {
+      background-color: #333;
     }
     .results-table {
       width: 100%;
@@ -146,7 +165,7 @@
         let overallTotal = 0;
         cart.forEach((item, index) => {
           const comp = item.component || {};
-          // Берем артикул из сохраненного поля article; если его нет, пробуем из comp.id
+          // Выводим артикул из поля article, сохраненного при добавлении
           const article = item.article || comp.id || "N/A";
           const name = comp.name || "Товар";
           const image = comp.image || "";
@@ -196,6 +215,14 @@
     
     document.addEventListener("DOMContentLoaded", loadCart);
     window.addEventListener("pageshow", loadCart);
+    
+    // Делаем окно корзины изменяемым с помощью jQuery UI
+    $(document).ready(function(){
+      $("#cartContent").resizable({
+        minWidth: 400,
+        minHeight: 300
+      });
+    });
   </script>
 </body>
 </html>
