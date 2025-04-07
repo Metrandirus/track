@@ -17,7 +17,7 @@
       padding: 0;
       box-sizing: border-box;
     }
-    /* Шапка страницы */
+    /* Шапка страницы с использованием flexbox */
     #headerRow {
       width: 100%;
       background-color: #fff;
@@ -26,18 +26,17 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
       position: relative;
     }
+    /* Заголовок занимает всю оставшуюся ширину слева */
     #headerRow h1 {
+      flex: 1;
       margin: 0;
       font-size: 20px;
     }
-    /* Кнопка "Корзина" – теперь расположена левее блока "Все производители" */
+    /* Кнопка "Корзина" – располагается сразу перед блоком "Все производители" */
     #cartButton {
-      position: absolute;
-      right: 120px;
-      top: 10px;
       background-color: #000;
       color: #fff;
       border: none;
@@ -45,12 +44,10 @@
       cursor: pointer;
       font-size: 14px;
       border-radius: 4px;
+      margin-right: 10px;
     }
-    /* Блок "Все производители" располагается ближе к правому краю */
+    /* Блок "Все производители" – располагается справа */
     #manufacturerControlsContainer {
-      position: absolute;
-      right: 20px;
-      top: 10px;
       width: 200px;
       border: 1px solid #ddd;
       background-color: #fff;
@@ -218,7 +215,7 @@
   <!-- Шапка страницы -->
   <div id="headerRow">
     <h1>Подбор трековой системы</h1>
-    <!-- Кнопка "Корзина" в правом верхнем углу, которая открывает модальное окно сразу -->
+    <!-- Кнопка "Корзина" расположена в правом верхнем углу, перед блоком "Все производители" -->
     <button id="cartButton" onclick="openCartModal()">Корзина</button>
     <div id="manufacturerControlsContainer">
       <div id="manufacturerHeader">Все производители</div>
@@ -415,7 +412,7 @@
       updateManufacturerColumnsDisplay(manufacturerList);
     }
 
-    /* Функция обновления блока управления производителями (чекбоксы) */
+    /* Функция обновления блока управления производителями (чекбоксы для скрытия/показывания столбцов) */
     function updateManufacturerControls(manufacturerList) {
       const controlsDiv = document.getElementById("manufacturerCheckboxes");
       controlsDiv.innerHTML = "";
@@ -544,7 +541,7 @@
       alert("Товары добавлены в корзину.");
     }
     
-    /* Функция для открытия модального окна корзины (при клике на "Корзина") */
+    /* Функция для открытия модального окна корзины (при клике на кнопку "Корзина") */
     function openCartModal() {
       $("#cartDialog").dialog("open");
     }
