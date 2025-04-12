@@ -101,6 +101,16 @@
   </div>
   
   <script>
+    /***** Функция проверки режима монтажа для AMBRELA *****/
+    function checkMountingForStLuce(mountingParam) {
+      if (mountingParam !== "surface" && mountingParam !== "recessed" && mountingParam !== "stretch-ceiling" && mountingParam !== "hanging") {
+        document.getElementById("resultContainer").style.display = "none";
+        document.getElementById("debug").textContent = "Для AMBRELA доступны только режимы surface, recessed, stretch-ceiling и hanging.";
+        return false;
+      }
+      return true;
+    }
+    
     /***** Встроенные данные для AMBRELA *****/
     var products = {
       "ambrela": {
@@ -280,8 +290,6 @@
     };
 
     /***** Функции расчёта трековых сегментов для AMBRELA *****/
-    // Если lengthOptions содержит только 2 варианта (для recessed), то используем варианты 1м и 2м,
-    // иначе стандартная логика.
     function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
       if (lengthOptions.length === 2) {
@@ -355,13 +363,12 @@
         alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
       }
     };
-
-    // Основная функция подбора для AMBRELA
+    
+    /***** Основная функция подбора для AMBRELA *****/
     window.showSelection = function() {
       console.log("Начало работы showSelection (AMBRELA)");
 
       const params = new URLSearchParams(window.location.search);
-      // Приводим параметры к нижнему регистру
       const color = (params.get("color") || "black").toLowerCase();
       let mountingParam = (params.get("mounting") || "surface").toLowerCase();
       if (!checkMountingForStLuce(mountingParam)) {
@@ -373,7 +380,6 @@
 
       console.log("Параметры подбора (AMBRELA):", { color, mounting: mountingParam, shape, lengthA, lengthB });
 
-      // Для режимов stretch-ceiling и hanging берём базовые треки из surface
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products.ambrela && products.ambrela[color] && products.ambrela[color]["surface"]) :
           (products.ambrela && products.ambrela[color] && products.ambrela[color][mountingParam]);
@@ -478,17 +484,16 @@
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
       } else if (shape === "x") {
-        // X‑образная система: два набора шинопроводов и один X‑образный коннектор
+        // X‑образная система: два набора шинопроводов и один X‑образный коннектор, плюс дополнительный X‑коннектор
         let busbarA = getTracksForStLuce(lengthA, lengthOptions);
         let busbarB = getTracksForStLuce(lengthB, lengthOptions);
         selectedItems = busbarA.concat(busbarB);
-        // Добавляем X‑образный коннектор для базового соединения (если есть в connectors)
+        // Если в connectors есть базовый X‑коннектор, используем его
         if (effectiveProduct.connectors["x"] && effectiveProduct.connectors["x"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["x"][0]));
         }
-        // Добавляем дополнительный X‑коннектор по выбору: для черного – GL7172 BK, для белого – GL7171 WH
+        // Добавляем дополнительный X‑коннектор по выбору: для черного – "GL7172 BK", для белого – "GL7171 WH"
         selectedItems.push({ id: (color === "black") ? "GL7172 BK" : "GL7171 WH" });
-        // Можно также добавить недостающие прямые коннекторы между сегментами, если требуется
       } else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для AMBRELA.");
       }
@@ -625,7 +630,7 @@
         if (!groupedItems[id]) {
           // Сначала ищем описание компонента в products.ambrela[color]["surface"].components,
           // затем в products.ambrela[color]["recessed"].components (если есть), затем в suspensionMappingAmbrela,
-          // затем в additionalMappingAmbrela, либо пустой объект.
+          // затем в additionalMappingAmbrela
           let comp = (products.ambrela[color]["surface"].components[id]) ||
                      (products.ambrela[color]["recessed"] && products.ambrela[color]["recessed"].components[id]) ||
                      suspensionMappingAmbrela[id] ||
@@ -657,7 +662,7 @@
           totalPrice += cost;
           tbodyHTML += `
             <tr>
-              <td><img src="images/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
+              <td><img src="images/st luce/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} ${id}</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
