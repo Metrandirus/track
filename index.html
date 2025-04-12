@@ -17,7 +17,7 @@
       padding: 0;
       box-sizing: border-box;
     }
-    /* Шапка страницы с использованием flexbox */
+    /* Шапка страницы */
     #headerRow {
       width: 100%;
       background-color: #fff;
@@ -26,17 +26,18 @@
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
       position: relative;
     }
-    /* Заголовок занимает всю оставшуюся ширину слева */
     #headerRow h1 {
-      flex: 1;
       margin: 0;
       font-size: 20px;
     }
-    /* Кнопка "Корзина" – располагается сразу перед блоком "Все производители" */
+    /* Кнопка "Корзина" – расположена в правом верхнем углу, перед блоком "Все производители" */
     #cartButton {
+      position: absolute;
+      right: 300px;
+      top: 10px;
       background-color: #000;
       color: #fff;
       border: none;
@@ -44,10 +45,12 @@
       cursor: pointer;
       font-size: 14px;
       border-radius: 4px;
-      margin-right: 10px;
     }
-    /* Блок "Все производители" – располагается справа */
+    /* Блок "Все производители" – расположенный в правом верхнем углу */
     #manufacturerControlsContainer {
+      position: absolute;
+      right: 20px;
+      top: 10px;
       width: 200px;
       border: 1px solid #ddd;
       background-color: #fff;
@@ -215,7 +218,7 @@
   <!-- Шапка страницы -->
   <div id="headerRow">
     <h1>Подбор трековой системы</h1>
-    <!-- Кнопка "Корзина" расположена в правом верхнем углу, перед блоком "Все производители" -->
+    <!-- Кнопка "Корзина" в правом верхнем углу -->
     <button id="cartButton" onclick="openCartModal()">Корзина</button>
     <div id="manufacturerControlsContainer">
       <div id="manufacturerHeader">Все производители</div>
@@ -412,7 +415,7 @@
       updateManufacturerColumnsDisplay(manufacturerList);
     }
 
-    /* Функция обновления блока управления производителями (чекбоксы для скрытия/показывания столбцов) */
+    /* Функция обновления блока управления производителями (чекбоксы) */
     function updateManufacturerControls(manufacturerList) {
       const controlsDiv = document.getElementById("manufacturerCheckboxes");
       controlsDiv.innerHTML = "";
@@ -461,6 +464,12 @@
         const shape = document.getElementById("selectedShape").value;
         const lengthA = encodeURIComponent(document.getElementById("lengthA").value.trim());
         const lengthB = encodeURIComponent(document.getElementById("lengthB").value.trim());
+        
+        // Если поле "Длина а" пустое или фигура не выбрана – не показываем производителей
+        if (!document.getElementById("lengthA").value.trim() || !document.getElementById("selectedShape").value) {
+          document.getElementById("manufacturersContainer").style.display = "none";
+          return;
+        }
         
         let lights = [];
         const lightingRows = document.querySelectorAll(".lighting-row");
