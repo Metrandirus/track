@@ -101,11 +101,6 @@
   </div>
   
   <script>
-    // Функция для очистки артикула от пробелов (для формирования корректного пути к изображению)
-    function cleanArticle(article) {
-      return article.replace(/\s+/g, "");
-    }
-    
     // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
@@ -505,6 +500,7 @@
         let busbarA = getTracksForStLuce(lengthA, lengthOptions);
         let busbarB = getTracksForStLuce(lengthB, lengthOptions);
         selectedItems = busbarA.concat(busbarB);
+        // Если в данных есть X‑образный коннектор, используем его
         if (effectiveProduct.connectors["x"] && effectiveProduct.connectors["x"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["x"][0]));
         }
@@ -586,8 +582,7 @@
         for (let i = 0; i < capCount; i++) {
           selectedItems.push({ id: capId });
         }
-      }
-      else if (mountingParam === "recessed") {
+      } else if (mountingParam === "recessed") {
         let effectiveTrackLength = 0;
         if (shape === "straight") {
           effectiveTrackLength = lengthA;
@@ -676,10 +671,10 @@
           }
           let cost = qty * comp.price;
           totalPrice += cost;
-          // Выводим название товара только один раз с артикулом (без двойного повторения)
+          // Выводим название товара один раз с артикулом (исходным id)
           tbodyHTML += `
             <tr>
-              <td><img src="images/ambrela/${cleanArticle(id)}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} (${id})</td>
+              <td><img src="images/ambrela/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} (${id})</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
