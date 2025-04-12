@@ -571,7 +571,7 @@
           }
         }
       }
-    
+      
       if (mountingParam === "hanging") {
         let effectiveTrackLength = 0;
         if (shape === "straight") {
@@ -591,7 +591,7 @@
           selectedItems.push({ id: suspensionId });
         }
       }
-    
+      
       console.log("Финальный результат подбора (NOVOTECH):", selectedItems);
     
       /***** Группировка элементов *****/
@@ -604,6 +604,8 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
+          // Сначала ищем описание компонента в products.novotech[color]["surface"].components,
+          // затем в suspensionMapping, затем используем пустой объект.
           let comp = (products.novotech[color]["surface"].components[id]) || suspensionMapping[id] || {};
           groupedItems[id] = { totalLength: 0, count: 0, component: comp, isTrack: isTrack };
         }
@@ -620,7 +622,7 @@
         let comp = group.component;
         if (comp && comp.name) {
           let qty;
-          if (group.isTrack && group.totalLength > 0) {
+          if (group.hasOwnProperty("totalLength") && group.totalLength > 0) {
             let nominal = getNominalLength(id);
             qty = Math.ceil(group.totalLength / nominal);
           } else {
@@ -671,9 +673,10 @@
         alert("Ошибка чтения корзины.");
         return;
       }
-      // Преобразуем сгруппированный объект в плоский массив объектов { component, count }
+      // Преобразуем сгруппированный объект в плоский массив объектов с артикулом, компонентом и количеством
       for (const [id, group] of Object.entries(window.currentNovotechSelection)) {
         cart.push({
+          article: id,  // сохраняем артикул (идентификатор)
           component: group.component,
           count: group.count
         });
