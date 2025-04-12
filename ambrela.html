@@ -101,6 +101,11 @@
   </div>
   
   <script>
+    // Добавляем функцию-обёртку для коннекторов, если она не была определена ранее
+    function wrapConnector(conn) {
+      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
+    }
+    
     /***** Функция проверки режима монтажа для AMBRELA *****/
     function checkMountingForStLuce(mountingParam) {
       if (mountingParam !== "surface" && mountingParam !== "recessed" && mountingParam !== "stretch-ceiling" && mountingParam !== "hanging") {
@@ -293,6 +298,7 @@
     function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
       if (lengthOptions.length === 2) {
+        // Для recessed: доступны только варианты 1м и 2м.
         if (legLength <= 100) {
           pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else if (legLength <= 200) {
@@ -312,6 +318,7 @@
           }
         }
       } else {
+        // Для вариантов с тремя длинами (surface, stretch-ceiling, hanging)
         if (legLength <= 100) {
           pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else if (legLength <= 200) {
@@ -488,14 +495,13 @@
         let busbarA = getTracksForStLuce(lengthA, lengthOptions);
         let busbarB = getTracksForStLuce(lengthB, lengthOptions);
         selectedItems = busbarA.concat(busbarB);
-        // Если в connectors есть базовый X‑коннектор, используем его
         if (effectiveProduct.connectors["x"] && effectiveProduct.connectors["x"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["x"][0]));
         }
-        // Добавляем дополнительный X‑коннектор по выбору: для черного – "GL7172 BK", для белого – "GL7171 WH"
+        // Добавляем дополнительный X‑коннектор: для черного – "GL7172 BK", для белого – "GL7171 WH"
         selectedItems.push({ id: (color === "black") ? "GL7172 BK" : "GL7171 WH" });
       } else {
-        throw new Error("Логика для фигуры '" + shape + "' не реализована для AMBRELA.");
+        throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
       }
       
       // Для систем "straight" – добавляем недостающие прямые коннекторы (только для прямых систем)
@@ -629,8 +635,8 @@
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
           // Сначала ищем описание компонента в products.ambrela[color]["surface"].components,
-          // затем в products.ambrela[color]["recessed"].components (если есть), затем в suspensionMappingAmbrela,
-          // затем в additionalMappingAmbrela
+          // затем в products.ambrela[color]["recessed"].components (если есть),
+          // затем в suspensionMappingAmbrela, затем в additionalMappingAmbrela
           let comp = (products.ambrela[color]["surface"].components[id]) ||
                      (products.ambrela[color]["recessed"] && products.ambrela[color]["recessed"].components[id]) ||
                      suspensionMappingAmbrela[id] ||
@@ -701,7 +707,7 @@
         alert("Ошибка чтения корзины.");
         return;
       }
-      // Преобразуем сгруппированный объект в плоский массив объектов
+      // Преобразуем сгруппированный объект в плоский массив объектов { article, component, count }
       for (const [id, group] of Object.entries(window.currentAmbrelaSelection)) {
         cart.push({
           article: id,
