@@ -101,6 +101,11 @@
   </div>
   
   <script>
+    // Функция для очистки артикула от пробелов (для формирования корректного пути к изображению)
+    function cleanArticle(article) {
+      return article.replace(/\s+/g, "");
+    }
+    
     // Функция-обёртка для коннекторов
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
@@ -250,10 +255,15 @@
               "L-shape": ["GL7070 WH"],
               "T-shape": ["GL7077 WH"]
             },
-            "additionalComponents": ["ST001MP-112S"],
             "components": {
-              "ST001MP-112S": { "name": "Профиль для натяжного потолка AMBRELA", "price": 5490, "image": "images/ambrela/GL7132.jpg" }
-            }
+              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/ambrela/GL7101.jpg" },
+              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/ambrela/GL7103.jpg" },
+              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/ambrela/GL7105.jpg" },
+              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/ambrela/GL7065.jpg" },
+              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/ambrela/GL7070.jpg" },
+              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/ambrela/GL7077.jpg" }
+            },
+            "additionalComponents": ["ST001MP-112S"]
           },
           "hanging": {
             "lengthOptions": [
@@ -498,13 +508,13 @@
         if (effectiveProduct.connectors["x"] && effectiveProduct.connectors["x"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["x"][0]));
         }
-        // Дополнительный X‑коннектор для выбранной фигуры: для черного — "GL7172 BK", для белого — "GL7171 WH"
+        // Дополнительный X‑коннектор: для черного — "GL7172 BK", для белого — "GL7171 WH"
         selectedItems.push({ id: (color === "black") ? "GL7172 BK" : "GL7171 WH" });
       } else {
         throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
       }
       
-      // Для систем "straight" – добавляем недостающие прямые коннекторы, если они не были добавлены.
+      // Для системы "straight" – добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -666,10 +676,10 @@
           }
           let cost = qty * comp.price;
           totalPrice += cost;
-          // Выводим название товара и артикул (id) только один раз, без дублирования
+          // Выводим название товара только один раз с артикулом (без двойного повторения)
           tbodyHTML += `
             <tr>
-              <td><img src="images/ambrela/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} (${id})</td>
+              <td><img src="images/ambrela/${cleanArticle(id)}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} (${id})</td>
               <td style="background-color: white; text-align: center;">${qty} шт.</td>
               <td>${comp.price}₽</td>
               <td>${cost}₽</td>
