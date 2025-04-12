@@ -64,6 +64,16 @@
       color: red;
       margin-top: 10px;
     }
+    .add-to-cart-button {
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 5px;
+      background-color: #000;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+    }
   </style>
 </head>
 <body>
@@ -84,6 +94,8 @@
         </tbody>
       </table>
       <div id="totalPrice" class="total-price"></div>
+      <!-- Кнопка "В корзину" -->
+      <button id="addToCartFromAmbrela" class="add-to-cart-button" onclick="addToCartFromAmbrela()">В корзину</button>
     </div>
     <div id="debug" class="debug"></div>
   </div>
@@ -251,8 +263,7 @@
         }
       }
     };
-    /***** Конец встроенных данных *****/
-
+    
     /***** Дополнительные сопоставления для AMBRELA *****/
     var suspensionMappingAmbrela = {
       "GL7192 BK": { "name": "Подвес черный AMBRELA", "price": 310, "image": "images/GL7192.jpg" },
@@ -268,50 +279,12 @@
       "GL7208": { "name": "Соединитель угловой для профиля", "price": 170, "image": "images/GL7208.jpg" }
     };
 
-    // Функция проверки режима монтажа для ST LUCE/AMBRELA
-    function checkMountingForStLuce(mountingParam) {
-      if (mountingParam !== "surface" && mountingParam !== "recessed" && mountingParam !== "stretch-ceiling" && mountingParam !== "hanging") {
-        document.getElementById("resultContainer").style.display = "none";
-        document.getElementById("debug").textContent = "Для ST LUCE/AMBRELA доступны только режимы surface, recessed, stretch-ceiling и hanging.";
-        return false;
-      }
-      return true;
-    }
-
-    // Функция изменения высоты iframe (оставлена для совместимости)
-    window.resizeIframe = function(iframe) {
-      try {
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
-        if (doc && doc.body && doc.body.scrollHeight) {
-          iframe.style.height = doc.body.scrollHeight + "px";
-        }
-      } catch (e) {
-        console.error("Ошибка при изменении высоты iframe:", e);
-      }
-    };
-
-    // Глобальная функция safeShowSelection для AMBRELA
-    window.safeShowSelection = function() {
-      try {
-        showSelection();
-      } catch (e) {
-        console.error("Ошибка в showSelection:", e);
-        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
-      }
-    };
-
-    // Функция-обёртка для коннекторов
-    function wrapConnector(conn) {
-      return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
-    }
-
-    // Функция для подбора трековых сегментов для AMBRELA.
-    // Если lengthOptions содержит только два элемента (для recessed), используем логику с вариантами 1м и 2м.
-    // Если вариантов три – стандартная логика.
+    /***** Функции расчёта трековых сегментов для AMBRELA *****/
+    // Если lengthOptions содержит только 2 варианта (для recessed), то используем варианты 1м и 2м,
+    // иначе стандартная логика.
     function getTracksForStLuce(legLength, lengthOptions) {
       let pieces = [];
       if (lengthOptions.length === 2) {
-        // Для recessed: доступны только 1м и 2м варианты.
         if (legLength <= 100) {
           pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else if (legLength <= 200) {
@@ -331,7 +304,6 @@
           }
         }
       } else {
-        // Для вариантов с тремя длинами (surface, stretch-ceiling, hanging)
         if (legLength <= 100) {
           pieces.push({ id: lengthOptions[0].items[0], pieceLength: 100 });
         } else if (legLength <= 200) {
@@ -363,8 +335,7 @@
     function getTracksForStLuceSurface(legLength, lengthOptions) {
       return getTracksForStLuce(legLength, lengthOptions);
     }
-
-    // Функция для определения номинальной длины трека по его id для ST LUCE/AMBRELA.
+    
     function getNominalLength(id) {
       if (id.indexOf("7101") !== -1 || id.indexOf("7121") !== -1) return 100;
       if (id.indexOf("7102") !== -1 || id.indexOf("7122") !== -1) return 100;
@@ -374,13 +345,23 @@
       if (id.indexOf("7106") !== -1) return 300;
       return 100;
     }
+    
+    // Глобальная функция safeShowSelection для AMBRELA
+    window.safeShowSelection = function() {
+      try {
+        showSelection();
+      } catch (e) {
+        console.error("Ошибка в showSelection:", e);
+        alert("Произошла ошибка при подборе. Проверьте консоль для подробностей.");
+      }
+    };
 
-    // Основная функция подбора для ST LUCE/AMBRELA
+    // Основная функция подбора для AMBRELA
     window.showSelection = function() {
       console.log("Начало работы showSelection (AMBRELA)");
 
       const params = new URLSearchParams(window.location.search);
-      // Приводим параметры цвета и режима монтажа к нижнему регистру
+      // Приводим параметры к нижнему регистру
       const color = (params.get("color") || "black").toLowerCase();
       let mountingParam = (params.get("mounting") || "surface").toLowerCase();
       if (!checkMountingForStLuce(mountingParam)) {
@@ -414,37 +395,33 @@
 
       // Логика подбора по фигурам:
       if (shape === "straight") {
-        selectedItems = (mountingParam === "recessed") ?
-                        getTracksForStLuceRecessed(lengthA, lengthOptions) :
-                        getTracksForStLuceSurface(lengthA, lengthOptions);
+        if (mountingParam === "recessed") {
+          selectedItems = getTracksForStLuceRecessed(lengthA, lengthOptions);
+        } else {
+          selectedItems = getTracksForStLuceSurface(lengthA, lengthOptions);
+        }
       } else if (shape === "L-shape") {
-        let legATracks = (mountingParam === "recessed") ?
-                         getTracksForStLuceRecessed(lengthA, lengthOptions) :
-                         getTracksForStLuceSurface(lengthA, lengthOptions);
-        let legBTracks = (mountingParam === "recessed") ?
-                         getTracksForStLuceRecessed(lengthB, lengthOptions) :
-                         getTracksForStLuceSurface(lengthB, lengthOptions);
+        let legATracks, legBTracks;
+        if (mountingParam === "recessed") {
+          legATracks = getTracksForStLuceRecessed(lengthA, lengthOptions);
+          legBTracks = getTracksForStLuceRecessed(lengthB, lengthOptions);
+        } else {
+          legATracks = getTracksForStLuceSurface(lengthA, lengthOptions);
+          legBTracks = getTracksForStLuceSurface(lengthB, lengthOptions);
+        }
         selectedItems = legATracks.concat(legBTracks);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
         }
-        if (legATracks.length > 1) {
-          for (let i = 0; i < legATracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
-        if (legBTracks.length > 1) {
-          for (let i = 0; i < legBTracks.length - 1; i++) {
-            usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
-          }
-        }
       } else if (shape === "T-shape") {
-        let topTracks = (mountingParam === "recessed") ?
-                        getTracksForStLuceRecessed(lengthA, lengthOptions) :
-                        getTracksForStLuceSurface(lengthA, lengthOptions);
-        let verticalTracks = (mountingParam === "recessed") ?
-                             getTracksForStLuceRecessed(lengthB, lengthOptions) :
-                             getTracksForStLuceSurface(lengthB, lengthOptions);
+        let topTracks, verticalTracks;
+        if (mountingParam === "recessed") {
+          topTracks = getTracksForStLuceRecessed(lengthA, lengthOptions);
+          verticalTracks = getTracksForStLuceRecessed(lengthB, lengthOptions);
+        } else {
+          topTracks = getTracksForStLuceSurface(lengthA, lengthOptions);
+          verticalTracks = getTracksForStLuceSurface(lengthB, lengthOptions);
+        }
         selectedItems = topTracks.concat(verticalTracks);
         if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["T-shape"][0]));
@@ -500,11 +477,23 @@
         for (let i = 0; i < straightForA + straightForB; i++) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
+      } else if (shape === "x") {
+        // X‑образная система: два набора шинопроводов и один X‑образный коннектор
+        let busbarA = getTracksForStLuce(lengthA, lengthOptions);
+        let busbarB = getTracksForStLuce(lengthB, lengthOptions);
+        selectedItems = busbarA.concat(busbarB);
+        // Добавляем X‑образный коннектор для базового соединения (если есть в connectors)
+        if (effectiveProduct.connectors["x"] && effectiveProduct.connectors["x"].length > 0) {
+          usedConnectors.push(wrapConnector(effectiveProduct.connectors["x"][0]));
+        }
+        // Добавляем дополнительный X‑коннектор по выбору: для черного – GL7172 BK, для белого – GL7171 WH
+        selectedItems.push({ id: (color === "black") ? "GL7172 BK" : "GL7171 WH" });
+        // Можно также добавить недостающие прямые коннекторы между сегментами, если требуется
       } else {
-        throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
+        throw new Error("Логика для фигуры '" + shape + "' не реализована для AMBRELA.");
       }
       
-      // Для фигуры "straight" добавляем недостающие прямые коннекторы (только для прямых систем)
+      // Для систем "straight" – добавляем недостающие прямые коннекторы (только для прямых систем)
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -519,63 +508,112 @@
       
       console.log("Подобранные треки (до доп. компонентов):", selectedItems);
       
-      // Режим stretch-ceiling – добавляем профили, торцевые заглушки и угол-соединители.
+      /***** Добавление выбранных светильников *****/
+      let lightsParam = params.get("lights") || "[]";
+      let selectedLightingOptions;
+      try {
+        selectedLightingOptions = JSON.parse(lightsParam);
+      } catch (e) {
+        selectedLightingOptions = [];
+      }
+      selectedLightingOptions.forEach(light => {
+        let lightItem = (lightingMappingMayotech[light.type] && lightingMappingMayotech[light.type][color])
+                          ? lightingMappingMayotech[light.type][color]
+                          : null;
+        if (lightItem) {
+          for (let i = 0; i < parseInt(light.quantity, 10); i++) {
+            selectedItems.push({ id: lightItem.id });
+            if (!components[lightItem.id]) {
+              components[lightItem.id] = {
+                name: lightItem.name,
+                price: lightItem.price,
+                image: lightItem.image
+              };
+            }
+          }
+        }
+      });
+      
+      /***** Дополнительные компоненты по режимам монтажа *****/
       if (mountingParam === "stretch-ceiling") {
-        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        console.log("Общая длина треков (stretch-ceiling):", trackLength, "см");
-        // Для AMBRELA: если общая длина ≤ 900 см – используем профиль 2м, иначе профиль 3м.
-        let profileKey;
-        if (color === "black") {
-          profileKey = (trackLength <= 900) ? "GL7131 BK" : "GL7132 BK";
+        let effectiveTrackLength = 0;
+        if (shape === "straight") {
+          effectiveTrackLength = lengthA;
+        } else if (["L-shape", "T-shape", "P-shape", "x"].includes(shape)) {
+          effectiveTrackLength = lengthA + lengthB;
+        } else if (shape === "rectangle") {
+          effectiveTrackLength = 2 * (lengthA + lengthB);
         } else {
-          profileKey = (trackLength <= 900) ? "GL7131 WH" : "GL7132 WH";
+          effectiveTrackLength = lengthA + lengthB;
         }
-        // Определяем данные профиля из сопоставления
-        var profileMapping = additionalMappingAmbrela[profileKey];
-        if (!profileMapping) {
-          throw new Error("Не найден профиль для ключа " + profileKey);
-        }
-        let profileData = { id: profileKey, pieceLength: (profileKey.indexOf("GL7131") !== -1 ? 200 : 300), price: profileMapping.price };
-        let profileCount = Math.ceil(trackLength / profileData.pieceLength);
-        console.log("Профилей для добавления:", profileCount);
+        console.log("Эффективная длина трековой системы (stretch-ceiling):", effectiveTrackLength, "см");
+        let profileCount = Math.ceil(effectiveTrackLength / 200);
+        console.log("Профилей для добавления (stretch-ceiling):", profileCount);
+        let profileId = (color === "black") ? "135191" : "135192";
         for (let i = 0; i < profileCount; i++) {
-          selectedItems.push({ id: profileData.id, pieceLength: profileData.pieceLength });
+          selectedItems.push({ id: profileId, pieceLength: 200 });
         }
-        // Если форма не "rectangle", добавляем торцевые заглушки
-        if (shape !== "rectangle") {
-          let endCapsCount = (shape === "T-shape") ? 2 : 1;
-          let endCapsId = (color === "black") ? "GL7204 BK" : "GL7203 WH";
-          for (let i = 0; i < endCapsCount; i++) {
-            selectedItems.push({ id: endCapsId });
-          }
+        let capCount = 0;
+        if (shape === "T-shape") {
+          capCount = 3;
+        } else if (shape === "x") {
+          capCount = 4;
+        } else if (["straight", "L-shape", "P-shape", "rectangle"].includes(shape)) {
+          capCount = 2;
         }
-        // Добавляем угол-соединитель профиля для каждого использования углового коннектора
-        let lShapeCount = 0;
-        usedConnectors.forEach(conn => {
-          if (conn.id === effectiveProduct.connectors["L-shape"][0]) {
-            lShapeCount++;
+        let capId = (color === "black") ? "135187" : "135188";
+        for (let i = 0; i < capCount; i++) {
+          selectedItems.push({ id: capId });
+        }
+      }
+      else if (mountingParam === "recessed") {
+        let effectiveTrackLength = 0;
+        if (shape === "straight") {
+          effectiveTrackLength = lengthA;
+        } else if (["L-shape", "T-shape", "P-shape", "x"].includes(shape)) {
+          effectiveTrackLength = lengthA + lengthB;
+        } else if (shape === "rectangle") {
+          effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
+        }
+        console.log("Эффективная длина трековой системы (recessed):", effectiveTrackLength, "см");
+        let profileCount = Math.ceil(effectiveTrackLength / 100);
+        console.log("Встраиваемых профилей для добавления (recessed):", profileCount);
+        for (let i = 0; i < profileCount; i++) {
+          selectedItems.push({ id: "358090", pieceLength: 100 });
+        }
+        if (profileCount > 1) {
+          let connectorCount = profileCount - 1;
+          for (let i = 0; i < connectorCount; i++) {
+            selectedItems.push({ id: "358233" });
           }
-        });
-        console.log("Количество угловых коннекторов (L-shape):", lShapeCount);
-        for (let i = 0; i < lShapeCount; i++) {
-          selectedItems.push({ id: "GL7208" });
         }
       }
       
-      // Режим hanging – добавляем подвесы.
       if (mountingParam === "hanging") {
-        let trackLength = selectedItems.reduce((sum, item) => sum + (item.pieceLength || 0), 0);
-        let suspCount = Math.max(2, 1 + Math.ceil(trackLength / 200));
-        console.log("Общая длина треков (hanging):", trackLength, "см, подвесов для добавления:", suspCount);
-        let suspensionId = (color === "black") ? "GL7192 BK" : "GL7191 WH";
+        let effectiveTrackLength = 0;
+        if (shape === "straight") {
+          effectiveTrackLength = lengthA;
+        } else if (["L-shape", "T-shape", "P-shape", "x"].includes(shape)) {
+          effectiveTrackLength = lengthA + lengthB;
+        } else if (shape === "rectangle") {
+          effectiveTrackLength = 2 * (lengthA + lengthB);
+        } else {
+          effectiveTrackLength = lengthA + lengthB;
+        }
+        console.log("Эффективная длина трековой системы (hanging):", effectiveTrackLength, "см");
+        let suspCount = Math.max(2, 1 + Math.ceil(effectiveTrackLength / 200));
+        console.log("Подвесов для добавления (hanging):", suspCount);
+        let suspensionId = (color === "black") ? "135152" : "135151";
         for (let i = 0; i < suspCount; i++) {
           selectedItems.push({ id: suspensionId });
         }
       }
       
-      console.log("Финальный результат подбора (ST LUCE/AMBRELA):", selectedItems);
+      console.log("Финальный результат подбора (AMBRELA):", selectedItems);
       
-      // Группировка элементов.
+      /***** Группировка элементов *****/
       let groupedItems = {};
       selectedItems.concat(usedConnectors).forEach(itemObj => {
         let id = itemObj.id;
@@ -585,6 +623,9 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
+          // Сначала ищем описание компонента в products.ambrela[color]["surface"].components,
+          // затем в products.ambrela[color]["recessed"].components (если есть), затем в suspensionMappingAmbrela,
+          // затем в additionalMappingAmbrela, либо пустой объект.
           let comp = (products.ambrela[color]["surface"].components[id]) ||
                      (products.ambrela[color]["recessed"] && products.ambrela[color]["recessed"].components[id]) ||
                      suspensionMappingAmbrela[id] ||
@@ -599,14 +640,14 @@
       });
       console.log("Сгруппированные элементы (до расчёта итоговых количеств):", groupedItems);
       
-      // Пересчитываем количество заказываемых единиц для трековых сегментов.
+      // Пересчитываем итоговое количество для трековых сегментов и сумму заказа.
       let totalPrice = 0;
       let tbodyHTML = "";
       for (const [id, group] of Object.entries(groupedItems)) {
         let comp = group.component;
         if (comp && comp.name) {
           let qty;
-          if (group.isTrack && group.totalLength > 0) {
+          if (group.hasOwnProperty("totalLength") && group.totalLength > 0) {
             let nominal = getNominalLength(id);
             qty = Math.ceil(group.totalLength / nominal);
           } else {
@@ -628,14 +669,44 @@
       }
       
       document.getElementById("results").innerHTML = tbodyHTML;
-      document.getElementById("totalPrice").innerHTML = `<div>Итого: ${totalPrice}₽</div>`;
+      document.getElementById("totalPrice").innerHTML = `<div>Итоговая стоимость: ${totalPrice}₽</div>`;
       document.getElementById("resultContainer").style.display = "block";
       console.log("Подбор завершён успешно (AMBRELA).");
+      
+      // Сохраняем сгруппированные данные в глобальную переменную для последующего добавления в корзину
+      window.currentAmbrelaSelection = groupedItems;
     };
 
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(window.safeShowSelection, 1000);
     });
+
+    /***** Функция для добавления товаров в корзину (Подход A для AMBRELA) *****/
+    function addToCartFromAmbrela() {
+      if (!window.currentAmbrelaSelection) {
+        alert("Нет данных для добавления в корзину.");
+        return;
+      }
+      let cart = [];
+      try {
+        if (localStorage.getItem("cart")) {
+          cart = JSON.parse(localStorage.getItem("cart"));
+        }
+      } catch (e) {
+        alert("Ошибка чтения корзины.");
+        return;
+      }
+      // Преобразуем сгруппированный объект в плоский массив объектов
+      for (const [id, group] of Object.entries(window.currentAmbrelaSelection)) {
+        cart.push({
+          article: id,
+          component: group.component,
+          count: group.count
+        });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Товары добавлены в корзину.");
+    }
   </script>
 </body>
 </html>
