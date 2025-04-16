@@ -35,11 +35,19 @@
       text-align: left;
       word-wrap: break-word;
       font-size: 13px;
+      vertical-align: middle;
     }
     .results-table th {
       background-color: #f4f4f4;
       font-weight: bold;
     }
+    /* Первая колонка – Артикул (выводится один раз) */
+    .results-table th:nth-child(1),
+    .results-table td:nth-child(1) {
+      width: 100px;
+      text-align: center;
+    }
+    /* Колонки для цены и количества */
     .results-table th:nth-child(3),
     .results-table td:nth-child(3) {
       width: 90px;
@@ -49,15 +57,17 @@
       width: 40px;
       text-align: center;
     }
+    .results-table img {
+      width: 50px;
+      height: auto;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
     .total-price {
       font-weight: bold;
       text-align: right;
       margin-top: 10px;
       font-size: 14px;
-    }
-    .result-container {
-      display: none;
-      overflow: visible;
     }
     .debug {
       font-size: 12px;
@@ -73,6 +83,9 @@
       color: #fff;
       border: none;
       border-radius: 3px;
+    }
+    .add-to-cart-button:hover {
+      background-color: #333;
     }
   </style>
 </head>
@@ -101,7 +114,7 @@
   </div>
   
   <script>
-    // Функция-обёртка для коннекторов
+    /***** Функция-обёртка для коннекторов *****/
     function wrapConnector(conn) {
       return (typeof conn === "object" && conn !== null && conn.id !== undefined) ? conn : { id: conn };
     }
@@ -132,12 +145,12 @@
               "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/ambrela/GL7102.jpg" },
-              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/ambrela/GL7104.jpg" },
-              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/ambrela/GL7106.jpg" },
-              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/ambrela/GL7066.jpg" },
-              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/ambrela/GL7071.jpg" },
-              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/ambrela/GL7078.jpg" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/ambrela/GL7102 BK.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/ambrela/GL7104 BK.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/ambrela/GL7106 BK.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/ambrela/GL7066 BK.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/ambrela/GL7071 BK.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/ambrela/GL7078 BK.jpg" }
             }
           },
           "recessed": {
@@ -151,11 +164,11 @@
               "T-shape": ["GL7168 BK"]
             },
             "components": {
-              "GL7122 BK": { "name": "Шинопровод встраиваемый черный 1м", "price": 1190, "image": "images/ambrela/GL7122.jpg" },
-              "GL7124 BK": { "name": "Шинопровод встраиваемый черный 2м", "price": 2380, "image": "images/ambrela/GL7124.jpg" },
-              "GL7160 BK": { "name": "Коннектор прямой черный (встраиваемый)", "price": 205, "image": "images/ambrela/GL7160.jpg" },
-              "GL7164 BK": { "name": "Коннектор угловой черный (встраиваемый)", "price": 225, "image": "images/ambrela/GL7164.jpg" },
-              "GL7168 BK": { "name": "Коннектор T-образный черный (встраиваемый)", "price": 410, "image": "images/ambrela/GL7168.jpg" }
+              "GL7122 BK": { "name": "Шинопровод встраиваемый черный 1м", "price": 1190, "image": "images/ambrela/GL7122 BK.jpg" },
+              "GL7124 BK": { "name": "Шинопровод встраиваемый черный 2м", "price": 2380, "image": "images/ambrela/GL7124 BK.jpg" },
+              "GL7160 BK": { "name": "Коннектор прямой черный (встраиваемый)", "price": 205, "image": "images/ambrela/GL7160 BK.jpg" },
+              "GL7164 BK": { "name": "Коннектор угловой черный (встраиваемый)", "price": 225, "image": "images/ambrela/GL7164 BK.jpg" },
+              "GL7168 BK": { "name": "Коннектор T-образный черный (встраиваемый)", "price": 410, "image": "images/ambrela/GL7168 BK.jpg" }
             }
           },
           "stretch-ceiling": {
@@ -170,12 +183,12 @@
               "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/ambrela/GL7102.jpg" },
-              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/ambrela/GL7104.jpg" },
-              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/ambrela/GL7106.jpg" },
-              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/ambrela/GL7066.jpg" },
-              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/ambrela/GL7071.jpg" },
-              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/ambrela/GL7078.jpg" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/ambrela/GL7102 BK.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/ambrela/GL7104 BK.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/ambrela/GL7106 BK.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/ambrela/GL7066 BK.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/ambrela/GL7071 BK.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/ambrela/GL7078 BK.jpg" }
             },
             "additionalComponents": []
           },
@@ -191,12 +204,12 @@
               "T-shape": ["GL7078 BK"]
             },
             "components": {
-              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/ambrela/GL7102.jpg" },
-              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/ambrela/GL7104.jpg" },
-              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/ambrela/GL7106.jpg" },
-              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/ambrela/GL7066.jpg" },
-              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/ambrela/GL7071.jpg" },
-              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/ambrela/GL7078.jpg" }
+              "GL7102 BK": { "name": "Шинопровод накладной черный 1м", "price": 870, "image": "images/ambrela/GL7102 BK.jpg" },
+              "GL7104 BK": { "name": "Шинопровод накладной черный 2м", "price": 1740, "image": "images/ambrela/GL7104 BK.jpg" },
+              "GL7106 BK": { "name": "Шинопровод накладной черный 3м", "price": 2600, "image": "images/ambrela/GL7106 BK.jpg" },
+              "GL7066 BK": { "name": "Коннектор прямой черный", "price": 295, "image": "images/ambrela/GL7066 BK.jpg" },
+              "GL7071 BK": { "name": "Коннектор угловой черный", "price": 295, "image": "images/ambrela/GL7071 BK.jpg" },
+              "GL7078 BK": { "name": "Коннектор T-образный черный", "price": 510, "image": "images/ambrela/GL7078 BK.jpg" }
             }
           }
         },
@@ -213,71 +226,61 @@
               "T-shape": ["GL7077 WH"]
             },
             "components": {
-              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/ambrela/GL7101.jpg" },
-              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/ambrela/GL7103.jpg" },
-              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/ambrela/GL7105.jpg" },
-              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/ambrela/GL7065.jpg" },
-              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/ambrela/GL7070.jpg" },
-              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/ambrela/GL7077.jpg" }
+              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/ambrela/GL7101 WH.jpg" },
+              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/ambrela/GL7103 WH.jpg" },
+              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/ambrela/GL7105 WH.jpg" },
+              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/ambrela/GL7065 WH.jpg" },
+              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/ambrela/GL7070 WH.jpg" },
+              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/ambrela/GL7077 WH.jpg" }
+            }
+          },
+          "hanging": {
+            "lengthOptions": [
+              { "min": 0, "max": 100, "items": ["GL7101 WH"] },
+              { "min": 101, "max": 200, "items": ["GL7103 WH"] }
+            ],
+            "connectors": {
+              "straight": ["GL7065 WH"],
+              "L-shape": ["GL7070 WH"],
+              "T-shape": ["GL7077 WH"]
+            },
+            "components": {
+              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/ambrela/GL7101 WH.jpg" },
+              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/ambrela/GL7103 WH.jpg" },
+              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/ambrela/GL7105 WH.jpg" },
+              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/ambrela/GL7065 WH.jpg" },
+              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/ambrela/GL7070 WH.jpg" },
+              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/ambrela/GL7077 WH.jpg" }
             }
           },
           "recessed": {
             "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7121 WH"] },
-              { "min": 101, "max": 200, "items": ["GL7123 WH"] }
+              { "min": 0, "max": 100, "items": ["358090"] }
             ],
             "connectors": {
-              "straight": ["GL7159 WH"],
-              "L-shape": ["GL7163 WH"],
-              "T-shape": ["GL7167 WH"]
+              "straight": [],
+              "L-shape": [],
+              "T-shape": [],
+              "x": []
             },
             "components": {
-              "GL7121 WH": { "name": "Шинопровод встраиваемый белый 1м", "price": 1190, "image": "images/ambrela/GL7121.jpg" },
-              "GL7123 WH": { "name": "Шинопровод встраиваемый белый 2м", "price": 2380, "image": "images/ambrela/GL7123.jpg" },
-              "GL7159 WH": { "name": "Коннектор прямой белый (встраиваемый)", "price": 205, "image": "images/ambrela/GL7159.jpg" },
-              "GL7163 WH": { "name": "Коннектор угловой белый (встраиваемый)", "price": 225, "image": "images/ambrela/GL7163.jpg" },
-              "GL7167 WH": { "name": "Коннектор T-образный белый (встраиваемый)", "price": 410, "image": "images/ambrela/GL7167.jpg" }
+         
             }
           },
           "stretch-ceiling": {
             "lengthOptions": [
               { "min": 0, "max": 100, "items": ["GL7101 WH"] },
-              { "min": 101, "max": 200, "items": ["GL7103 WH"] },
-              { "min": 201, "max": 300, "items": ["GL7105 WH"] }
+              { "min": 101, "max": 200, "items": ["GL7103 WH"] }
             ],
             "connectors": {
               "straight": ["GL7065 WH"],
               "L-shape": ["GL7070 WH"],
-              "T-shape": ["GL7077 WH"]
+              "T-shape": ["GL7077 WH"],
+              "x": []
             },
             "components": {
-              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/ambrela/GL7101.jpg" },
-              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/ambrela/GL7103.jpg" },
-              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/ambrela/GL7105.jpg" },
-              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/ambrela/GL7065.jpg" },
-              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/ambrela/GL7070.jpg" },
-              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/ambrela/GL7077.jpg" }
-            },
-            "additionalComponents": ["ST001MP-112S"]
-          },
-          "hanging": {
-            "lengthOptions": [
-              { "min": 0, "max": 100, "items": ["GL7101 WH"] },
-              { "min": 101, "max": 200, "items": ["GL7103 WH"] },
-              { "min": 201, "max": 300, "items": ["GL7105 WH"] }
-            ],
-            "connectors": {
-              "straight": ["GL7065 WH"],
-              "L-shape": ["GL7070 WH"],
-              "T-shape": ["GL7077 WH"]
-            },
-            "components": {
-              "GL7101 WH": { "name": "Шинопровод накладной белый 1м", "price": 870, "image": "images/ambrela/GL7101.jpg" },
-              "GL7103 WH": { "name": "Шинопровод накладной белый 2м", "price": 1740, "image": "images/ambrela/GL7103.jpg" },
-              "GL7105 WH": { "name": "Шинопровод накладной белый 3м", "price": 2600, "image": "images/ambrela/GL7105.jpg" },
-              "GL7065 WH": { "name": "Коннектор прямой белый", "price": 235, "image": "images/ambrela/GL7065.jpg" },
-              "GL7070 WH": { "name": "Коннектор угловой белый", "price": 295, "image": "images/ambrela/GL7070.jpg" },
-              "GL7077 WH": { "name": "Коннектор T-образный белый", "price": 480, "image": "images/ambrela/GL7077.jpg" }
+              "135192": { "name": "Профиль для натяжного потолка белый 2м", "price": 6400, "image": "images/ambrela/135192.jpg" },
+              "135188": { "name": "Заглушка для профиля белая", "price": 1100, "image": "images/ambrela/135188.jpg" }
             }
           }
         }
@@ -286,21 +289,28 @@
     
     /***** Дополнительные сопоставления для AMBRELA *****/
     var suspensionMappingAmbrela = {
-      "GL7192 BK": { "name": "Подвес черный AMBRELA", "price": 310, "image": "images/ambrela/GL7192.jpg" },
-      "GL7191 WH": { "name": "Подвес белый AMBRELA", "price": 320, "image": "images/ambrela/GL7191.jpg" }
+      "GL7192 BK": { "name": "Подвес черный AMBRELA", "price": 310, "image": "images/ambrela/GL7192 BK.jpg" },
+      "GL7191 WH": { "name": "Подвес белый AMBRELA", "price": 320, "image": "images/ambrela/GL7191 WH.jpg" }
     };
     var additionalMappingAmbrela = {
-      "GL7132 BK": { "name": "Профиль 3м AMBRELA (черный)", "price": 4860, "image": "images/ambrela/GL7132.jpg" },
-      "GL7131 BK": { "name": "Профиль 2м AMBRELA (черный)", "price": 3230, "image": "images/ambrela/GL7131.jpg" },
-      "GL7132 WH": { "name": "Профиль 3м AMBRELA (белый)", "price": 4860, "image": "images/ambrela/GL7132.jpg" },
-      "GL7131 WH": { "name": "Профиль 2м AMBRELA (белый)", "price": 3230, "image": "images/ambrela/GL7131.jpg" },
-      "GL7203 WH": { "name": "Заглушка для корпуса (2 шт.) белая", "price": 170, "image": "images/ambrela/GL7203.jpg" },
-      "GL7204 BK": { "name": "Заглушка для корпуса (2 шт.) черная", "price": 170, "image": "images/ambrela/GL7204.jpg" },
+      "GL7132 BK": { "name": "Профиль 3м AMBRELA (черный)", "price": 4860, "image": "images/ambrela/GL7132 BK.jpg" },
+      "GL7131 BK": { "name": "Профиль 2м AMBRELA (черный)", "price": 3230, "image": "images/ambrela/GL7131 BK.jpg" },
+      "GL7132 WH": { "name": "Профиль 3м AMBRELA (белый)", "price": 4860, "image": "images/ambrela/GL7132 WH.jpg" },
+      "GL7131 WH": { "name": "Профиль 2м AMBRELA (белый)", "price": 3230, "image": "images/ambrela/GL7131 WH.jpg" },
+      "GL7203 WH": { "name": "Заглушка для корпуса (2 шт.) белая", "price": 170, "image": "images/ambrela/GL7203 WH.jpg" },
+      "GL7204 BK": { "name": "Заглушка для корпуса (2 шт.) черная", "price": 170, "image": "images/ambrela/GL7204 BK.jpg" },
       "GL7208": { "name": "Соединитель угловой для профиля", "price": 170, "image": "images/ambrela/GL7208.jpg" }
     };
 
+    // Добавляем для X-образной системы: X-коннекторы
+    // Если выбран X-фигура, то для чёрного добавляем "GL7172 BK", для белого – "GL7171 WH".
+    function addXConnector(selectedItems, color) {
+      let xConnectorId = (color === "black") ? "GL7172 BK" : "GL7171 WH";
+      selectedItems.push({ id: xConnectorId });
+    }
+    
     /***** Функции расчёта трековых сегментов для AMBRELA *****/
-    function getTracksForStLuce(legLength, lengthOptions) {
+    function getTracksForAmbrela(legLength, lengthOptions) {
       let pieces = [];
       if (lengthOptions.length === 2) {
         // Для recessed: доступны только варианты 1м и 2м.
@@ -349,21 +359,21 @@
       }
       return pieces;
     }
-    function getTracksForStLuceRecessed(legLength, lengthOptions) {
-      return getTracksForStLuce(legLength, lengthOptions);
+    function getTracksForAmbrelaRecessed(legLength, lengthOptions) {
+      return getTracksForAmbrela(legLength, lengthOptions);
     }
-    function getTracksForStLuceSurface(legLength, lengthOptions) {
-      return getTracksForStLuce(legLength, lengthOptions);
+    function getTracksForAmbrelaSurface(legLength, lengthOptions) {
+      return getTracksForAmbrela(legLength, lengthOptions);
     }
     
+    // Функция определения номинальной длины трека для AMBRELA.
     function getNominalLength(id) {
-      if (id.indexOf("7101") !== -1 || id.indexOf("7121") !== -1) return 100;
-      if (id.indexOf("7102") !== -1 || id.indexOf("7122") !== -1) return 100;
-      if (id.indexOf("7103") !== -1 || id.indexOf("7123") !== -1) return 200;
-      if (id.indexOf("7104") !== -1 || id.indexOf("7124") !== -1) return 200;
-      if (id.indexOf("7105") !== -1) return 300;
+      if (id.indexOf("7102") !== -1 || id.indexOf("7101") !== -1) return 100;
+      if (id.indexOf("7104") !== -1 || id.indexOf("7103") !== -1) return 200;
       if (id.indexOf("7106") !== -1) return 300;
-      return 100;
+      if (id.indexOf("7122") !== -1 || id.indexOf("7121") !== -1) return 100;
+      if (id.indexOf("7124") !== -1 || id.indexOf("7123") !== -1) return 200;
+      return 100; // Значение по умолчанию
     }
     
     // Глобальная функция safeShowSelection для AMBRELA
@@ -379,7 +389,7 @@
     /***** Основная функция подбора для AMBRELA *****/
     window.showSelection = function() {
       console.log("Начало работы showSelection (AMBRELA)");
-
+      
       const params = new URLSearchParams(window.location.search);
       const color = (params.get("color") || "black").toLowerCase();
       let mountingParam = (params.get("mounting") || "surface").toLowerCase();
@@ -389,16 +399,16 @@
       const shape = params.get("shape") || "straight";
       const lengthA = parseFloat(params.get("lengthA")) || 150;
       const lengthB = parseFloat(params.get("lengthB")) || 0;
-
+      
       console.log("Параметры подбора (AMBRELA):", { color, mounting: mountingParam, shape, lengthA, lengthB });
-
+      
       let effectiveProduct = (mountingParam === "stretch-ceiling" || mountingParam === "hanging") ?
           (products.ambrela && products.ambrela[color] && products.ambrela[color]["surface"]) :
           (products.ambrela && products.ambrela[color] && products.ambrela[color][mountingParam]);
       if (!effectiveProduct) {
         throw new Error("Не найден комплект для AMBRELA с выбранными параметрами.");
       }
-
+      
       let components = effectiveProduct.components;
       if (mountingParam === "stretch-ceiling") {
         const ceilingProduct = products.ambrela[color]["stretch-ceiling"];
@@ -406,26 +416,26 @@
           components = Object.assign({}, components, ceilingProduct.components);
         }
       }
-
+      
       const lengthOptions = effectiveProduct.lengthOptions;
       let selectedItems = [];
       let usedConnectors = [];
-
-      // Логика подбора по фигурам:
+      
+      // Логика подбора по фигурам
       if (shape === "straight") {
         if (mountingParam === "recessed") {
-          selectedItems = getTracksForStLuceRecessed(lengthA, lengthOptions);
+          selectedItems = getTracksForAmbrelaRecessed(lengthA, lengthOptions);
         } else {
-          selectedItems = getTracksForStLuceSurface(lengthA, lengthOptions);
+          selectedItems = getTracksForAmbrelaSurface(lengthA, lengthOptions);
         }
       } else if (shape === "L-shape") {
         let legATracks, legBTracks;
         if (mountingParam === "recessed") {
-          legATracks = getTracksForStLuceRecessed(lengthA, lengthOptions);
-          legBTracks = getTracksForStLuceRecessed(lengthB, lengthOptions);
+          legATracks = getTracksForAmbrelaRecessed(lengthA, lengthOptions);
+          legBTracks = getTracksForAmbrelaRecessed(lengthB, lengthOptions);
         } else {
-          legATracks = getTracksForStLuceSurface(lengthA, lengthOptions);
-          legBTracks = getTracksForStLuceSurface(lengthB, lengthOptions);
+          legATracks = getTracksForAmbrelaSurface(lengthA, lengthOptions);
+          legBTracks = getTracksForAmbrelaSurface(lengthB, lengthOptions);
         }
         selectedItems = legATracks.concat(legBTracks);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
@@ -434,11 +444,11 @@
       } else if (shape === "T-shape") {
         let topTracks, verticalTracks;
         if (mountingParam === "recessed") {
-          topTracks = getTracksForStLuceRecessed(lengthA, lengthOptions);
-          verticalTracks = getTracksForStLuceRecessed(lengthB, lengthOptions);
+          topTracks = getTracksForAmbrelaRecessed(lengthA, lengthOptions);
+          verticalTracks = getTracksForAmbrelaRecessed(lengthB, lengthOptions);
         } else {
-          topTracks = getTracksForStLuceSurface(lengthA, lengthOptions);
-          verticalTracks = getTracksForStLuceSurface(lengthB, lengthOptions);
+          topTracks = getTracksForAmbrelaSurface(lengthA, lengthOptions);
+          verticalTracks = getTracksForAmbrelaSurface(lengthB, lengthOptions);
         }
         selectedItems = topTracks.concat(verticalTracks);
         if (effectiveProduct.connectors["T-shape"] && effectiveProduct.connectors["T-shape"].length > 0) {
@@ -456,11 +466,11 @@
         }
       } else if (shape === "P-shape") {
         let sideTracks = (mountingParam === "recessed") ?
-            getTracksForStLuceRecessed(lengthA, lengthOptions) :
-            getTracksForStLuceSurface(lengthA, lengthOptions);
+            getTracksForAmbrelaRecessed(lengthA, lengthOptions) :
+            getTracksForAmbrelaSurface(lengthA, lengthOptions);
         let connectingTracks = (mountingParam === "recessed") ?
-            getTracksForStLuceRecessed(lengthB, lengthOptions) :
-            getTracksForStLuceSurface(lengthB, lengthOptions);
+            getTracksForAmbrelaRecessed(lengthB, lengthOptions) :
+            getTracksForAmbrelaSurface(lengthB, lengthOptions);
         selectedItems = sideTracks.concat(sideTracks, connectingTracks);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["L-shape"][0]));
@@ -479,11 +489,11 @@
         }
       } else if (shape === "rectangle") {
         let tracksA = (mountingParam === "recessed") ?
-            getTracksForStLuceRecessed(lengthA, lengthOptions) :
-            getTracksForStLuceSurface(lengthA, lengthOptions);
+            getTracksForAmbrelaRecessed(lengthA, lengthOptions) :
+            getTracksForAmbrelaSurface(lengthA, lengthOptions);
         let tracksB = (mountingParam === "recessed") ?
-            getTracksForStLuceRecessed(lengthB, lengthOptions) :
-            getTracksForStLuceSurface(lengthB, lengthOptions);
+            getTracksForAmbrelaRecessed(lengthB, lengthOptions) :
+            getTracksForAmbrelaSurface(lengthB, lengthOptions);
         selectedItems = tracksA.concat(tracksA, tracksB, tracksB);
         if (effectiveProduct.connectors["L-shape"] && effectiveProduct.connectors["L-shape"].length > 0) {
           for (let i = 0; i < 4; i++) {
@@ -496,21 +506,21 @@
           usedConnectors.push(wrapConnector(effectiveProduct.connectors.straight[0]));
         }
       } else if (shape === "x") {
-        // X‑образная система: два набора шинопроводов, один X‑образный коннектор и дополнительный X‑коннектор
-        let busbarA = getTracksForStLuce(lengthA, lengthOptions);
-        let busbarB = getTracksForStLuce(lengthB, lengthOptions);
+        // Если выбран X-образный вариант: собираем трековые сегменты и добавляем дополнительный X-коннектор
+        let busbarA = getTracksForAmbrelaSurface(lengthA, lengthOptions);
+        let busbarB = getTracksForAmbrelaSurface(lengthB, lengthOptions);
         selectedItems = busbarA.concat(busbarB);
-        // Если в данных есть X‑образный коннектор, используем его
+        // Если в данных задан X‑образный коннектор, используем его (если нет, добавляем дополнительный)
         if (effectiveProduct.connectors["x"] && effectiveProduct.connectors["x"].length > 0) {
           usedConnectors.push(wrapConnector(effectiveProduct.connectors["x"][0]));
         }
         // Дополнительный X‑коннектор: для черного — "GL7172 BK", для белого — "GL7171 WH"
-        selectedItems.push({ id: (color === "black") ? "GL7172 BK" : "GL7171 WH" });
+        addXConnector(selectedItems, color);
       } else {
-        throw new Error("Логика для фигуры '" + shape + "' не реализована для ST LUCE/AMBRELA.");
+        throw new Error("Логика для фигуры '" + shape + "' не реализована для AMBRELA.");
       }
       
-      // Для системы "straight" – добавляем недостающие прямые коннекторы
+      // Для "straight" – добавляем недостающие прямые коннекторы
       if (shape === "straight") {
         let trackPieces = selectedItems.filter(item => item.hasOwnProperty("pieceLength"));
         let neededStraight = (trackPieces.length > 1) ? trackPieces.length - 1 : 0;
@@ -534,8 +544,9 @@
         selectedLightingOptions = [];
       }
       selectedLightingOptions.forEach(light => {
-        let lightItem = (lightingMappingMayotech[light.type] && lightingMappingMayotech[light.type][color])
-                          ? lightingMappingMayotech[light.type][color]
+        // Для AMBRELA допустим та же логика, что и для Maytoni (если нужны изменения – можно добавить аналогичные условия)
+        let lightItem = (typeof lightingMappingMayontech !== "undefined" && lightingMappingMayontech[light.type] && lightingMappingMayontech[light.type][color])
+                          ? lightingMappingMayontech[light.type][color]
                           : null;
         if (lightItem) {
           for (let i = 0; i < parseInt(light.quantity, 10); i++) {
@@ -639,9 +650,7 @@
         }
         let isTrack = itemObj.hasOwnProperty("pieceLength");
         if (!groupedItems[id]) {
-          // Сначала ищем описание компонента в products.ambrela[color]["surface"].components,
-          // затем в products.ambrela[color]["recessed"].components (если есть),
-          // затем в suspensionMappingAmbrela, затем в additionalMappingAmbrela
+          // Сначала ищем компонент в surface, затем в recessed, затем в сопоставлениях
           let comp = (products.ambrela[color]["surface"].components[id]) ||
                      (products.ambrela[color]["recessed"] && products.ambrela[color]["recessed"].components[id]) ||
                      suspensionMappingAmbrela[id] ||
@@ -671,7 +680,7 @@
           }
           let cost = qty * comp.price;
           totalPrice += cost;
-          // Выводим название товара один раз с артикулом (исходным id)
+          // Выводим название товара один раз с указанием артикулы (id)
           tbodyHTML += `
             <tr>
               <td><img src="images/ambrela/${id}.jpg" alt="${comp.name}" style="width:50px; height:auto; margin-right:10px;">${comp.name} (${id})</td>
@@ -713,10 +722,10 @@
         alert("Ошибка чтения корзины.");
         return;
       }
-      // Преобразуем сгруппированный объект в плоский массив объектов { article, component, count }
+      // Преобразуем сгруппированные данные в плоский массив объектов { article, component, count }
       for (const [id, group] of Object.entries(window.currentAmbrelaSelection)) {
         cart.push({
-          article: id,
+          article: id,  // Артикул, как в исходном id (например, "GL7106 BK")
           component: group.component,
           count: group.count
         });
