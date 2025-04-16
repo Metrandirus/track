@@ -4,16 +4,25 @@
   <meta charset="UTF-8">
   <title>Корзина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Подключаем jQuery и jQuery UI (если требуется для дополнительных функций) -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <!-- Можно подключать jQuery/UI, если необходимо -->
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background-color: #e7f5fd;
       font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
     }
     .results-table {
       width: 100%;
@@ -27,21 +36,22 @@
       padding: 6px 8px;
       font-size: 13px;
       text-align: left;
+      vertical-align: middle;
     }
     .results-table th {
       background-color: #f4f4f4;
       font-weight: bold;
     }
-    /* Колонка для артикула */
+    /* Первая колонка – артикул */
     .results-table th:nth-child(1),
     .results-table td:nth-child(1) {
-      width: 80px;
+      width: 100px;
       text-align: center;
     }
     .results-table img {
       width: 50px;
       height: auto;
-      margin-right: 10px;
+      margin-right: 8px;
       vertical-align: middle;
     }
     .total-price {
@@ -56,7 +66,7 @@
       margin-top: 10px;
       text-align: center;
     }
-    .clear-cart-button, .delete-button, .refresh-cart-button {
+    .delete-button, .clear-cart-button, .refresh-cart-button {
       background-color: #000;
       color: #fff;
       border: none;
@@ -66,27 +76,33 @@
       border-radius: 3px;
       margin-top: 5px;
     }
-    .clear-cart-button:hover, .delete-button:hover, .refresh-cart-button:hover {
+    .delete-button:hover,
+    .clear-cart-button:hover,
+    .refresh-cart-button:hover {
       background-color: #333;
     }
     .delete-button {
       padding: 4px 8px;
       font-size: 12px;
     }
+    .buttons-row {
+      text-align: center;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <!-- Здесь выводится содержимое корзины -->
-  <div id="cartContent">
-    <!-- Таблица корзины сформируется динамически -->
+  <div class="container">
+    <h1>Корзина</h1>
+    <div id="cartContent"><!-- Здесь будет таблица корзины --></div>
+    <div id="totalPrice" class="total-price"></div>
+    <div class="buttons-row">
+      <button class="refresh-cart-button" onclick="loadCart()">Обновить корзину</button>
+      <button class="clear-cart-button" onclick="clearCart()">Очистить корзину</button>
+    </div>
+    <div id="debug" class="debug"></div>
   </div>
-  <div id="totalPrice" class="total-price"></div>
-  <div style="text-align:center; margin-top:10px;">
-    <button class="refresh-cart-button" onclick="loadCart()">Обновить корзину</button>
-    <button class="clear-cart-button" onclick="clearCart()">Очистить корзину</button>
-  </div>
-  <div id="debug" class="debug"></div>
-
+  
   <script>
     function loadCart() {
       let cart = [];
@@ -99,50 +115,67 @@
         debugDiv.textContent = "Ошибка чтения корзины.";
         return;
       }
-      
+
       let html = "";
       if (cart.length === 0) {
         html = "<p style='text-align:center;'>Корзина пуста</p>";
-      } else {
-        html += `<table class="results-table">
-          <thead>
-            <tr>
-              <th>Артикул</th>
-              <th>Наименование</th>
-              <th>Кол.</th>
-              <th>Цена за шт.</th>
-              <th>Общая цена</th>
-              <th>Действие</th>
-            </tr>
-          </thead>
-          <tbody>`;
-        let overallTotal = 0;
-        cart.forEach((item, index) => {
-          const comp = item.component || {};
-          // Артикул берем из сохранённого поля item.article (если установлено), иначе из comp.id
-          const article = item.article || comp.id || "N/A";
-          const name = comp.name || "Товар";
-          const image = comp.image || "";
-          const unitPrice = parseFloat(comp.price) || 0;
-          const count = parseInt(item.count) || 1;
-          const total = unitPrice * count;
-          overallTotal += total;
-          html += `<tr>
+        document.getElementById("cartContent").innerHTML = html;
+        document.getElementById("totalPrice").textContent = "";
+        return;
+      }
+
+      html += `<table class="results-table">
+        <thead>
+          <tr>
+            <th>Артикул</th>
+            <th>Наименование</th>
+            <th>Кол.</th>
+            <th>Цена за шт.</th>
+            <th>Общая цена</th>
+            <th>Действие</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+      let overallTotal = 0;
+      cart.forEach((item, index) => {
+        // article – то, что сохранено в поле article
+        // component – объект { name, price, image }
+        const article = item.article || (item.component && item.component.id) || "N/A";
+        const comp = item.component || {};
+        const name = comp.name || "Товар";
+        // Если в component уже прописано "Название (артикул)", убираем повтор, НО:
+        // Обычно в brand-файле формируется { name: "...", image: "...", price: ... } без артикула
+        // Так что здесь мы делаем "name (article)" сами
+        const image = comp.image || "";
+        const unitPrice = parseFloat(comp.price) || 0;
+        const count = parseInt(item.count) || 1;
+        const total = unitPrice * count;
+        overallTotal += total;
+
+        html += `
+          <tr>
             <td style="text-align:center;">${article}</td>
-            <td><img src="${image}" alt="${name}">${name}</td>
+            <td>
+              <img src="${image}" alt="${name}" onerror="this.style.display='none'">
+              ${name}
+            </td>
             <td style="text-align:center;">${count} шт.</td>
             <td>${unitPrice}₽</td>
             <td>${total}₽</td>
-            <td style="text-align:center;"><button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button></td>
-          </tr>`;
-        });
-        html += `</tbody>
-        </table>
+            <td style="text-align:center;">
+              <button class="delete-button" onclick="deleteCartItem(${index})">Удалить</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table>
         <div class="total-price">Итоговая стоимость: ${overallTotal.toFixed(2)}₽</div>`;
-      }
+
       document.getElementById("cartContent").innerHTML = html;
     }
-    
+
     function deleteCartItem(index) {
       let cart = [];
       try {
@@ -159,16 +192,15 @@
         loadCart();
       }
     }
-    
+
     function clearCart() {
       if (confirm("Вы действительно хотите очистить корзину?")) {
-        localStorage.setItem("cart", JSON.stringify([]));
+        localStorage.setItem("cart", "[]");
         loadCart();
       }
     }
-    
+
     document.addEventListener("DOMContentLoaded", loadCart);
-    window.addEventListener("pageshow", loadCart);
   </script>
 </body>
 </html>
