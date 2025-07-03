@@ -1,38 +1,3 @@
--- maytoni.html --
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>Maytoni UNITY – Подбор трековой системы</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container">
-    <div id="resultContainer" class="result-container">
-      <table class="results-table" id="resultsTable">
-        <thead>
-          <tr>
-            <th>Наименование</th>
-            <th>Кол.</th>
-            <th>Цена за шт.</th>
-            <th>Общая цена</th>
-          </tr>
-        </thead>
-        <tbody id="results"></tbody>
-      </table>
-      <div id="totalPrice" class="total-price"></div>
-    </div>
-    <div id="debug" class="debug"></div>
-  </div>
-  <div id="lightingButtonsContainer"></div>
-
-  <!-- Подключаем общие утилиты и логику Maytoni -->
-  <script src="utils.js"></script>
-  <script src="maytoni.js"></script>
-</body>
-</html>
-
 -- maytoni.js --
 /**
  * maytoni.js — Логика подбора для Maytoni UNITY
@@ -104,7 +69,6 @@
     }
   };
 
-  // Сборка сегментов
   function getTracks(len, opts) {
     let pieces=[];
     opts.forEach(o=>{
@@ -124,18 +88,14 @@
     const cfgKey=(mounting==='hanging'||mounting==='stretch-ceiling')?'surface':mounting;
     const cfg=DATA[type][color][cfgKey];
     let items=[],conns=[];
-    // фигуры
     if(shape==='straight') items=getTracks(lengthA,cfg.lengthOptions);
     else if(shape==='L-shape'){items=getTracks(lengthA,cfg.lengthOptions).concat(getTracks(lengthB,cfg.lengthOptions));conns.push({id:cfg.connectors['L-shape'][0]});}
     else if(shape==='T-shape'){items=getTracks(lengthA,cfg.lengthOptions).concat(getTracks(lengthB,cfg.lengthOptions));conns.push({id:cfg.connectors['T-shape'][0]});}
     else if(shape==='P-shape'){const a=getTracks(lengthA,cfg.lengthOptions),b=getTracks(lengthB,cfg.lengthOptions);items=a.concat(a,b);conns.push({id:cfg.connectors['L-shape'][0]},{id:cfg.connectors['L-shape'][0]});}
     else if(shape==='rectangle'){const a=getTracks(lengthA,cfg.lengthOptions),b=getTracks(lengthB,cfg.lengthOptions);items=a.concat(a,b,b);for(let i=0;i<4;i++)conns.push({id:cfg.connectors['L-shape'][0]});}
     else if(shape==='x'){const a=getTracks(lengthA,cfg.lengthOptions),b=getTracks(lengthB,cfg.lengthOptions);items=a.concat(b);const xId=(mounting==='recessed'?cfg.connectors['x'][0]:'')||cfg.connectors['x'][0]||cfg.connectors['x'][0];conns.push({id:xId});}
-    // stretch ceiling дополнительные
     if(mounting==='stretch-ceiling'&&cfg.additionalComponents)cfg.additionalComponents.forEach(id=>items.push({id}));
-    // светильники
     lights.forEach(l=>{const m=lightingMappingMaytoni[l.type]&&lightingMappingMaytoni[l.type][color];if(m)for(let i=0;i<l.quantity;i++)items.push({id:m.id});});
-    // встраиваемые профили
     if(mounting==='recessed'){const total=lengthA+lengthB;const cnt=Math.ceil(total/100);for(let i=0;i<cnt;i++)items.push({id:'358090',pieceLength:100});}
     return items.concat(conns);
   }
@@ -144,7 +104,7 @@
     const all=assembleItems();
     const cfgKey=(mounting==='hanging'||mounting==='stretch-ceiling')?'surface':mounting;
     const components=DATA[type][color][cfgKey].components;
-    const grouped=groupItems(all,components,/*suspensionMap*/{},{});
+    const grouped=groupItems(all,components,{},{});
     renderTable(grouped,'#resultsTable','#totalPrice');
     document.getElementById('addToCartFromMaytoni').onclick=()=>saveToCart(grouped);
   }
