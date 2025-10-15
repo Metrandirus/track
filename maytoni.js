@@ -72,7 +72,7 @@
   function getTracks(len, opts) {
     let pieces=[];
     opts.forEach(o=>{
-      if(len>o.min&&len<=o.max) pieces.push({id:o.items[0],pieceLength:o.max});
+      if(len>=o.min&&len<=o.max) pieces.push({id:o.items[0],pieceLength:o.max});
     });
     if(pieces.length===0&&len>opts[opts.length-1].max) {
       const max=opts[opts.length-1];
